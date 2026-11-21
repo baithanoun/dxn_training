@@ -19,8 +19,8 @@ android {
             useSupportLibrary = true
         }
 
-        // عنوان السيرفر الأساسي — يُغيَّر بعد نشر الموقع
-        buildConfigField("String", "BASE_URL", "\"https://dxn-training-api.example.com/\"")
+        // عنوان السيرفر — debug: emulator (10.0.2.2 = host machine)
+        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
     }
 
     buildTypes {
