@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ReorderController;
 use App\Http\Controllers\Admin\RoundsController;
 use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
@@ -42,6 +43,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('teams/{leaderId}', [TeamController::class, 'show']);
     Route::get('settings', [SettingsController::class, 'index']);
     Route::put('settings', [SettingsController::class, 'update']);
+    Route::get('dashboard/overview', [DashboardController::class, 'overview']);
     Route::get('content/tree', ContentTreeController::class);
     Route::apiResource('sections', SectionController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
