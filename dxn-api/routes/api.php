@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ContentTreeController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ReorderController;
 use App\Http\Controllers\Admin\RoundsController;
 use App\Http\Controllers\Admin\SectionController;
@@ -24,4 +25,5 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::put('levels/{id}/cards', [LevelController::class, 'saveCards']);
     Route::put('levels/{id}/rounds', RoundsController::class);
     Route::post('reorder', ReorderController::class);
+    Route::post('media', [MediaController::class, 'store']);
 });
