@@ -166,6 +166,13 @@ class ContentCrudTest extends TestCase
         ])->assertStatus(422);
     }
 
+    public function test_section_cannot_require_itself(): void
+    {
+        $s = $this->section();
+        $this->admin()->putJson("/api/admin/sections/{$s->id}", ['requiredSectionId' => (string) $s->id])
+            ->assertStatus(422)->assertJsonValidationErrors('requiredSectionId');
+    }
+
     public function test_reorder_applies_positions(): void
     {
         $a = $this->section();

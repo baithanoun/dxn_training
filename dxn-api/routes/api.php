@@ -19,7 +19,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('content/tree', ContentTreeController::class);
     Route::apiResource('sections', SectionController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
-    Route::apiResource('levels', LevelController::class);
+    Route::apiResource('levels', LevelController::class)->only(['show', 'store', 'update', 'destroy']);
     Route::put('levels/{id}/cards', [LevelController::class, 'saveCards']);
     Route::post('reorder', ReorderController::class);
 });

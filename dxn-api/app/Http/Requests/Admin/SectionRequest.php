@@ -14,7 +14,7 @@ class SectionRequest extends AdminRequest
             'description' => ['nullable', 'string'],
             'bagId' => ['nullable', 'integer', 'between:1,99'],
             'certificateTitle' => ['nullable', 'string', 'max:255'],
-            'requiredSectionId' => ['nullable', Rule::exists('sections', 'id')->whereNull('deleted_at'), Rule::notIn([(string) $this->route('id')])],
+            'requiredSectionId' => ['nullable', Rule::exists('sections', 'id')->whereNull('deleted_at'), Rule::notIn([(string) $this->route('section')])],
             'status' => ['sometimes', Rule::in(Section::STATUSES)],
         ];
     }
