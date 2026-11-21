@@ -20,21 +20,54 @@ data class LevelCompletionResponse(
     val certificateTitle: String? = null
 )
 
+data class LoginRequest(
+    val login: String,
+    val password: String
+)
+
+data class RegisterRequest(
+    val fullName: String,
+    val email: String? = null,
+    val phone: String? = null,
+    val password: String,
+    val dxnId: String,
+    val leaderDxnId: String? = null
+)
+
+data class AuthResponse(
+    val token: String,
+    val user: UserProfileResponse
+)
+
 data class UserProfileResponse(
     val id: String,
     val fullName: String,
-    val email: String,
+    val email: String? = null,
+    val phone: String? = null,
     val dxnId: String,
     val role: String,
-    val totalXp: Int,
-    val currentStreak: Int,
-    val hearts: Int,
-    val gems: Int
+    val totalXp: Int = 0,
+    val currentStreak: Int = 0,
+    val hearts: Int = 3,
+    val gems: Int = 0
 )
 
 // ===================  API Interface  ===================
 
 interface ApiService {
+
+    // ===================  المصادقة  ===================
+
+    @POST("api/auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+
+    @POST("api/auth/register")
+    suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
+
+    @POST("api/auth/logout")
+    suspend fun logout(): Response<Unit>
+
+    // ===================  المحتوى  ===================
 
     /**
      * جلب شجرة المحتوى الكاملة (الأقسام والمهارات والمستويات).

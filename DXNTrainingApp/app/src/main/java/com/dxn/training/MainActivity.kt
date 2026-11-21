@@ -9,12 +9,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.ui.navigation.AppNavigation
 import com.dxn.training.ui.theme.DXNTrainingTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ApiClient.init(this)
         enableEdgeToEdge()
         setContent {
             DXNTrainingTheme {

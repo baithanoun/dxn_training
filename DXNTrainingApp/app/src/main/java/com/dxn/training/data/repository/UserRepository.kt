@@ -52,7 +52,7 @@ class UserRepository(
 private fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = User(
     id = id,
     fullName = fullName,
-    email = email,
+    email = email ?: "",
     phone = "", // غير متوفر في الاستجابة الحالية
     dxnId = dxnId,
     role = role.toUserRole(),
