@@ -18,6 +18,16 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
+    public function sponsor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sponsor_id');
+    }
+
+    public function certificates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
     protected static function booted(): void
     {
         static::saving(function (User $u) {
