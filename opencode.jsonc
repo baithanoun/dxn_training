@@ -1,0 +1,101 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      // ─────────────────────────────────────────────────────────────
+      // الوثائق التقنية والمعرفة
+      // ─────────────────────────────────────────────────────────────
+      "context7": {
+        "type": "remote",
+        "url": "https://mcp.context7.com/mcp"
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // التحكم بالشيفرة والمستودعات
+      // ─────────────────────────────────────────────────────────────
+      "github": {
+        "type": "remote",
+        "url": "https://api.githubcopilot.com/mcp/",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:GITHUB_PERSONAL_ACCESS_TOKEN}"
+        }
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // قواعد البيانات والـ Backend
+      // ─────────────────────────────────────────────────────────────
+      "supabase": {
+        "type": "remote",
+        "url": "https://mcp.supabase.com/mcp"
+        // نصيحة أمنية: يمكنك تقييده بمشروع واحد ووضع القراءة فقط:
+        // "url": "https://mcp.supabase.com/mcp?project_ref=YOUR_REF&read_only=true"
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // مراقبة الإنتاج وتصحيح الأخطاء
+      // ─────────────────────────────────────────────────────────────
+      "sentry": {
+        "type": "remote",
+        "url": "https://mcp.sentry.dev/mcp"
+      },
+      "grafana": {
+        "type": "local",
+        "command": ["uvx", "mcp-grafana"],
+        "environment": {
+          "GRAFANA_URL": "{env:GRAFANA_URL}",
+          "GRAFANA_SERVICE_ACCOUNT_TOKEN": "{env:GRAFANA_SERVICE_ACCOUNT_TOKEN}"
+        }
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // اختبار واجهات المستخدم والمتصفح
+      // ─────────────────────────────────────────────────────────────
+      "playwright": {
+        "type": "local",
+        "command": ["npx", "-y", "@playwright/mcp@latest"]
+      },
+      "chrome_devtools": {
+        "type": "local",
+        "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // التفكير التسلسلي والتخطيط
+      // ─────────────────────────────────────────────────────────────
+      "sequential_thinking": {
+        "type": "local",
+        "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // البنية التحتية والحاويات والسحابة
+      // ─────────────────────────────────────────────────────────────
+      "cloudflare": {
+        "type": "remote",
+        "url": "https://mcp.cloudflare.com/mcp"
+      },
+      "kubernetes": {
+        "type": "local",
+        "command": ["npx", "-y", "kubernetes-mcp-server@latest"],
+        "environment": {
+          // وضع عدم التدمير موصى به افتراضيًا للسلامة. لتفعيل وضع القراءة فقط، استبدل القيمة أدناه.
+          "ALLOW_ONLY_NON_DESTRUCTIVE_TOOLS": "true",
+          "MASK_SECRETS": "true"
+        }
+      },
+      "docker_gateway": {
+        "type": "local",
+        "command": ["docker", "mcp", "gateway", "run"]
+      }
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────
+  // البحث في الإنترنت (مُدمج في OpenCode، ليس MCP server)
+  // ─────────────────────────────────────────────────────────────────
+  "websearch": {
+    "provider": "tavily"
+    // يمكنك استخدام: exa, firecrawl, parallel, tinyfish
+  }
+}

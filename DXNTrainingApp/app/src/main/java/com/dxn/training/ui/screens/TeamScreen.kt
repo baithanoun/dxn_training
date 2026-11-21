@@ -1,0 +1,156 @@
+package com.dxn.training.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.dxn.training.data.model.MemberStatus
+import com.dxn.training.data.model.TeamMember
+import com.dxn.training.ui.components.DxButton
+import com.dxn.training.ui.components.DxCard
+import com.dxn.training.ui.components.DxProgressBar
+import com.dxn.training.ui.components.ScreenHeader
+import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.viewmodel.TeamViewModel
+
+@Composable
+fun TeamScreen(viewModel: TeamViewModel) {
+    val members by viewModel.members.collectAsState()
+    var filter by remember { mutableStateOf(MemberStatus.ACTIVE) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Background)
+            .verticalScroll(rememberScrollState())
+    ) {
+        ScreenHeader(title = "فريقي", streak = 5)
+
+        // Summary
+        DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(
+                text = "ملخص الفريق",
+                style = MaterialTheme.typography.bodyLarge,
+                color = DXNBlue
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "الأعضاء: ${members.size}  |  معدل الإكمال: 68%",
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextMuted
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            DxProgressBar(progress = 0.68f)
+        }
+
+        // Filters
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            FilterChip(
+                label = "نشط",
+                selected = filter == MemberStatus.ACTIVE,
+                onClick = { filter = MemberStatus.ACTIVE },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            FilterChip(
+                label = "متوقف >3 أيام",
+                selected = filter == MemberStatus.INACTIVE,
+                onClick = { filter = MemberStatus.INACTIVE },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        val filtered = members.filter { it.status == filter }
+        filtered.forEach { member ->
+            MemberRow(member = member)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+        DxButton(
+            text = "إرسال تشجيع",
+            onClick = { },
+            containerColor = DXNGold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Spacer(modifier = Modifier.height(80.dp))
+    }
+}
+
+@Composable
+private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(40.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (selected) DXNRed else CardSurface,
+            contentColor = if (selected) CardSurface else TextMuted
+        )
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun MemberRow(member: TeamMember) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = CardSurface)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Disabled),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = member.name.first().toString(), color = TextMuted)
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = member.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextPrimary
+                )
+                Text(
+                    text = "إنجاز ${member.progressPercent}%",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextMuted
+                )
+            }
+            val color = when (member.status) {
+                MemberStatus.ACTIVE -> DXNGreen
+                MemberStatus.INACTIVE -> DXNRedDeep
+                MemberStatus.COMPLETED -> DXNGold
+            }
+            Box(
+                modifier = Modifier
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(color)
+            )
+        }
+    }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "dxn-training-playwright",
+  "version": "1.0.0",
+  "description": "End-to-end test automation for DXN Training App",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test --grep smoke",
+    "test:critical": "playwright test --grep critical",
+    "test:regression": "playwright test --grep regression",
+    "test:a11y": "playwright test --grep a11y",
+    "test:perf": "playwright test --grep perf",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "report": "playwright show-report",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"tests/**/*.ts\" \"*.ts\" \"*.json\"",
+    "typecheck": "tsc --noEmit",
+    "prepare": "playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.9.1",
+    "@faker-js/faker": "^8.4.1",
+    "@playwright/test": "1.49.1",
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "@typescript-eslint/parser": "^7.10.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^1.6.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+
+  "overrides": {
+    "playwright-core": "1.49.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

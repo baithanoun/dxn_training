@@ -1,0 +1,83 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      test_tag:
+        description: 'Test tag to run (e.g. @smoke, @critical, @regression)'
+        required: false
+        default: ''
+
+jobs:
+  lint-and-typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: QA_DELIVERABLES/dxn-playwright/package-lock.json
+      - name: Install dependencies
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: npm ci
+      - name: Lint
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: npm run lint
+      - name: Type check
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: npm run typecheck
+
+  test:
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: QA_DELIVERABLES/dxn-playwright/package-lock.json
+      - name: Install dependencies
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: npm ci
+      - name: Install Playwright browsers
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: npx playwright install --with-deps
+      - name: Create env file
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: |
+          cp .env.example .env
+          echo "BASE_URL=${{ secrets.BASE_URL }}" >> .env
+          echo "TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL }}" >> .env
+          echo "TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD }}" >> .env
+      - name: Run Playwright tests
+        working-directory: QA_DELIVERABLES/dxn-playwright
+        run: |
+          if [ -n "${{ github.event.inputs.test_tag }}" ]; then
+            npx playwright test --grep "${{ github.event.inputs.test_tag }}" --shard=${{ matrix.shard }}
+          else
+            npx playwright test --shard=${{ matrix.shard }}
+          fi
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: QA_DELIVERABLES/dxn-playwright/playwright-report/
+          retention-days: 14
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.shard }}
+          path: QA_DELIVERABLES/dxn-playwright/test-results/
+          retention-days: 7

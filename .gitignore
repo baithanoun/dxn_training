@@ -1,0 +1,22 @@
+# Large local tooling
+jdk17/
+.venv/
+.playwright-mcp/
+
+# Dependencies / build output
+node_modules/
+dist/
+build/
+.gradle/
+.idea/
+__pycache__/
+*.apk
+*.aab
+
+# Secrets / machine-specific
+.env
+.env.*
+!.env.example
+local.properties
+*.keystore
+*.jks
