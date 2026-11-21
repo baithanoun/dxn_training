@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ReorderController;
 use App\Http\Controllers\Admin\RoundsController;
 use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\SkillController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Mobile\TreeController;
@@ -36,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('users/export', [UserController::class, 'export']);
     Route::apiResource('users', UserController::class)->only(['index', 'show', 'store', 'update']);
+    Route::get('teams', [TeamController::class, 'index']);
+    Route::get('teams/{leaderId}', [TeamController::class, 'show']);
     Route::get('content/tree', ContentTreeController::class);
     Route::apiResource('sections', SectionController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
