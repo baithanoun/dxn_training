@@ -85,7 +85,7 @@ class AuthTest extends TestCase
     {
         $trainee = $this->user(['email' => 't@x.com', 'role' => 'trainee']);
         $admin = $this->user();
-        $this->actingAs($trainee, 'sanctum')->getJson('/api/admin/ping')->assertStatus(403);
-        $this->actingAs($admin, 'sanctum')->getJson('/api/admin/ping')->assertOk();
+        $this->actingAs($trainee, 'sanctum')->getJson('/api/admin/content/tree')->assertStatus(403);
+        $this->actingAs($admin, 'sanctum')->getJson('/api/admin/content/tree')->assertOk();
     }
 }

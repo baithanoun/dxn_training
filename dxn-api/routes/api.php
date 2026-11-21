@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\ContentTreeController;
+use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\ReorderController;
+use App\Http\Controllers\Admin\SectionController;
+use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,5 +15,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
 });
 
-// Temporary until Task 4 adds a real admin route.
-Route::get('/admin/ping', fn () => ['ok' => true])->middleware(['auth:sanctum', 'role:admin']);
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('content/tree', ContentTreeController::class);
+    Route::apiResource('sections', SectionController::class)->only(['store', 'update', 'destroy']);
+    Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
+    Route::apiResource('levels', LevelController::class);
+    Route::put('levels/{id}/cards', [LevelController::class, 'saveCards']);
+    Route::post('reorder', ReorderController::class);
+});
