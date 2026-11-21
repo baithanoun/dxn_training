@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ContentTreeController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\ReorderController;
+use App\Http\Controllers\Admin\RoundsController;
 use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\AuthController;
@@ -21,5 +22,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('levels', LevelController::class)->only(['show', 'store', 'update', 'destroy']);
     Route::put('levels/{id}/cards', [LevelController::class, 'saveCards']);
+    Route::put('levels/{id}/rounds', RoundsController::class);
     Route::post('reorder', ReorderController::class);
 });
