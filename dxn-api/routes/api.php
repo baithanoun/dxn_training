@@ -12,6 +12,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Mobile\TreeController;
 use App\Http\Controllers\Mobile\ProgressController;
 use App\Http\Controllers\Mobile\CompletionController;
+use App\Http\Controllers\Mobile\LeaderTeamController;
+use App\Http\Controllers\Mobile\EventController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
@@ -27,6 +29,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{userId}/sections-progress', [ProgressController::class, 'sectionsProgress']);
     Route::get('/users/{userId}/profile', [ProgressController::class, 'profile']);
     Route::post('/levels/{levelId}/complete', CompletionController::class)->middleware('throttle:30,1');
+    Route::get('/leader/team', LeaderTeamController::class);
+    Route::post('/events', EventController::class)->middleware('throttle:60,1');
 });
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
