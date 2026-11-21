@@ -7,11 +7,16 @@ import Users from "@/pages/Users"
 import Teams from "@/pages/Teams"
 import Analytics from "@/pages/Analytics"
 import Settings from "@/pages/Settings"
+import Login from "@/pages/Login"
+import { AuthProvider, RequireAuth } from "@/lib/auth"
 
 function App() {
   return (
     <BrowserRouter>
+      <AuthProvider>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route element={<RequireAuth />}>
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Overview />} />
           <Route path="content" element={<Content />} />
@@ -21,7 +26,9 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+        </Route>
       </Routes>
+      </AuthProvider>
     </BrowserRouter>
   )
 }

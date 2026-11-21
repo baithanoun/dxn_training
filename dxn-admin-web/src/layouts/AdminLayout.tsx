@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/lib/auth"
 
 const navItems = [
   { path: "/", label: "نظرة عامة", icon: LayoutDashboard },
@@ -25,6 +26,7 @@ const navItems = [
 
 export default function AdminLayout() {
   const location = useLocation()
+  const { user, logout } = useAuth()
 
   return (
     <div dir="rtl" className="min-h-screen bg-dxn-bg flex">
@@ -44,10 +46,10 @@ export default function AdminLayout() {
 
         <div className="px-4 py-4 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-dxn-secondary/20 text-dxn-secondary flex items-center justify-center font-bold">م</div>
+            <div className="w-10 h-10 rounded-full bg-dxn-secondary/20 text-dxn-secondary flex items-center justify-center font-bold">{user?.fullName.charAt(0)}</div>
             <div>
-              <p className="text-sm font-semibold">محمد العمري</p>
-              <p className="text-xs text-muted-foreground">Super Admin</p>
+              <p className="text-sm font-semibold">{user?.fullName}</p>
+              <p className="text-xs text-muted-foreground">مدير</p>
             </div>
           </div>
         </div>
@@ -79,7 +81,7 @@ export default function AdminLayout() {
             <Bell size={18} />
             الإشعارات
           </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3 text-dxn-error hover:text-dxn-error hover:bg-dxn-error/10">
+          <Button variant="ghost" onClick={logout} className="w-full justify-start gap-3 text-dxn-error hover:text-dxn-error hover:bg-dxn-error/10">
             <LogOut size={18} />
             تسجيل الخروج
           </Button>
