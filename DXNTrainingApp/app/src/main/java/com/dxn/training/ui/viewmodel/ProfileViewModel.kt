@@ -8,7 +8,8 @@ import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.repository.UserRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
@@ -19,15 +20,20 @@ class ProfileViewModel(
 
     init {
         viewModelScope.launch {
-            try {
-                sessionStore?.session?.first()?.userId?.let { userId ->
-                    userRepository.loadUserProfile(userId)
+            sessionStore?.session
+                ?.map { it?.userId }
+                ?.distinctUntilChanged()
+                ?.collect { userId ->
+                    if (userId != null) {
+                        try {
+                            userRepository.loadUserProfile(userId)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            // يُعرض المحتوى المحلي الاحتياطي إذا تعذّر جلب الملف الشخصي.
+                        }
+                    }
                 }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                // يُعرض المحتوى المحلي الاحتياطي إذا تعذّر جلب الملف الشخصي.
-            }
         }
     }
 }

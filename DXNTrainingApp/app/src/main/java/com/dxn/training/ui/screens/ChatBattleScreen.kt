@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
+import com.dxn.training.data.remote.AnswerDto
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -20,29 +21,27 @@ import com.dxn.training.ui.theme.*
 @Composable
 fun ChatBattleScreen(
     levelId: String,
-    onComplete: (Int, Int) -> Unit,
+    onComplete: (List<AnswerDto>) -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
-    val round = level?.rounds?.firstOrNull()
-    var trust by remember { mutableIntStateOf(round?.initialTrust ?: 50) }
-    var hearts by remember { mutableIntStateOf(3) }
-    var answered by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf<RoundOption?>(null) }
-    val messages = remember { mutableStateListOf<Pair<String, Boolean>>() }
-    LaunchedEffect(round) {
-        if (round != null && messages.isEmpty()) {
-            messages.add(round.prompt to false)
-        }
-    }
-
+    val rounds = level?.rounds ?: emptyList()
+    var roundIndex by remember(levelId) { mutableIntStateOf(0) }
+    val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
+
+    var trust by remember(round.id) { mutableIntStateOf(round.initialTrust) }
+    var hearts by remember(levelId) { mutableIntStateOf(3) }
+    var answered by remember(round.id) { mutableStateOf(false) }
+    var selectedOption by remember(round.id) { mutableStateOf<RoundOption?>(null) }
+    val messages = remember(round.id) { mutableStateListOf(round.prompt to false) }
+    val answers = remember(levelId) { mutableListOf<AnswerDto>() }
 
     Column(
         modifier = Modifier
@@ -87,17 +86,6 @@ fun ChatBattleScreen(
             messages.forEach { (text, isUser) ->
                 ChatBubble(text = text, isUser = isUser)
                 Spacer(modifier = Modifier.height(8.dp))
-            }
-            // Ensure prompt is shown when level changes
-            LaunchedEffect(levelId) {
-                if (messages.isEmpty() || messages.firstOrNull()?.first != round.prompt) {
-                    messages.clear()
-                    messages.add(round.prompt to false)
-                    trust = round.initialTrust
-                    hearts = 3
-                    answered = false
-                    selectedOption = null
-                }
             }
         }
 
@@ -144,14 +132,17 @@ fun ChatBattleScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         DxButton(
-            text = if (answered) "متابعة" else "إرسال",
+            text = if (answered && roundIndex < rounds.lastIndex) "التالي"
+                   else if (answered) "متابعة" else "إرسال",
             onClick = {
                 if (answered) {
-                    val passed = trust >= level.passThreshold && hearts > 0
-                    val score = if (passed) 100 else 0
-                    val xp = if (passed) level.xpReward else 0
-                    contentRepository.updateLevelProgress(levelId, score, passed)
-                    onComplete(score, xp)
+                    val chosen = selectedOption ?: return@DxButton
+                    answers.add(AnswerDto(round.id, chosen.id))
+                    if (roundIndex < rounds.lastIndex) {
+                        roundIndex++
+                    } else {
+                        onComplete(answers.toList())
+                    }
                 } else {
                     selectedOption?.let { option ->
                         trust = (trust + option.trustImpact).coerceIn(0, 100)

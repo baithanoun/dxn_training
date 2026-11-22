@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
+import com.dxn.training.data.remote.AnswerDto
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -19,21 +20,24 @@ import com.dxn.training.ui.theme.*
 @Composable
 fun QuizScreen(
     levelId: String,
-    onComplete: (Int, Int) -> Unit,
+    onComplete: (List<AnswerDto>) -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
-    val round = level?.rounds?.firstOrNull()
+    val rounds = level?.rounds ?: emptyList()
+    var roundIndex by remember(levelId) { mutableIntStateOf(0) }
+    val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
-    var selected by remember { mutableStateOf<RoundOption?>(null) }
-    var hearts by remember { mutableIntStateOf(3) }
-    var answered by remember { mutableStateOf(false) }
+    var selected by remember(round.id) { mutableStateOf<RoundOption?>(null) }
+    var hearts by remember(levelId) { mutableIntStateOf(3) }
+    var answered by remember(round.id) { mutableStateOf(false) }
+    val answers = remember(levelId) { mutableListOf<AnswerDto>() }
 
     Column(
         modifier = Modifier
@@ -125,14 +129,18 @@ fun QuizScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
-            text = if (answered) "متابعة" else "تحقق",
+            text = if (answered && roundIndex < rounds.lastIndex) "التالي" else if (answered) "متابعة" else "تحقق",
             onClick = {
                 if (answered) {
-                    val score = if (selected?.isCorrect == true) 100 else 0
-                    val xp = if (score >= level.passThreshold) level.xpReward else 0
-                    val passed = score >= level.passThreshold
-                    contentRepository.updateLevelProgress(levelId, score, passed)
-                    onComplete(score, xp)
+                    val chosen = selected ?: return@DxButton
+                    answers.add(AnswerDto(round.id, chosen.id))
+                    if (roundIndex < rounds.lastIndex) {
+                        roundIndex++
+                        selected = null
+                        answered = false
+                    } else {
+                        onComplete(answers.toList())
+                    }
                 } else {
                     answered = true
                     if (selected?.isCorrect == false) {

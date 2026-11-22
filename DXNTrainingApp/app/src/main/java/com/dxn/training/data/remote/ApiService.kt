@@ -7,17 +7,26 @@ import retrofit2.http.*
 
 // ===================  الطلبات والاستجابات  ===================
 
+data class AnswerDto(
+    val roundId: String,
+    val optionId: String? = null,
+    val orderedOptionIds: List<String>? = null
+)
+
 data class LevelCompletionRequest(
-    val userId: String,
-    val score: Int,
-    val passed: Boolean
+    val answers: List<AnswerDto>
 )
 
 data class LevelCompletionResponse(
     val success: Boolean,
+    val score: Int = 0,
+    val passed: Boolean = false,
     val xpAwarded: Int = 0,
+    val totalXp: Int = 0,
+    val currentStreak: Int = 0,
     val certificateIssued: Boolean = false,
-    val certificateTitle: String? = null
+    val certificateTitle: String? = null,
+    val certificateId: String? = null
 )
 
 data class LoginRequest(

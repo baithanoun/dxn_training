@@ -28,7 +28,8 @@ class HomeViewModel(
         val progress: Map<String, UserProgress> = emptyMap(),
         val sectionProgress: Map<String, SectionProgress> = emptyMap(),
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val offlineFallback: Boolean = false
     )
 
     private val _isLoading = MutableStateFlow(false)
@@ -39,6 +40,7 @@ class HomeViewModel(
         contentRepository.progress,
         contentRepository.sectionProgress,
         contentRepository.sections,
+        contentRepository.loadedFromNetwork,
         _isLoading,
         _error
     ) { values ->
@@ -50,8 +52,9 @@ class HomeViewModel(
         val sectionProgress = values[2] as Map<String, SectionProgress>
         @Suppress("UNCHECKED_CAST")
         val sections = values[3] as List<com.dxn.training.data.model.Section>
-        val isLoading = values[4] as Boolean
-        val error = values[5] as String?
+        val loadedFromNetwork = values[4] as Boolean
+        val isLoading = values[5] as Boolean
+        val error = values[6] as String?
         HomeUiState(
             userName = user.fullName.substringBefore(" "),
             totalXp = user.totalXp,
@@ -61,7 +64,8 @@ class HomeViewModel(
             progress = progress,
             sectionProgress = sectionProgress,
             isLoading = isLoading,
-            error = error
+            error = error,
+            offlineFallback = !loadedFromNetwork
         )
     }.stateIn(
         scope = viewModelScope,
@@ -69,17 +73,23 @@ class HomeViewModel(
         initialValue = HomeUiState()
     )
 
+    private var loadedUserId: String? = null
+
     init {
-        loadContent()
+        // إعادة التحميل عند ظهور جلسة (مثلاً بعد تسجيل الدخول من شاشة البداية).
+        viewModelScope.launch {
+            sessionStore?.session
+                ?.map { it?.userId }
+                ?.distinctUntilChanged()
+                ?.collect { userId ->
+                    if (userId != null) loadContent(userId)
+                }
+        }
     }
 
-    private fun loadContent() {
+    private fun loadContent(userId: String) {
         viewModelScope.launch {
-            val userId = sessionStore?.session?.first()?.userId
-            if (userId == null) {
-                _error.value = "انتهت الجلسة — سجّل الدخول من جديد"
-                return@launch
-            }
+            loadedUserId = userId
             _isLoading.value = true
             _error.value = null
             try {
@@ -99,20 +109,10 @@ class HomeViewModel(
     }
 
     fun refresh() {
-        loadContent()
+        loadedUserId?.let { loadContent(it) }
     }
 
     fun clearError() {
         _error.value = null
-    }
-
-    fun unlockNextLevel(levelId: String) {
-        viewModelScope.launch {
-            contentRepository.updateLevelProgress(levelId, 0, true)
-        }
-    }
-
-    fun unlockFirstLevelOfSection(sectionId: String): Boolean {
-        return contentRepository.unlockFirstLevelOfSection(sectionId)
     }
 }

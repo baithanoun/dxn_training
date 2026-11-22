@@ -60,6 +60,23 @@ fun HomeScreen(
             }
         }
 
+        // الشجرة المحلية للعرض فقط؛ التقدّم لا يُحسب محلياً.
+        if (uiState.offlineFallback && !uiState.isLoading) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = WarningAmber)
+            ) {
+                Text(
+                    text = "وضع غير متصل — المحتوى للعرض فقط",
+                    color = TextPrimary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
         DailyProgressCard(uiState)
 
         Text(
@@ -101,9 +118,6 @@ fun HomeScreen(
                         lockedSectionMessage = "يجب إكمال $requiredTitle والحصول على شهادته لفتح هذا القسم"
                         return@SectionCard
                     }
-
-                    // فتح أول مستوى في القسم إذا لم يُفتح بعد
-                    viewModel.unlockFirstLevelOfSection(section.id)
 
                     val firstLevel = section.skills
                         .flatMap { it.levels }

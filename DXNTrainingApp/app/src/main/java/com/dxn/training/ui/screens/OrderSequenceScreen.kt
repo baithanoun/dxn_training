@@ -2,7 +2,6 @@ package com.dxn.training.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.dxn.training.data.model.RoundOption
+import com.dxn.training.data.remote.AnswerDto
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -18,36 +17,27 @@ import com.dxn.training.ui.theme.*
 @Composable
 fun OrderSequenceScreen(
     levelId: String,
-    onComplete: (Int, Int) -> Unit,
+    onComplete: (List<AnswerDto>) -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
-    val round = level?.rounds?.firstOrNull()
-
-    // استخراج الخطوات من خيارات الجولة (الخيارات "الصحيحة" بالترتيب)
-    val steps = remember(levelId) {
-        round?.options
-            ?.filter { it.isCorrect }
-            ?.sortedBy { it.id }
-            ?.map { it.text }
-            ?: emptyList()
-    }
-
-    // إذا لم تتوفر خطوات من البيانات، استخدم قائمة افتراضية
-    val defaultSteps = remember { listOf("الدعوة والتشويق", "عرض المنتج", "شرح الخطة", "طلب القرار") }
-    val actualSteps = if (steps.isNotEmpty()) steps else defaultSteps
-
-    var ordered by remember { mutableStateOf(actualSteps.shuffled()) }
-    var checked by remember { mutableStateOf(false) }
-    var hearts by remember { mutableIntStateOf(3) }
-
+    val rounds = level?.rounds ?: emptyList()
+    var roundIndex by remember(levelId) { mutableIntStateOf(0) }
+    val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
+
+    // ترتيب الخيارات القادم من السيرفر هو الترتيب الصحيح؛ نعرض كل الخيارات بترتيب عشوائي.
+    val options = round.options
+    var ordered by remember(round.id) { mutableStateOf(options.shuffled()) }
+    var checked by remember(round.id) { mutableStateOf(false) }
+    var hearts by remember(levelId) { mutableIntStateOf(3) }
+    val answers = remember(levelId) { mutableListOf<AnswerDto>() }
 
     Column(
         modifier = Modifier
@@ -93,7 +83,7 @@ fun OrderSequenceScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = step,
+                        text = step.text,
                         style = MaterialTheme.typography.bodyLarge,
                         color = TextPrimary,
                         modifier = Modifier.weight(1f)
@@ -137,21 +127,22 @@ fun OrderSequenceScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
-            text = if (checked) "متابعة" else "تحقق",
+            text = if (checked && roundIndex < rounds.lastIndex) "التالي"
+                   else if (checked) "متابعة" else "تحقق",
             onClick = {
                 if (checked) {
-                    val correct = ordered == actualSteps
-                    val score = if (correct) 100 else 0
-                    val xp = if (correct) level.xpReward else 0
-                    val passed = score >= level.passThreshold
-                    contentRepository.updateLevelProgress(levelId, score, passed)
-                    onComplete(score, xp)
+                    answers.add(AnswerDto(round.id, orderedOptionIds = ordered.map { it.id }))
+                    if (roundIndex < rounds.lastIndex) {
+                        roundIndex++
+                    } else {
+                        onComplete(answers.toList())
+                    }
                 } else {
                     checked = true
-                    if (ordered != actualSteps) hearts--
+                    if (ordered.map { it.id } != options.map { it.id }) hearts--
                 }
             },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
+            enabled = ordered.isNotEmpty()
         )
     }
 }

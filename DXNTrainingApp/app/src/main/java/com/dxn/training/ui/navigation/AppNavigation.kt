@@ -23,6 +23,7 @@ import androidx.navigation.navArgument
 import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
+import com.dxn.training.data.remote.AnswerDto
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import com.dxn.training.ui.screens.*
@@ -77,13 +78,28 @@ class ProfileViewModelFactory(
     }
 }
 
+class CompletionViewModelFactory(
+    private val contentRepository: ContentRepository
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CompletionViewModel::class.java)) {
+            return CompletionViewModel(contentRepository = contentRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
 @Composable
 fun AppNavigation(navController: NavHostController) {
     val context = LocalContext.current
     val api = remember { ApiClient.create() }
     val sessionStore = remember { ApiClient.getSessionStore() ?: SessionStore(context.applicationContext) }
     val userRepository = remember { UserRepository(api) }
-    val contentRepository = remember { ContentRepository.getInstance(api) }
+    val contentRepository = remember { ContentRepository.getInstance(api, sessionStore, userRepository) }
+    val completionViewModel: CompletionViewModel = viewModel(
+        factory = CompletionViewModelFactory(contentRepository)
+    )
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(api, sessionStore))
     val homeViewModel: HomeViewModel = viewModel(
         factory = HomeViewModelFactory(contentRepository, userRepository, sessionStore)
@@ -202,6 +218,12 @@ fun AppNavigation(navController: NavHostController) {
                         else -> navController.navigate(Screen.Quiz.createRoute(levelId))
                     }
                 },
+                onFinishLesson = {
+                    completionViewModel.submit(levelId, emptyList())
+                    navController.navigate(Screen.Completion.createRoute(levelId)) {
+                        popUpTo(Screen.Lesson.route) { inclusive = true }
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 contentRepository = contentRepository
             )
@@ -214,8 +236,9 @@ fun AppNavigation(navController: NavHostController) {
             val levelId = backStackEntry.arguments?.getString("levelId") ?: return@composable
             QuizScreen(
                 levelId = levelId,
-                onComplete = { score, xp ->
-                    navController.navigate(Screen.Completion.createRoute(levelId, score, xp)) {
+                onComplete = { answers ->
+                    completionViewModel.submit(levelId, answers)
+                    navController.navigate(Screen.Completion.createRoute(levelId)) {
                         popUpTo(Screen.Quiz.route) { inclusive = true }
                     }
                 },
@@ -231,8 +254,11 @@ fun AppNavigation(navController: NavHostController) {
             val levelId = backStackEntry.arguments?.getString("levelId") ?: return@composable
             ChatBattleScreen(
                 levelId = levelId,
-                onComplete = { score, xp ->
-                    navController.navigate(Screen.Completion.createRoute(levelId, score, xp))
+                onComplete = { answers ->
+                    completionViewModel.submit(levelId, answers)
+                    navController.navigate(Screen.Completion.createRoute(levelId)) {
+                        popUpTo(Screen.ChatBattle.route) { inclusive = true }
+                    }
                 },
                 onBack = { navController.popBackStack() },
                 contentRepository = contentRepository
@@ -246,8 +272,11 @@ fun AppNavigation(navController: NavHostController) {
             val levelId = backStackEntry.arguments?.getString("levelId") ?: return@composable
             MatchPairsScreen(
                 levelId = levelId,
-                onComplete = { score, xp ->
-                    navController.navigate(Screen.Completion.createRoute(levelId, score, xp))
+                onComplete = { answers ->
+                    completionViewModel.submit(levelId, answers)
+                    navController.navigate(Screen.Completion.createRoute(levelId)) {
+                        popUpTo(Screen.MatchPairs.route) { inclusive = true }
+                    }
                 },
                 onBack = { navController.popBackStack() },
                 contentRepository = contentRepository
@@ -261,8 +290,11 @@ fun AppNavigation(navController: NavHostController) {
             val levelId = backStackEntry.arguments?.getString("levelId") ?: return@composable
             OrderSequenceScreen(
                 levelId = levelId,
-                onComplete = { score, xp ->
-                    navController.navigate(Screen.Completion.createRoute(levelId, score, xp))
+                onComplete = { answers ->
+                    completionViewModel.submit(levelId, answers)
+                    navController.navigate(Screen.Completion.createRoute(levelId)) {
+                        popUpTo(Screen.OrderSequence.route) { inclusive = true }
+                    }
                 },
                 onBack = { navController.popBackStack() },
                 contentRepository = contentRepository
@@ -271,19 +303,12 @@ fun AppNavigation(navController: NavHostController) {
 
         composable(
             route = Screen.Completion.route,
-            arguments = listOf(
-                navArgument("levelId") { type = NavType.StringType },
-                navArgument("score") { type = NavType.IntType },
-                navArgument("xp") { type = NavType.IntType }
-            )
+            arguments = listOf(navArgument("levelId") { type = NavType.StringType })
         ) { backStackEntry ->
             val levelId = backStackEntry.arguments?.getString("levelId") ?: return@composable
-            val score = backStackEntry.arguments?.getInt("score") ?: 0
-            val xp = backStackEntry.arguments?.getInt("xp") ?: 0
             CompletionScreen(
                 levelId = levelId,
-                score = score,
-                xp = xp,
+                completionViewModel = completionViewModel,
                 onNextLevel = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Main.route) { inclusive = true }

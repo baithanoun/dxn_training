@@ -5,6 +5,7 @@ import com.dxn.training.data.model.User
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
+import com.dxn.training.data.remote.LevelCompletionResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,8 +43,12 @@ class UserRepository(
         }
     }
 
-    fun addXp(amount: Int) {
-        _user.value = _user.value.copy(totalXp = _user.value.totalXp + amount)
+    /** تحديث الإجماليات بقيم السيرفر بعد إكمال المستوى (لا إضافة XP محلية). */
+    fun applyCompletionResult(response: LevelCompletionResponse) {
+        _user.value = _user.value.copy(
+            totalXp = response.totalXp,
+            currentStreak = response.currentStreak
+        )
     }
 
     fun updateHearts(hearts: Int) {

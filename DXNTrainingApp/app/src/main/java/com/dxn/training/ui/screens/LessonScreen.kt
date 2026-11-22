@@ -10,7 +10,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.repository.ContentRepository
-import com.dxn.training.data.repository.MockData
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
 
@@ -18,6 +17,7 @@ import com.dxn.training.ui.theme.*
 fun LessonScreen(
     levelId: String,
     onStartQuiz: () -> Unit,
+    onFinishLesson: () -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
@@ -107,10 +107,19 @@ fun LessonScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
-            text = if (currentIndex < cards.size - 1) "التالي" else "ابدأ الاختبار",
+            text = if (currentIndex < cards.size - 1) {
+                "التالي"
+            } else if (level.type == "lesson") {
+                "إنهاء الدرس"
+            } else {
+                "ابدأ الاختبار"
+            },
             onClick = {
                 if (currentIndex < cards.size - 1) {
                     currentIndex++
+                } else if (level.type == "lesson") {
+                    // درس بلا إجابات: يُرسل طلب إكمال بقائمة إجابات فارغة.
+                    onFinishLesson()
                 } else {
                     onStartQuiz()
                 }
