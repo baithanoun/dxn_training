@@ -153,3 +153,84 @@ export interface TeamDetail {
   leader: AdminUser
   members: TeamMember[]
 }
+
+// Mirrors Admin\DashboardController@overview.
+export interface OverviewStat {
+  title: string
+  value: number | string
+  change: number
+  changeType: "up" | "down"
+  icon: string
+}
+
+export interface OverviewActivity {
+  date: string
+  sessions: number
+  activeUsers: number
+}
+
+export interface FailedSkill {
+  name: string
+  failureRate: number
+}
+
+export interface InactiveUser {
+  id: string
+  name: string
+  lastActive: string | null
+  xp: number
+  role: Role
+}
+
+export interface CertificateCount {
+  sectionId: string
+  title: string
+  issuedCount: number
+}
+
+export interface BagProgress {
+  sectionId: string
+  title: string
+  percent: number
+}
+
+export interface DashboardOverview {
+  stats: OverviewStat[]
+  activity: OverviewActivity[]
+  failedSkills: FailedSkill[]
+  inactiveUsers: InactiveUser[]
+  certificatesBySection: CertificateCount[]
+  bagsProgress: BagProgress[]
+}
+
+// Mirrors Admin\DashboardController@analytics.
+export interface AnalyticsSummary {
+  title: string
+  value: string
+  change: number
+}
+
+export interface FunnelStep {
+  name: string
+  value: number
+}
+
+export interface FailedQuestion {
+  id: string
+  question: string
+  attempts: number
+  errorRate: number
+  avgTime: string
+}
+
+export interface RetentionDay {
+  day: string
+  rate: number
+}
+
+export interface AnalyticsData {
+  summary: AnalyticsSummary[]
+  funnel: FunnelStep[]
+  failedQuestions: FailedQuestion[]
+  retention: RetentionDay[]
+}
