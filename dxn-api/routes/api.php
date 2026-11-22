@@ -46,6 +46,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('settings', [SettingsController::class, 'index']);
     Route::put('settings', [SettingsController::class, 'update']);
     Route::get('dashboard/overview', [DashboardController::class, 'overview']);
+    Route::get('analytics/export', [DashboardController::class, 'analyticsExport']);
+    Route::get('analytics', [DashboardController::class, 'analytics']);
+    Route::get('certificates', [DashboardController::class, 'certificates']);
     Route::get('content/tree', ContentTreeController::class);
     Route::apiResource('sections', SectionController::class)->only(['store', 'update', 'destroy']);
     Route::apiResource('skills', SkillController::class)->only(['store', 'update', 'destroy']);
