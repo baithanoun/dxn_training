@@ -183,10 +183,17 @@ class UserController extends Controller
 
         $handle = fopen('php://temp', 'r+');
         fwrite($handle, "\xEF\xBB\xBF"); // BOM
-        // shortcut: static header written literally because fputcsv quotes cells containing spaces,
-        // which changes the published header shape; upgrade by changing the published header to single words.
-        fwrite($handle, "الاسم,البريد,الهاتف,DXN ID,الدور,القائد,XP,Streak,آخر نشاط\n");
+        fputcsv($handle, ['الاسم', 'البريد', 'الهاتف', 'رقم العضوية', 'الدور', 'القائد', 'XP', 'آخر نشاط', 'الحالة']);
         foreach ($users as $u) {
+            $lastActivity = $u->last_activity_date?->toDateString();
+            if (! $u->is_active) {
+                $status = 'DISABLED';
+            } elseif ($lastActivity !== null && $lastActivity >= now()->subDays(3)->toDateString()) {
+                $status = 'ACTIVE';
+            } else {
+                $status = 'INACTIVE';
+            }
+
             fputcsv($handle, [
                 $this->csvSafe($u->name),
                 $this->csvSafe((string) $u->email),
@@ -195,8 +202,8 @@ class UserController extends Controller
                 $this->csvSafe($u->role),
                 $this->csvSafe($u->sponsor?->name),
                 $this->csvSafe((string) $u->total_xp),
-                $this->csvSafe((string) $u->current_streak),
-                $this->csvSafe($u->last_activity_date?->toDateString()),
+                $this->csvSafe($lastActivity),
+                $this->csvSafe($status),
             ]);
         }
         rewind($handle);

@@ -136,7 +136,10 @@ class UsersTest extends TestCase
 
         $this->assertSame("\xEF\xBB\xBF", substr($csv, 0, 3));
         $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
-        $this->assertStringContainsString('الاسم,البريد,الهاتف,DXN ID', $csv);
+        $lines = preg_split('/\R/u', substr($csv, 3));
+        $this->assertSame([
+            'الاسم', 'البريد', 'الهاتف', 'رقم العضوية', 'الدور', 'القائد', 'XP', 'آخر نشاط', 'الحالة',
+        ], str_getcsv($lines[0]));
         $this->assertStringContainsString('Plain User', $csv);
     }
 

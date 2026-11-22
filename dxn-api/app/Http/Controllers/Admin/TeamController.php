@@ -32,6 +32,7 @@ class TeamController extends Controller
             $out[] = [
                 'leaderId' => (string) $leader->id,
                 'leader' => new AdminUserResource($leader),
+                'leaderName' => $leader->name,
                 'members' => $memberCount,
                 'completion' => $completion,
                 'activeToday' => $activeToday,

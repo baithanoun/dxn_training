@@ -41,8 +41,10 @@ class TeamsTest extends TestCase
             ->assertOk()->assertJsonCount(2)->json();
         $byLeader = collect($teams)->keyBy('leaderId');
 
-        $this->assertSame(['leaderId', 'leader', 'members', 'completion', 'activeToday'], array_keys($teams[0]));
+        $this->assertSame(['leaderId', 'leader', 'leaderName', 'members', 'completion', 'activeToday'], array_keys($teams[0]));
         $this->assertIsString($teams[0]['leaderId']);
+        $this->assertSame('Leader A', $byLeader[(string) $leaderA->id]['leaderName']);
+        $this->assertSame('Leader B', $byLeader[(string) $leaderB->id]['leaderName']);
         $this->assertSame(2, $byLeader[(string) $leaderA->id]['members']);
         $this->assertSame((int) round(2 / (2 * $published->count()) * 100), $byLeader[(string) $leaderA->id]['completion']);
         $this->assertSame(1, $byLeader[(string) $leaderA->id]['activeToday']);
