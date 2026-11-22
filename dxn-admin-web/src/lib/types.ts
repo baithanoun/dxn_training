@@ -87,3 +87,69 @@ export interface LevelDetail extends Level {
   cards: Card[]
   rounds: Round[]
 }
+
+// Mirrors Admin\AdminUserResource. Roles are serialized uppercase; ids stay strings.
+export interface AdminUser {
+  id: string
+  fullName: string
+  email: string | null
+  phone: string | null
+  dxnId: string | null
+  role: Role
+  leaderId: string | null
+  leaderName: string | null
+  totalXp: number
+  currentStreak: number
+  lastActivityDate: string | null
+  isActive: boolean
+  certificatesCount: number
+  createdAt: string | null
+}
+
+export interface AdminCertificate {
+  sectionId: string
+  sectionTitle: string | null
+  code: string
+  issuedAt: string | null
+}
+
+// Shape expected from GET admin/users/{id}; sectionsProgress is currently [] in the API.
+export interface SectionProgress {
+  sectionId: string
+  sectionTitle?: string | null
+  progressPercent: number
+}
+
+export interface AdminUserDetail extends AdminUser {
+  certificates: AdminCertificate[]
+  sectionsProgress: SectionProgress[]
+}
+
+export interface Paginated<T> {
+  data: T[]
+  meta: {
+    page: number
+    perPage: number
+    total: number
+    lastPage: number
+  }
+}
+
+// Mirrors Admin\TeamController@index (leaderName added alongside the leader object).
+export interface TeamSummary {
+  leaderId: string
+  leader: AdminUser
+  leaderName: string
+  members: number
+  completion: number
+  activeToday: number
+}
+
+export interface TeamMember extends AdminUser {
+  progressPercent: number
+}
+
+export interface TeamDetail {
+  leader: AdminUser
+  members: TeamMember[]
+}
