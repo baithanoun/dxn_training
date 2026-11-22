@@ -45,8 +45,6 @@ class SettingsTest extends TestCase
 
     public function test_unknown_key_422(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->actingAs($this->admin(), 'sanctum')
             ->putJson('/api/admin/settings', ['foo' => 1])
             ->assertStatus(422);
@@ -54,8 +52,6 @@ class SettingsTest extends TestCase
 
     public function test_maintenance_blocks_mobile_not_admin(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $admin = $this->admin();
         $this->actingAs($admin, 'sanctum')->putJson('/api/admin/settings', ['maintenance_mode' => true])
             ->assertOk();
@@ -68,8 +64,6 @@ class SettingsTest extends TestCase
 
     public function test_completion_limiter_honors_setting(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $section = Section::create(['title' => 'S', 'order_index' => 1, 'status' => 'published']);
         $skill = Skill::create(['section_id' => $section->id, 'title' => 'K', 'order_index' => 1, 'status' => 'published']);
         $level = Level::create([

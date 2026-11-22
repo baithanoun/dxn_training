@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -69,9 +70,12 @@ class AuthController extends Controller
         }
 
         $tokenName = $request->header('X-Client') === 'android' ? 'mobile' : 'dashboard';
+        $token = $tokenName === 'dashboard'
+            ? $user->createToken('dashboard', ['*'], now()->addMinutes((int) Setting::get('session_minutes', Setting::DEFAULTS['session_minutes'])))
+            : $user->createToken('mobile');
 
         return response()->json([
-            'token' => $user->createToken($tokenName)->plainTextToken,
+            'token' => $token->plainTextToken,
             'user' => new UserResource($user),
         ]);
     }

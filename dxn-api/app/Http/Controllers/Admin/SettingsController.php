@@ -8,24 +8,6 @@ use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    private const DEFAULTS = [
-        'app_name' => 'DXN Training',
-        'default_language' => 'ar',
-        'maintenance_mode' => false,
-        'xp_lesson_default' => 20,
-        'hearts_default' => 3,
-        'heart_refill_hours' => 4,
-        'streak_reminder_days' => 2,
-        'xp_first_try_multiplier' => 1.5,
-        'xp_replay_ratio' => 0.25,
-        'notify_streak' => true,
-        'notify_reengage' => true,
-        'notify_leagues' => true,
-        'notify_leaders' => true,
-        'session_minutes' => 60,
-        'quiz_rate_limit_per_minute' => 10,
-    ];
-
     private const RULES = [
         'app_name' => 'string|max:100',
         'default_language' => 'in:ar',
@@ -46,16 +28,25 @@ class SettingsController extends Controller
 
     public function index()
     {
-        $stored = Setting::all()->pluck('value', 'key')->toArray();
         $out = [];
-        foreach (self::DEFAULTS as $key => $default) {
-            $out[$key] = array_key_exists($key, $stored) ? $stored[$key] : $default;
+        foreach (Setting::DEFAULTS as $key => $default) {
+            $out[$key] = Setting::get($key, $default);
         }
         return response()->json($out);
     }
 
     public function update(Request $request)
     {
+        $unknown = array_diff(array_keys($request->all()), array_keys(self::RULES));
+        if ($unknown !== []) {
+            $errors = [];
+            foreach ($unknown as $key) {
+                $errors[$key] = ['مفتاح غير معروف'];
+            }
+
+            return response()->json(['message' => 'مفتاح غير معروف', 'errors' => $errors], 422);
+        }
+
         $data = $request->validate(self::RULES);
         foreach ($data as $key => $value) {
             Setting::updateOrCreate(['key' => $key], ['value' => $value]);

@@ -8,6 +8,7 @@ use App\Models\AnalyticsEvent;
 use App\Models\Level;
 use App\Models\UserLevelProgress;
 use App\Models\Certificate;
+use App\Models\Setting;
 use App\Services\ProgressService;
 use App\Services\ScoringService;
 use Illuminate\Support\Facades\DB;
@@ -26,8 +27,8 @@ class CompletionController extends Controller
         $score = $scoring->score($level, $answers);
         $passed = $scoring->passed($level, $score);
 
-        $xpFirst = (float) (\App\Models\Setting::get('xp_first_try_multiplier', 1.5));
-        $xpReplay = (float) (\App\Models\Setting::get('xp_replay_ratio', 0.25));
+        $xpFirst = (float) Setting::get('xp_first_try_multiplier', Setting::DEFAULTS['xp_first_try_multiplier']);
+        $xpReplay = (float) Setting::get('xp_replay_ratio', Setting::DEFAULTS['xp_replay_ratio']);
 
         $result = DB::transaction(function () use ($user, $level, $score, $passed, $progress, $xpFirst, $xpReplay) {
             $row = UserLevelProgress::where('user_id', $user->id)
