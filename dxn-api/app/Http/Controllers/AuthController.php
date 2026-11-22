@@ -16,12 +16,12 @@ class AuthController extends Controller
 
         $dxnId = trim($data['dxnId']);
         if ($dxnId === '') {
-            return response()->json(['message' => 'DXN ID is required', 'errors' => ['dxnId' => ['DXN ID is required']]], 422);
+            return response()->json(['message' => 'رقم العضوية مطلوب', 'errors' => ['dxnId' => ['رقم العضوية مطلوب']]], 422);
         }
 
         $hash = User::hashDxnId($dxnId);
         if (User::where('dxn_id_hash', $hash)->exists()) {
-            return response()->json(['message' => 'DXN ID already in use', 'errors' => ['dxnId' => ['DXN ID is already in use']]], 422);
+            return response()->json(['message' => 'رقم العضوية مسجّل مسبقاً', 'errors' => ['dxnId' => ['رقم العضوية مسجّل مسبقاً']]], 422);
         }
 
         $sponsorId = null;
@@ -30,12 +30,14 @@ class AuthController extends Controller
                 ->where('role', 'leader')
                 ->first();
             if (! $leader) {
-                return response()->json(['message' => 'Leader not found', 'errors' => ['leaderDxnId' => ['Leader not found among registered leaders']]], 422);
+                return response()->json(['message' => 'لم يتم العثور على قائد بهذا الرقم', 'errors' => ['leaderDxnId' => ['لم يتم العثور على قائد بهذا الرقم']]], 422);
             }
             $sponsorId = $leader->id;
         }
 
-        $user = User::create([
+        // role is server-owned: forceCreate bypasses the model's fillable list so the
+        // in-memory model returned to UserResource matches the DB default (trainee).
+        $user = User::forceCreate([
             'name' => $data['fullName'],
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,

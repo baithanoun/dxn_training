@@ -22,4 +22,25 @@ class RegisterRequest extends FormRequest
             'leaderDxnId' => ['nullable', 'string', 'max:64'],
         ];
     }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('dxnId'))) {
+            $this->merge(['dxnId' => trim($this->input('dxnId'))]);
+        }
+        if (is_string($this->input('leaderDxnId'))) {
+            $this->merge(['leaderDxnId' => trim($this->input('leaderDxnId'))]);
+        }
+    }
+
+    public function messages(): array
+    {
+        return [
+            'fullName.required' => 'الاسم مطلوب',
+            'email.required_without' => 'البريد الإلكتروني أو الهاتف مطلوب',
+            'phone.required_without' => 'البريد الإلكتروني أو الهاتف مطلوب',
+            'password.required' => 'كلمة المرور مطلوبة',
+            'dxnId.required' => 'رقم العضوية مطلوب',
+        ];
+    }
 }

@@ -134,8 +134,6 @@ class CompletionTest extends TestCase
 
     public function test_first_pass_after_fail_awards_full_xp(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->seed(ContentSeeder::class);
         $user = $this->trainee();
         $level = $this->level(1, 1, 1);
@@ -191,8 +189,6 @@ class CompletionTest extends TestCase
 
     public function test_missing_option_id_422(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->seed(ContentSeeder::class);
         $user = $this->trainee();
         $level = $this->level(1, 1, 1);
@@ -205,8 +201,6 @@ class CompletionTest extends TestCase
 
     public function test_foreign_round_id_422(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->seed(ContentSeeder::class);
         $user = $this->trainee();
         $level = $this->level(1, 1, 1);
@@ -220,8 +214,6 @@ class CompletionTest extends TestCase
 
     public function test_duplicate_round_422(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->seed(ContentSeeder::class);
         $user = $this->trainee();
         $level = $this->level(1, 1, 1);
@@ -233,8 +225,6 @@ class CompletionTest extends TestCase
 
     public function test_unanswered_round_422(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $user = $this->trainee();
         $level = $this->quizWithTwoRounds();
         $round = $level->rounds()->orderBy('order_index')->firstOrFail();
@@ -309,8 +299,6 @@ class CompletionTest extends TestCase
 
     public function test_completion_writes_level_event(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $this->seed(ContentSeeder::class);
         $user = $this->trainee();
         $level = $this->level(1, 1, 1);

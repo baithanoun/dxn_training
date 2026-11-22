@@ -142,8 +142,6 @@ class UsersTest extends TestCase
 
     public function test_export_escapes_commas_and_formulas(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         $admin = $this->admin();
         User::factory()->create(['role' => 'trainee', 'name' => '=HYPERLINK("x")']);
         User::factory()->create(['role' => 'trainee', 'name' => 'علي, محمد']);

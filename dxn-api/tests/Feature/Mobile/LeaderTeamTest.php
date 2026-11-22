@@ -29,8 +29,6 @@ class LeaderTeamTest extends TestCase
 
     public function test_last_active_days_and_status(): void
     {
-        $this->markTestIncomplete('fixed in T2/T3');
-
         Carbon::setTestNow(Carbon::parse('2026-11-22 12:00:00'));
         $leader = User::factory()->create(['role' => 'leader']);
         $yesterday = User::factory()->create(['name' => 'Am yesterday', 'sponsor_id' => $leader->id, 'last_activity_date' => '2026-11-21']);

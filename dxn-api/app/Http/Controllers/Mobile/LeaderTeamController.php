@@ -22,7 +22,9 @@ class LeaderTeamController extends Controller
         foreach ($members as $m) {
             $completed = \App\Models\UserLevelProgress::where('user_id', $m->id)->where('status', 'completed')->count();
             $progressPercent = $totalPublished > 0 ? (int) round($completed / $totalPublished * 100) : 0;
-            $lastActiveDays = $m->last_activity_date ? (int) now()->diffInDays($m->last_activity_date) : 999;
+            $lastActiveDays = $m->last_activity_date
+                ? (int) $m->last_activity_date->copy()->startOfDay()->diffInDays(now()->startOfDay())
+                : 999;
             $status = 'INACTIVE';
             if ($progressPercent === 100) {
                 $status = 'COMPLETED';

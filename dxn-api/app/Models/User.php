@@ -31,6 +31,10 @@ class User extends Authenticatable
     protected static function booted(): void
     {
         static::saving(function (User $u) {
+            // M-5: normalize blank DXN IDs to null before hashing; encrypted empty strings would still be "present".
+            if (is_string($u->dxn_id) && trim($u->dxn_id) === '') {
+                $u->dxn_id = null;
+            }
             if ($u->isDirty('dxn_id')) {
                 $u->dxn_id_hash = $u->dxn_id === null ? null : self::hashDxnId($u->dxn_id);
             }

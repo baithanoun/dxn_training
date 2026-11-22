@@ -24,13 +24,19 @@ class EventController extends Controller
         $user = $request->user();
         $count = 0;
         foreach ($data['events'] as $e) {
+            $payload = $e['payload'] ?? null;
+            if (! empty($e['occurredAt'])) {
+                $payload = is_array($payload) ? $payload : [];
+                $payload['occurredAt'] = $e['occurredAt'];
+            }
+
             AnalyticsEvent::create([
                 'user_id' => $user->id,
                 'event_name' => $e['eventName'],
                 'level_id' => $e['levelId'] ?? null,
-                'payload' => $e['payload'] ?? null,
+                'payload' => $payload,
                 'device_info' => $e['deviceInfo'] ?? null,
-                'created_at' => $e['occurredAt'] ?? now(),
+                'created_at' => now(),
             ]);
             $count++;
         }

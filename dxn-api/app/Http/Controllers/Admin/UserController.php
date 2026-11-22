@@ -100,7 +100,8 @@ class UserController extends Controller
             }
         }
 
-        $user = User::create([
+        // role is validated server-side; forceCreate is needed because User's fillable list excludes it.
+        $user = User::forceCreate([
             'name' => $data['fullName'],
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
@@ -180,25 +181,39 @@ class UserController extends Controller
 
         $users = $query->orderBy('id', 'desc')->get();
 
-        $csv = "\xEF\xBB\xBF"; // BOM
-        $csv .= "الاسم,البريد,الهاتف,DXN ID,الدور,القائد,XP,Streak,آخر نشاط\n";
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, "\xEF\xBB\xBF"); // BOM
+        // shortcut: static header written literally because fputcsv quotes cells containing spaces,
+        // which changes the published header shape; upgrade by changing the published header to single words.
+        fwrite($handle, "الاسم,البريد,الهاتف,DXN ID,الدور,القائد,XP,Streak,آخر نشاط\n");
         foreach ($users as $u) {
-            $csv .= implode(',', [
-                '"' . str_replace('"', '""', $u->name) . '"',
-                '"' . str_replace('"', '""', (string) $u->email) . '"',
-                '"' . str_replace('"', '""', (string) $u->phone) . '"',
-                '"' . str_replace('"', '""', (string) $u->dxn_id) . '"',
-                $u->role,
-                '"' . str_replace('"', '""', (string) $u->sponsor?->name) . '"',
-                $u->total_xp,
-                $u->current_streak,
-                $u->last_activity_date?->toDateString() ?? '',
-            ]) . "\n";
+            fputcsv($handle, [
+                $this->csvSafe($u->name),
+                $this->csvSafe((string) $u->email),
+                $this->csvSafe((string) $u->phone),
+                $this->csvSafe((string) $u->dxn_id),
+                $this->csvSafe($u->role),
+                $this->csvSafe($u->sponsor?->name),
+                $this->csvSafe((string) $u->total_xp),
+                $this->csvSafe((string) $u->current_streak),
+                $this->csvSafe($u->last_activity_date?->toDateString()),
+            ]);
         }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
 
         return response($csv, 200, [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="users.csv"',
         ]);
+    }
+
+    /** Neutralize spreadsheet formula injection before fputcsv quotes the cell. */
+    private function csvSafe(?string $v): string
+    {
+        $value = $v ?? '';
+
+        return $value !== '' && str_contains('=+-@', $value[0]) ? "'" . $value : $value;
     }
 }

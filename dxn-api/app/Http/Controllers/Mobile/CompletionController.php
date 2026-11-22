@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompletionRequest;
+use App\Models\AnalyticsEvent;
 use App\Models\Level;
-use App\Models\User;
 use App\Models\UserLevelProgress;
 use App\Models\Certificate;
-use App\Models\Section;
 use App\Services\ProgressService;
 use App\Services\ScoringService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CompletionController extends Controller
 {
-    public function __invoke(Request $request, string $levelId, ProgressService $progress, ScoringService $scoring)
+    public function __invoke(CompletionRequest $request, string $levelId, ProgressService $progress, ScoringService $scoring)
     {
         $level = Level::where('status', 'published')->find($levelId);
         if (! $level) {
@@ -23,21 +22,7 @@ class CompletionController extends Controller
         }
 
         $user = $request->user();
-
-        if (! $progress->isUnlocked($user, $level)) {
-            return response()->json(['message' => 'المستوى مقفل'], 409);
-        }
-
-        $answers = $request->input('answers', []);
-        if (! is_array($answers)) {
-            return response()->json(['message' => 'Invalid answers', 'errors' => ['answers' => ['answers must be an array']]], 422);
-        }
-
-        // Validate answers for non-lesson levels
-        if ($level->type !== 'lesson' && empty($answers)) {
-            return response()->json(['message' => 'Answers required', 'errors' => ['answers' => ['answers are required for this level type']]], 422);
-        }
-
+        $answers = $request->validated('answers') ?? [];
         $score = $scoring->score($level, $answers);
         $passed = $scoring->passed($level, $score);
 
@@ -50,17 +35,25 @@ class CompletionController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            $isFirstAttempt = ! $row;
-            $wasCompleted = $row && $row->status === 'completed';
-            $improved = $row && $score > $row->best_score;
+            // M-3: authoritative unlock check under the row lock (the FormRequest
+            // pre-check only preserves 409-before-validation).
+            if (! $progress->isUnlocked($user, $level)) {
+                return ['locked' => true];
+            }
+
+            // I-1: first ever attempt gets the multiplier; a first pass after a
+            // failure gets the base reward; only an improved replay gets the ratio.
+            $firstAttempt = ! $row;
+            $wasCompleted = $row?->status === 'completed';
+            $prevBest = (int) ($row?->best_score ?? 0);
 
             $xpAwarded = 0;
-            if ($passed) {
-                if ($isFirstAttempt) {
-                    $xpAwarded = (int) round($level->xp_reward * $xpFirst);
-                } elseif ($improved) {
-                    $xpAwarded = (int) floor($level->xp_reward * $xpReplay);
-                }
+            if ($passed && ! $wasCompleted) {
+                $xpAwarded = $firstAttempt
+                    ? (int) round($level->xp_reward * $xpFirst)
+                    : (int) $level->xp_reward;
+            } elseif ($passed && $wasCompleted && $score > $prevBest) {
+                $xpAwarded = (int) floor($level->xp_reward * $xpReplay);
             }
 
             if (! $row) {
@@ -122,6 +115,15 @@ class CompletionController extends Controller
                 }
             }
 
+            // I-3: server-owned audit event for every graded attempt.
+            AnalyticsEvent::create([
+                'user_id' => $user->id,
+                'event_name' => $passed ? 'level_completed' : 'level_failed',
+                'level_id' => $level->id,
+                'payload' => ['score' => $score, 'attempt' => $row->attempts],
+                'created_at' => now(),
+            ]);
+
             return [
                 'xpAwarded' => $xpAwarded,
                 'totalXp' => $user->total_xp,
@@ -131,6 +133,10 @@ class CompletionController extends Controller
                 'certificateId' => $certificateId,
             ];
         });
+
+        if (! empty($result['locked'])) {
+            return response()->json(['message' => 'المستوى مقفل'], 409);
+        }
 
         return response()->json([
             'success' => true,

@@ -66,9 +66,14 @@ class ProgressService
     /** Per-section status map for a user. */
     public function sectionStatuses(User $user): array
     {
+        // M-1: load level statuses and all certificates once for the whole section loop.
+        $statuses = $this->levelStatuses($user);
+        $certificates = Certificate::where('user_id', $user->id)
+            ->get(['section_id', 'code', 'issued_at'])->keyBy('section_id');
+
         $result = [];
         foreach (Section::where('status', 'published')->orderBy('order_index')->get() as $section) {
-            $cert = Certificate::where('user_id', $user->id)->where('section_id', $section->id)->first();
+            $cert = $certificates->get($section->id);
             if ($cert) {
                 $result[$section->id] = [
                     'status' => 'COMPLETED',
@@ -79,26 +84,19 @@ class ProgressService
                 continue;
             }
             $requiredId = $section->required_section_id;
-            $unlocked = true;
-            if ($requiredId) {
-                $reqCert = Certificate::where('user_id', $user->id)->where('section_id', $requiredId)->first();
-                $unlocked = (bool) $reqCert;
-            }
-            if (! $unlocked) {
+            if ($requiredId && ! $certificates->has($requiredId)) {
                 $result[$section->id] = ['status' => 'LOCKED', 'certificateIssued' => false, 'certificateId' => null, 'completedAt' => null];
                 continue;
             }
             $levels = $this->orderedLevels($section);
-            $statuses = $this->levelStatuses($user);
-            $allCompleted = $levels->isNotEmpty() && $levels->every(fn ($l) => ($statuses[$l->id] ?? 'LOCKED') === 'COMPLETED');
             $hasUnlocked = $levels->contains(fn ($l) => ($statuses[$l->id] ?? 'LOCKED') !== 'LOCKED');
-            if ($allCompleted) {
-                $result[$section->id] = ['status' => 'COMPLETED', 'certificateIssued' => false, 'certificateId' => null, 'completedAt' => null];
-            } elseif ($hasUnlocked) {
-                $result[$section->id] = ['status' => 'UNLOCKED', 'certificateIssued' => false, 'certificateId' => null, 'completedAt' => null];
-            } else {
-                $result[$section->id] = ['status' => 'LOCKED', 'certificateIssued' => false, 'certificateId' => null, 'completedAt' => null];
-            }
+            // M-2: without a certificate the section is never COMPLETED, even if every level is done.
+            $result[$section->id] = [
+                'status' => $hasUnlocked ? 'UNLOCKED' : 'LOCKED',
+                'certificateIssued' => false,
+                'certificateId' => null,
+                'completedAt' => null,
+            ];
         }
         return $result;
     }
