@@ -19,12 +19,16 @@ android {
             useSupportLibrary = true
         }
 
-        // عنوان السيرفر — debug: emulator (10.0.2.2 = host machine)
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
     }
 
     buildTypes {
+        debug {
+            // debug: emulator (10.0.2.2 = host machine)
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
+        }
         release {
+            // shortcut: release URL placeholder, set in F1
+            buildConfigField("String", "BASE_URL", "\"https://CHANGE-ME/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

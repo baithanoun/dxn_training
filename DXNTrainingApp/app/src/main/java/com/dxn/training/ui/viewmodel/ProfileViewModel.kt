@@ -2,19 +2,32 @@ package com.dxn.training.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.model.User
+import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.repository.UserRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(
-    private val userRepository: UserRepository = UserRepository()
+    private val userRepository: UserRepository = UserRepository(),
+    private val sessionStore: SessionStore? = ApiClient.getSessionStore()
 ) : ViewModel() {
     val user: StateFlow<User> = userRepository.user
 
     init {
         viewModelScope.launch {
-            userRepository.loadUserProfile("u1")
+            try {
+                sessionStore?.session?.first()?.userId?.let { userId ->
+                    userRepository.loadUserProfile(userId)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // يُعرض المحتوى المحلي الاحتياطي إذا تعذّر جلب الملف الشخصي.
+            }
         }
     }
 }

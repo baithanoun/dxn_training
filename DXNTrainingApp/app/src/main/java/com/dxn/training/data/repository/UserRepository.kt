@@ -5,12 +5,12 @@ import com.dxn.training.data.model.User
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 private const val TAG = "UserRepository"
-private const val DEFAULT_USER_ID = "u1"
 
 class UserRepository(
     private val api: ApiService? = ApiClient.create()
@@ -21,7 +21,7 @@ class UserRepository(
     /**
      * تحميل بيانات المستخدم من السيرفر مع العودة إلى البيانات المحلية عند الفشل.
      */
-    suspend fun loadUserProfile(userId: String = DEFAULT_USER_ID): Boolean {
+    suspend fun loadUserProfile(userId: String): Boolean {
         val service = api ?: return false
         return try {
             val response = service.getUserProfile(userId)
@@ -34,6 +34,8 @@ class UserRepository(
                 Log.w(TAG, "getUserProfile failed with HTTP ${response.code()}")
                 false
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Network error while loading user profile", e)
             false

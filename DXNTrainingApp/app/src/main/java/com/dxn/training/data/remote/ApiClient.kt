@@ -3,6 +3,8 @@ package com.dxn.training.data.remote
 import android.content.Context
 import com.dxn.training.BuildConfig
 import com.dxn.training.data.local.SessionStore
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
@@ -14,6 +16,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     @Volatile
     private var sessionStore: SessionStore? = null
+
+    private val _logoutEvents = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val logoutEvents: SharedFlow<Unit> = _logoutEvents
 
     fun init(context: Context) {
         if (sessionStore == null) {
@@ -34,7 +39,8 @@ object ApiClient {
             }
             addInterceptor(Interceptor { chain ->
                 val request = chain.request()
-                val token = sessionStore?.let { runBlocking { it.session.first()?.token } }
+                val store = sessionStore
+                val token = store?.let { runBlocking { it.session.first()?.token } }
                 val newRequest = request.newBuilder().apply {
                     addHeader("Accept", "application/json")
                     addHeader("X-Client", "android")
@@ -42,7 +48,13 @@ object ApiClient {
                         addHeader("Authorization", "Bearer $token")
                     }
                 }.build()
-                chain.proceed(newRequest)
+                val response = chain.proceed(newRequest)
+                // جلسة منتهية: امسح التوكن وأخطر واجهة المستخدم لتعود إلى تسجيل الدخول.
+                if (response.code == 401 && token != null) {
+                    runBlocking { store.clear() }
+                    _logoutEvents.tryEmit(Unit)
+                }
+                response
             })
         }.build()
 

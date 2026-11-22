@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.*
 
 private const val TAG = "ContentRepository"
-private const val DEFAULT_USER_ID = "u1"
 
 class ContentRepository(
     private val api: ApiService? = ApiClient.create(),
@@ -47,6 +46,9 @@ class ContentRepository(
     private val _loadedFromNetwork = MutableStateFlow(false)
     val loadedFromNetwork: StateFlow<Boolean> = _loadedFromNetwork.asStateFlow()
 
+    private val _currentUserId = MutableStateFlow("")
+    val currentUserId: StateFlow<String> = _currentUserId.asStateFlow()
+
     // ===================  قراءة المحتوى  ===================
 
     fun getSections(): List<Section> = _sections.value
@@ -64,12 +66,12 @@ class ContentRepository(
     }
 
     fun getProgress(levelId: String): UserProgress {
-        return _progress.value[levelId] ?: UserProgress(DEFAULT_USER_ID, levelId, LevelStatus.LOCKED)
+        return _progress.value[levelId] ?: UserProgress(_currentUserId.value, levelId, LevelStatus.LOCKED)
     }
 
     fun getSectionProgress(sectionId: String): SectionProgress {
         return _sectionProgress.value[sectionId]
-            ?: SectionProgress(DEFAULT_USER_ID, sectionId, SectionStatus.LOCKED)
+            ?: SectionProgress(_currentUserId.value, sectionId, SectionStatus.LOCKED)
     }
 
     // ===================  تحميل البيانات من السيرفر  ===================
@@ -78,7 +80,8 @@ class ContentRepository(
      * تحميل كل البيانات من السيرفر مع العودة إلى البيانات المحلية عند الفشل.
      * @return true إذا نجح تحميل الأقسام على الأقل.
      */
-    suspend fun loadContent(userId: String = DEFAULT_USER_ID): Boolean {
+    suspend fun loadContent(userId: String): Boolean {
+        _currentUserId.value = userId
         _isLoading.value = true
         _lastError.value = null
         _loadedFromNetwork.value = false
@@ -163,7 +166,7 @@ class ContentRepository(
         return sectionsLoadedFromNetwork
     }
 
-    suspend fun refreshAll(userId: String = DEFAULT_USER_ID): Boolean = loadContent(userId)
+    suspend fun refreshAll(userId: String): Boolean = loadContent(userId)
 
     // ===================  منطق القفل والشهادات  ===================
 
@@ -311,7 +314,7 @@ class ContentRepository(
 
             // مزامنة مع السيرفر (best-effort، لا نمنع UI)
             syncScope.launch {
-                submitLevelCompletion(levelId, score, passed)
+                submitLevelCompletion(levelId, score, passed, _currentUserId.value)
             }
         }
     }
@@ -342,7 +345,7 @@ class ContentRepository(
         levelId: String,
         score: Int,
         passed: Boolean,
-        userId: String = DEFAULT_USER_ID
+        userId: String
     ): Boolean {
         val service = api ?: return false
         return try {

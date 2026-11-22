@@ -2,9 +2,11 @@ package com.dxn.training.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.model.Section
 import com.dxn.training.data.model.SectionProgress
 import com.dxn.training.data.model.UserProgress
+import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import kotlinx.coroutines.CancellationException
@@ -12,8 +14,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val contentRepository: ContentRepository = ContentRepository(),
-    private val userRepository: UserRepository = UserRepository()
+    private val contentRepository: ContentRepository = ContentRepository.getInstance(),
+    private val userRepository: UserRepository = UserRepository(),
+    private val sessionStore: SessionStore? = ApiClient.getSessionStore()
 ) : ViewModel() {
 
     data class HomeUiState(
@@ -72,10 +75,16 @@ class HomeViewModel(
 
     private fun loadContent() {
         viewModelScope.launch {
+            val userId = sessionStore?.session?.first()?.userId
+            if (userId == null) {
+                _error.value = "انتهت الجلسة — سجّل الدخول من جديد"
+                return@launch
+            }
             _isLoading.value = true
             _error.value = null
             try {
-                val success = contentRepository.loadContent("u1")
+                val success = contentRepository.loadContent(userId)
+                userRepository.loadUserProfile(userId)
                 if (!success) {
                     _error.value = "تعذر تحميل المحتوى من الخادم. يُعرض المحتوى المحلي كاحتياط."
                 }

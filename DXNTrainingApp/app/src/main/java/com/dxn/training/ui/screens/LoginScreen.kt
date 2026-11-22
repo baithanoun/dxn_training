@@ -15,11 +15,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.viewmodel.AuthUiState
+import com.dxn.training.ui.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
-    var email by remember { mutableStateOf("") }
+fun LoginScreen(
+    authViewModel: AuthViewModel,
+    onLogin: () -> Unit,
+    onRegister: () -> Unit
+) {
+    var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val state by authViewModel.state.collectAsState()
+
+    LaunchedEffect(state) {
+        if (state is AuthUiState.LoggedIn) onLogin()
+    }
 
     Column(
         modifier = Modifier
@@ -38,8 +49,8 @@ fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
         Spacer(modifier = Modifier.height(40.dp))
 
         AuthTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = login,
+            onValueChange = { login = it },
             label = "البريد / رقم الهاتف",
             keyboardType = KeyboardType.Email
         )
@@ -52,8 +63,22 @@ fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
             keyboardType = KeyboardType.Password
         )
 
+        (state as? AuthUiState.Error)?.let { error ->
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = error.message,
+                color = DXNRedDeep,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
-        DxButton(text = "دخول", onClick = onLogin)
+        DxButton(
+            text = if (state is AuthUiState.Loading) "جاري الدخول..." else "دخول",
+            onClick = { authViewModel.login(login, password) },
+            enabled = state !is AuthUiState.Loading
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
         TextButton(onClick = onRegister) {
