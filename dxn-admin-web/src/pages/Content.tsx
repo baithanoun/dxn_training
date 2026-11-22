@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import {
   ChevronDown,
   ChevronLeft,
@@ -21,7 +22,7 @@ import {
   X,
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -930,9 +931,19 @@ function LevelPanel({
       </div>
 
       <div className="flex justify-between gap-2">
-        <Button variant="outline" className="gap-2 text-red-600" disabled={busy} onClick={() => void remove(`/api/admin/levels/${id}`, "المستوى", onDeleted)}>
-          <Trash2 size={16} /> حذف المستوى
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2 text-red-600" disabled={busy} onClick={() => void remove(`/api/admin/levels/${id}`, "المستوى", onDeleted)}>
+            <Trash2 size={16} /> حذف المستوى
+          </Button>
+          {detail.type !== "lesson" && (
+            <Link
+              to={`/scenario?levelId=${encodeURIComponent(id)}`}
+              className={buttonVariants({ variant: "outline", size: "default", className: "gap-2" })}
+            >
+              <MessageSquareText size={16} /> فتح في منشئ السيناريوهات
+            </Link>
+          )}
+        </div>
         <div className="flex gap-2">
           <Button variant="outline" disabled={busy} onClick={() => apply(detail)}>
             إلغاء
