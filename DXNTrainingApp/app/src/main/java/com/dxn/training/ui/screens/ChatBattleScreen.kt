@@ -1,5 +1,6 @@
 package com.dxn.training.ui.screens
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
 import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -42,6 +44,9 @@ fun ChatBattleScreen(
     var selectedOption by remember(round.id) { mutableStateOf<RoundOption?>(null) }
     val messages = remember(round.id) { mutableStateListOf(round.prompt to false) }
     val answers = remember(levelId) { mutableListOf<AnswerDto>() }
+    val roundStartedAt = remember(round.id) { SystemClock.elapsedRealtime() }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
 
     Column(
         modifier = Modifier
@@ -149,6 +154,16 @@ fun ChatBattleScreen(
                         if (!option.isCorrect && !option.isNeutral) hearts--
                         messages.add(option.text to true)
                         answered = true
+                        EventSender.send(
+                            name = "question_answered",
+                            levelId = levelId,
+                            payload = mapOf(
+                                "roundId" to round.id,
+                                "optionId" to option.id,
+                                "correct" to option.isCorrect,
+                                "timeMs" to (SystemClock.elapsedRealtime() - roundStartedAt)
+                            )
+                        )
                     }
                 }
             },

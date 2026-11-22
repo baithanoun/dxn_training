@@ -1,5 +1,7 @@
 package com.dxn.training.data.remote
 
+import com.dxn.training.data.model.MemberStatus
+import com.dxn.training.data.model.TeamMember
 import com.dxn.training.data.model.UserProgress
 import com.dxn.training.data.model.SectionProgress
 import retrofit2.Response
@@ -46,6 +48,42 @@ data class RegisterRequest(
 data class AuthResponse(
     val token: String,
     val user: UserProfileResponse
+)
+
+// ===================  الفريق والأحداث  ===================
+
+data class LeaderTeamMemberResponse(
+    val id: String,
+    val name: String,
+    val progressPercent: Int = 0,
+    val lastActiveDays: Int = 0,
+    val status: String = "INACTIVE"
+) {
+    fun toDomain(): TeamMember = TeamMember(
+        id = id,
+        name = name,
+        progressPercent = progressPercent,
+        lastActiveDays = lastActiveDays,
+        status = try {
+            MemberStatus.valueOf(status.uppercase())
+        } catch (e: IllegalArgumentException) {
+            MemberStatus.INACTIVE
+        }
+    )
+}
+
+data class AnalyticsEventRequest(
+    val eventName: String,
+    val levelId: String? = null,
+    val payload: Map<String, Any?>? = null
+)
+
+data class AnalyticsEventsBatchRequest(
+    val events: List<AnalyticsEventRequest>
+)
+
+data class AnalyticsEventsAcceptedResponse(
+    val accepted: Int = 0
 )
 
 data class UserProfileResponse(
@@ -116,4 +154,18 @@ interface ApiService {
     suspend fun getUserProfile(
         @Path("userId") userId: String
     ): Response<UserProfileResponse>
+
+    /**
+     * أعضاء فريق القائد (للقادة فقط).
+     */
+    @GET("api/leader/team")
+    suspend fun getLeaderTeam(): Response<List<LeaderTeamMemberResponse>>
+
+    /**
+     * إرسال دفعة أحداث من العميل. الأسماء المسموحة فقط هي التي تُرسَل.
+     */
+    @POST("api/events")
+    suspend fun sendEvents(
+        @Body request: AnalyticsEventsBatchRequest
+    ): Response<AnalyticsEventsAcceptedResponse>
 }

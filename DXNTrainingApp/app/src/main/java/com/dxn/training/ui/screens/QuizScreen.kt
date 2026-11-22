@@ -1,5 +1,6 @@
 package com.dxn.training.ui.screens
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
 import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -38,6 +40,9 @@ fun QuizScreen(
     var hearts by remember(levelId) { mutableIntStateOf(3) }
     var answered by remember(round.id) { mutableStateOf(false) }
     val answers = remember(levelId) { mutableListOf<AnswerDto>() }
+    val roundStartedAt = remember(round.id) { SystemClock.elapsedRealtime() }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
 
     Column(
         modifier = Modifier
@@ -134,6 +139,16 @@ fun QuizScreen(
                 if (answered) {
                     val chosen = selected ?: return@DxButton
                     answers.add(AnswerDto(round.id, chosen.id))
+                    EventSender.send(
+                        name = "question_answered",
+                        levelId = levelId,
+                        payload = mapOf(
+                            "roundId" to round.id,
+                            "optionId" to chosen.id,
+                            "correct" to chosen.isCorrect,
+                            "timeMs" to (SystemClock.elapsedRealtime() - roundStartedAt)
+                        )
+                    )
                     if (roundIndex < rounds.lastIndex) {
                         roundIndex++
                         selected = null

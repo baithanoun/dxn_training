@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -38,6 +39,8 @@ fun OrderSequenceScreen(
     var checked by remember(round.id) { mutableStateOf(false) }
     var hearts by remember(levelId) { mutableIntStateOf(3) }
     val answers = remember(levelId) { mutableListOf<AnswerDto>() }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
 
     Column(
         modifier = Modifier

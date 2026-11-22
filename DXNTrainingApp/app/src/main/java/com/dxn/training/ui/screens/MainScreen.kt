@@ -17,37 +17,50 @@ import com.dxn.training.ui.viewmodel.HomeViewModel
 import com.dxn.training.ui.viewmodel.ProfileViewModel
 import com.dxn.training.ui.viewmodel.TeamViewModel
 
+private enum class MainTab { HOME, LEARN, TEAM, PROFILE }
+
 @Composable
 fun MainScreen(
     homeViewModel: HomeViewModel,
     teamViewModel: TeamViewModel,
     profileViewModel: ProfileViewModel,
     onLevelClick: (String) -> Unit,
-    onAdminClick: () -> Unit
+    onAdminClick: () -> Unit,
+    onLogout: () -> Unit,
+    isLeader: Boolean = false
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf(
-        stringResource(R.string.title_home),
-        stringResource(R.string.title_learn),
-        stringResource(R.string.title_team),
-        stringResource(R.string.title_profile)
-    )
-    val icons = listOf(
-        Icons.Default.Home,
-        Icons.Default.School,
-        Icons.Default.Groups,
-        Icons.Default.Person
-    )
-
+    // تبويب الفريق للقادة فقط (السيرفر يمنع المتدربين من api/leader/team).
+    val tabs = buildList {
+        add(MainTab.HOME)
+        add(MainTab.LEARN)
+        if (isLeader) add(MainTab.TEAM)
+        add(MainTab.PROFILE)
+    }
+    var selectedTab by remember(isLeader) { mutableIntStateOf(0) }
+    val titles = tabs.map { tab ->
+        when (tab) {
+            MainTab.HOME -> stringResource(R.string.title_home)
+            MainTab.LEARN -> stringResource(R.string.title_learn)
+            MainTab.TEAM -> stringResource(R.string.title_team)
+            MainTab.PROFILE -> stringResource(R.string.title_profile)
+        }
+    }
     Scaffold(
         bottomBar = {
             NavigationBar(
                 containerColor = CardSurface,
                 tonalElevation = 4.dp
             ) {
-                tabs.forEachIndexed { index, title ->
+                tabs.forEachIndexed { index, tab ->
+                    val title = titles[index]
+                    val icon = when (tab) {
+                        MainTab.HOME -> Icons.Default.Home
+                        MainTab.LEARN -> Icons.Default.School
+                        MainTab.TEAM -> Icons.Default.Groups
+                        MainTab.PROFILE -> Icons.Default.Person
+                    }
                     NavigationBarItem(
-                        icon = { Icon(icons[index], contentDescription = title) },
+                        icon = { Icon(icon, contentDescription = title) },
                         label = { Text(title) },
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
@@ -69,20 +82,22 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (selectedTab) {
-                0 -> HomeScreen(
+            when (tabs.getOrNull(selectedTab)) {
+                MainTab.HOME -> HomeScreen(
                     viewModel = homeViewModel,
                     onLevelClick = onLevelClick
                 )
-                1 -> LearnScreen(
+                MainTab.LEARN -> LearnScreen(
                     viewModel = homeViewModel,
                     onLevelClick = onLevelClick
                 )
-                2 -> TeamScreen(viewModel = teamViewModel)
-                3 -> ProfileScreen(
+                MainTab.TEAM -> TeamScreen(viewModel = teamViewModel)
+                MainTab.PROFILE -> ProfileScreen(
                     viewModel = profileViewModel,
-                    onAdminClick = onAdminClick
+                    onAdminClick = onAdminClick,
+                    onLogout = onLogout
                 )
+                null -> Unit
             }
         }
     }

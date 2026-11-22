@@ -37,7 +37,7 @@ class ContentRepository private constructor(
         ): ContentRepository {
             return instance ?: synchronized(this) {
                 instance ?: ContentRepository(
-                    api = api ?: ApiClient.create(),
+                    api = api ?: ApiClient.api,
                     sessionStore = sessionStore ?: ApiClient.getSessionStore(),
                     userRepository = userRepository ?: UserRepository()
                 ).also { instance = it }

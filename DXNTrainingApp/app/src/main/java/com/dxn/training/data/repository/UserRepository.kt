@@ -14,13 +14,16 @@ import kotlinx.coroutines.flow.asStateFlow
 private const val TAG = "UserRepository"
 
 class UserRepository(
-    private val api: ApiService? = ApiClient.create()
+    private val api: ApiService? = ApiClient.api
 ) {
-    private val _user = MutableStateFlow(MockData.currentUser)
+    // قيم فارغة مؤقتاً حتى يصل الملف الشخصي من السيرفر؛ لا بيانات تجريبية هنا.
+    private val _user = MutableStateFlow(
+        User(id = "", fullName = "", email = "", phone = "", dxnId = "", role = UserRole.TRAINEE)
+    )
     val user: StateFlow<User> = _user.asStateFlow()
 
     /**
-     * تحميل بيانات المستخدم من السيرفر مع العودة إلى البيانات المحلية عند الفشل.
+     * تحميل بيانات المستخدم من السيرفر مع الإبقاء على آخر قيمة معروفة عند الفشل.
      */
     suspend fun loadUserProfile(userId: String): Boolean {
         val service = api ?: return false
@@ -60,7 +63,7 @@ private fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = 
     id = id,
     fullName = fullName,
     email = email ?: "",
-    phone = "", // غير متوفر في الاستجابة الحالية
+    phone = phone ?: "",
     dxnId = dxnId,
     role = role.toUserRole(),
     totalXp = totalXp,

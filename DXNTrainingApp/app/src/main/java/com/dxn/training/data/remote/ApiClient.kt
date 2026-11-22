@@ -28,6 +28,9 @@ object ApiClient {
 
     fun getSessionStore(): SessionStore? = sessionStore
 
+    /** عميل واحد مشترك بين المستودعات ومرسل الأحداث (لا إنشاء OkHttp متعدد). */
+    val api: ApiService by lazy { create() }
+
     fun create(loggingEnabled: Boolean = BuildConfig.DEBUG): ApiService {
         val client = OkHttpClient.Builder().apply {
             if (loggingEnabled) {

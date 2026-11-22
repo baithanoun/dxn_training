@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.CompletionResult
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.DxButton
@@ -167,7 +168,7 @@ fun CompletionScreen(
         Spacer(modifier = Modifier.height(12.dp))
         DxButton(
             text = "مشاركة الإنجاز",
-            onClick = { },
+            onClick = { EventSender.send("share_achievement", levelId = levelId) },
             containerColor = Color(0xFFE3EDF3),
             contentColor = DXNBlue
         )

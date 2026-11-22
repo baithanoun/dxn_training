@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
@@ -24,6 +25,8 @@ fun LessonScreen(
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
     val cards = level?.cards ?: emptyList()
     var currentIndex by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
 
     Column(
         modifier = Modifier

@@ -1,6 +1,7 @@
 package com.dxn.training.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -26,9 +27,11 @@ import com.dxn.training.ui.viewmodel.ProfileViewModel
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    onAdminClick: () -> Unit
+    onAdminClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val user by viewModel.user.collectAsState()
+    val certificates by viewModel.certificates.collectAsState()
 
     Column(
         modifier = Modifier
@@ -46,7 +49,7 @@ fun ProfileScreen(
                 AvatarPlaceholder(size = 90)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = user.fullName,
+                    text = user.fullName.ifBlank { "..." },
                     style = MaterialTheme.typography.headlineMedium,
                     color = DXNBlue
                 )
@@ -67,12 +70,49 @@ fun ProfileScreen(
         ) {
             StatBox(value = user.currentStreak.toString(), label = "Streak", icon = "★")
             StatBox(value = user.totalXp.toString(), label = "XP", icon = "●")
-            StatBox(value = user.certificates.size.toString(), label = "شهادة", icon = "▮")
+            StatBox(value = certificates.size.toString(), label = "شهادة", icon = "▮")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val menuItems = listOf("حقيبة المتدرب", "الأوسمة", "الشهادات", "الإعدادات", "تسجيل الخروج")
+        // الشهادات من تقدّم الأقسام على السيرفر.
+        DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(
+                text = "الشهادات",
+                style = MaterialTheme.typography.bodyLarge,
+                color = DXNBlue
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (certificates.isEmpty()) {
+                Text(
+                    text = "لا توجد شهادات بعد",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextMuted
+                )
+            } else {
+                certificates.forEach { certificate ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "🎓 ${certificate.title}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary
+                        )
+                        if (certificate.issuedAt.isNotBlank()) {
+                            Text(
+                                text = certificate.issuedAt.take(10),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextMuted
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        val menuItems = listOf("حقيبة المتدرب", "الأوسمة", "الإعدادات")
         menuItems.forEach { item ->
             Card(
                 modifier = Modifier
@@ -99,6 +139,34 @@ fun ProfileScreen(
                         color = TextPrimary
                     )
                 }
+            }
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clickable { onLogout() },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = CardSurface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "تسجيل الخروج",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = DXNRedDeep
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = DXNRedDeep
+                )
             }
         }
 

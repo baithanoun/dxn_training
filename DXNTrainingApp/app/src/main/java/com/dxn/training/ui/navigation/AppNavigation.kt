@@ -24,6 +24,7 @@ import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
 import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import com.dxn.training.ui.screens.*
@@ -93,7 +94,7 @@ class CompletionViewModelFactory(
 @Composable
 fun AppNavigation(navController: NavHostController) {
     val context = LocalContext.current
-    val api = remember { ApiClient.create() }
+    val api = ApiClient.api
     val sessionStore = remember { ApiClient.getSessionStore() ?: SessionStore(context.applicationContext) }
     val userRepository = remember { UserRepository(api) }
     val contentRepository = remember { ContentRepository.getInstance(api, sessionStore, userRepository) }
@@ -112,8 +113,12 @@ fun AppNavigation(navController: NavHostController) {
     val session by sessionStore.session.collectAsState(initial = null)
     var sessionChecked by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        sessionStore.session.first()
+        val currentSession = sessionStore.session.first()
         sessionChecked = true
+        // حدث فتح التطبيق مرة واحدة عند بدء التطبيق بحالة تسجيل دخول صالحة.
+        if (currentSession != null) {
+            EventSender.send("app_opened")
+        }
     }
     LaunchedEffect(Unit) {
         ApiClient.logoutEvents.collect {
@@ -195,10 +200,17 @@ fun AppNavigation(navController: NavHostController) {
                 homeViewModel = homeViewModel,
                 teamViewModel = teamViewModel,
                 profileViewModel = profileViewModel,
+                isLeader = session?.role.equals("LEADER", ignoreCase = true),
                 onLevelClick = { levelId ->
                     navController.navigate(Screen.Lesson.createRoute(levelId))
                 },
-                onAdminClick = { navController.navigate(Screen.AdminOverview.route) }
+                onAdminClick = { navController.navigate(Screen.AdminOverview.route) },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 
