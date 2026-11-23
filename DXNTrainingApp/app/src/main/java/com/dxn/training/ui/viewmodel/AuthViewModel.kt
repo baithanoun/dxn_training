@@ -120,7 +120,7 @@ class AuthViewModel(
         if (response.isSuccessful) {
             val body = response.body()
             if (body != null) {
-                sessionStore.save(body.token, body.user.id, body.user.role)
+                sessionStore.save(body.token, body.user.id, body.user.role, body.user.gender)
                 _state.value = AuthUiState.LoggedIn
             } else {
                 _state.value = AuthUiState.Error("تعذر الاتصال بالخادم")

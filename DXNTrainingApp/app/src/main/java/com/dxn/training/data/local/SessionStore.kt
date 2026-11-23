@@ -14,30 +14,37 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 data class Session(
     val token: String,
     val userId: String,
-    val role: String
+    val role: String,
+    val gender: String? = null
 )
 
 class SessionStore(private val context: Context) {
     private val TOKEN_KEY = stringPreferencesKey("token")
     private val USER_ID_KEY = stringPreferencesKey("user_id")
     private val ROLE_KEY = stringPreferencesKey("role")
+    private val GENDER_KEY = stringPreferencesKey("gender")
 
     val session: Flow<Session?> = context.dataStore.data.map { prefs ->
         val token = prefs[TOKEN_KEY]
         val userId = prefs[USER_ID_KEY]
         val role = prefs[ROLE_KEY]
         if (token != null && userId != null && role != null) {
-            Session(token, userId, role)
+            Session(token, userId, role, prefs[GENDER_KEY])
         } else {
             null
         }
     }
 
-    suspend fun save(token: String, userId: String, role: String) {
+    suspend fun save(token: String, userId: String, role: String, gender: String? = null) {
         context.dataStore.edit { prefs ->
             prefs[TOKEN_KEY] = token
             prefs[USER_ID_KEY] = userId
             prefs[ROLE_KEY] = role
+            if (gender != null) {
+                prefs[GENDER_KEY] = gender
+            } else {
+                prefs.remove(GENDER_KEY)
+            }
         }
     }
 
@@ -46,6 +53,7 @@ class SessionStore(private val context: Context) {
             prefs.remove(TOKEN_KEY)
             prefs.remove(USER_ID_KEY)
             prefs.remove(ROLE_KEY)
+            prefs.remove(GENDER_KEY)
         }
     }
 }

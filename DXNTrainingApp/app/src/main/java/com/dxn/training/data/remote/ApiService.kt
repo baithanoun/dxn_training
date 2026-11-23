@@ -93,6 +93,7 @@ data class UserProfileResponse(
     val phone: String? = null,
     val dxnId: String,
     val role: String,
+    val gender: String? = null,
     val totalXp: Int = 0,
     val currentStreak: Int = 0,
     val hearts: Int = 3,

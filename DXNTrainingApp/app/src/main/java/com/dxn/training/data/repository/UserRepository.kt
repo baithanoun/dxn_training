@@ -66,6 +66,7 @@ private fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = 
     phone = phone ?: "",
     dxnId = dxnId,
     role = role.toUserRole(),
+    gender = gender,
     totalXp = totalXp,
     currentStreak = currentStreak,
     hearts = hearts,
