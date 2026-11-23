@@ -19,6 +19,7 @@ class RegisterRequest extends FormRequest
             'phone' => ['required_without:email', 'nullable', 'string', 'max:32', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8'],
             'dxnId' => ['required', 'string', 'max:64'],
+            'gender' => ['required', 'string', 'in:male,female'],
             'leaderDxnId' => ['nullable', 'string', 'max:64'],
         ];
     }
@@ -27,6 +28,9 @@ class RegisterRequest extends FormRequest
     {
         if (is_string($this->input('dxnId'))) {
             $this->merge(['dxnId' => trim($this->input('dxnId'))]);
+        }
+        if (is_string($this->input('gender'))) {
+            $this->merge(['gender' => strtolower($this->input('gender'))]);
         }
         if (is_string($this->input('leaderDxnId'))) {
             $this->merge(['leaderDxnId' => trim($this->input('leaderDxnId'))]);
@@ -41,6 +45,8 @@ class RegisterRequest extends FormRequest
             'phone.required_without' => 'البريد الإلكتروني أو الهاتف مطلوب',
             'password.required' => 'كلمة المرور مطلوبة',
             'dxnId.required' => 'رقم العضوية مطلوب',
+            'gender.required' => 'اختر الجنس',
+            'gender.in' => 'اختر الجنس',
         ];
     }
 }

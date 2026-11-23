@@ -17,6 +17,7 @@ class RegisterTest extends TestCase
             'email' => 'trainee@example.test',
             'password' => 'password123',
             'dxnId' => 'DXN-1001',
+            'gender' => 'male',
         ], $overrides);
     }
 
@@ -36,6 +37,32 @@ class RegisterTest extends TestCase
     {
         $this->postJson('/api/auth/register', $this->payload(['email' => null]))
             ->assertStatus(422);
+    }
+
+    public function test_register_requires_gender(): void
+    {
+        $this->postJson('/api/auth/register', $this->payload(['gender' => null]))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('gender')
+            ->assertJsonPath('errors.gender.0', 'اختر الجنس');
+    }
+
+    public function test_register_rejects_invalid_gender(): void
+    {
+        $this->postJson('/api/auth/register', $this->payload(['gender' => 'other']))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('gender')
+            ->assertJsonPath('errors.gender.0', 'اختر الجنس');
+    }
+
+    public function test_register_stores_gender(): void
+    {
+        $response = $this->postJson('/api/auth/register', $this->payload(['gender' => 'FEMALE']))
+            ->assertCreated()
+            ->assertJsonPath('user.gender', 'FEMALE');
+
+        $this->assertArrayHasKey('gender', $response->json('user'));
+        $this->assertSame('female', User::where('email', 'trainee@example.test')->firstOrFail()->gender);
     }
 
     public function test_duplicate_dxn_id_422(): void

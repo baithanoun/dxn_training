@@ -210,9 +210,9 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 - `POST /api/auth/register`: `gender` **مطلوب** `in:male,female` (الطلب يرسل lowercase أو uppercase — طبّعه بـ `strtolower` في `prepareForValidation`)؛ رسالة الخطأ: «اختر الجنس».
 - Admin `POST/PUT users`: `gender` `nullable|in:male,female`.
 
-- [ ] Tests: `test_register_requires_gender` (422 `errors.gender`)، `test_register_stores_gender` (`user.gender==='FEMALE'`)، `test_admin_can_set_gender`، `test_existing_user_without_gender_serializes_null`.
-- [ ] `php artisan migrate` على MySQL المحلي (dev فقط) + `php artisan test` → PASS.
-- [ ] Commit `feat(api): user gender for gendered addressing`
+- [x] Tests: `test_register_requires_gender` (422 `errors.gender`)، `test_register_stores_gender` (`user.gender==='FEMALE'`)، `test_admin_can_set_gender`، `test_existing_user_without_gender_serializes_null`.
+- [x] `php artisan migrate` على MySQL المحلي (dev فقط) + `php artisan test` → PASS (`129 tests, 620 assertions`)؛ عمود `gender varchar(6) nullable` موجود بعد `name`.
+- [x] Commit `feat(api): user gender for gendered addressing`
 
 ---
 

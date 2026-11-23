@@ -92,6 +92,69 @@ class UsersTest extends TestCase
             ->assertStatus(422)->assertJsonValidationErrors('phone');
     }
 
+    public function test_admin_can_filter_by_gender(): void
+    {
+        $admin = $this->admin();
+        User::factory()->create(['gender' => 'female', 'name' => 'Female']);
+        User::factory()->create(['gender' => 'male', 'name' => 'Male']);
+        User::factory()->create(['gender' => null, 'name' => 'Unknown']);
+
+        $this->actingAs($admin, 'sanctum')->getJson('/api/admin/users?gender=FEMALE')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.fullName', 'Female')
+            ->assertJsonPath('data.0.gender', 'FEMALE');
+    }
+
+    public function test_admin_can_set_gender(): void
+    {
+        $admin = $this->admin();
+
+        $created = $this->actingAs($admin, 'sanctum')->postJson('/api/admin/users', [
+            'fullName' => 'Gendered user',
+            'email' => 'gendered@example.test',
+            'password' => 'password123',
+            'role' => 'trainee',
+            'gender' => 'female',
+        ])->assertCreated()->assertJsonPath('gender', 'FEMALE');
+
+        $id = $created->json('id');
+        $this->assertSame('female', User::findOrFail($id)->gender);
+
+        $this->putJson("/api/admin/users/{$id}", ['gender' => 'male'])
+            ->assertOk()->assertJsonPath('gender', 'MALE');
+        $this->assertSame('male', User::findOrFail($id)->gender);
+    }
+
+    public function test_admin_rejects_invalid_gender(): void
+    {
+        $this->actingAs($this->admin(), 'sanctum')->postJson('/api/admin/users', [
+            'fullName' => 'Invalid gender',
+            'email' => 'invalid-gender@example.test',
+            'password' => 'password123',
+            'role' => 'trainee',
+            'gender' => 'other',
+        ])->assertStatus(422)->assertJsonValidationErrors('gender');
+    }
+
+    public function test_existing_user_without_gender_serializes_null(): void
+    {
+        $user = User::factory()->create(['password' => 'secret123']);
+        $this->assertNull($user->gender);
+
+        $mobileUser = $this->postJson('/api/auth/login', [
+            'login' => $user->email,
+            'password' => 'secret123',
+        ])->assertOk()->json('user');
+        $this->assertArrayHasKey('gender', $mobileUser);
+        $this->assertNull($mobileUser['gender']);
+
+        $adminUser = $this->actingAs($this->admin(), 'sanctum')
+            ->getJson("/api/admin/users/{$user->id}")->assertOk()->json();
+        $this->assertArrayHasKey('gender', $adminUser);
+        $this->assertNull($adminUser['gender']);
+    }
+
     public function test_leader_must_have_leader_role(): void
     {
         $admin = $this->admin();

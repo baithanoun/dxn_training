@@ -40,6 +40,7 @@ class AuthController extends Controller
         // in-memory model returned to UserResource matches the DB default (trainee).
         $user = User::forceCreate([
             'name' => $data['fullName'],
+            'gender' => $data['gender'],
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'password' => $data['password'],

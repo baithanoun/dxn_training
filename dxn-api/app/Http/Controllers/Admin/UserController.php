@@ -27,6 +27,10 @@ class UserController extends Controller
             $query->where('role', strtolower($role));
         }
 
+        if ($gender = $request->input('gender')) {
+            $query->where('gender', strtolower($gender));
+        }
+
         if ($status = $request->input('status')) {
             if ($status === 'active') {
                 $query->where('last_activity_date', '>=', now()->subDays(3)->toDateString());
@@ -87,6 +91,7 @@ class UserController extends Controller
             'dxnId' => 'nullable|string|max:64',
             'role' => 'required|in:admin,leader,trainee',
             'leaderId' => 'nullable|exists:users,id',
+            'gender' => 'nullable|in:male,female',
         ]);
 
         if (empty($data['email']) && empty($data['phone'])) {
@@ -103,6 +108,7 @@ class UserController extends Controller
         // role is validated server-side; forceCreate is needed because User's fillable list excludes it.
         $user = User::forceCreate([
             'name' => $data['fullName'],
+            'gender' => $data['gender'] ?? null,
             'email' => $data['email'] ?? null,
             'phone' => $data['phone'] ?? null,
             'password' => $data['password'],
@@ -128,6 +134,7 @@ class UserController extends Controller
             'role' => 'sometimes|in:admin,leader,trainee',
             'leaderId' => 'sometimes|nullable|exists:users,id',
             'isActive' => 'sometimes|boolean',
+            'gender' => 'sometimes|nullable|in:male,female',
         ]);
 
         if (isset($data['role']) && (string) $current->id === $id && $data['role'] !== $user->role) {
@@ -138,6 +145,7 @@ class UserController extends Controller
         }
 
         if (array_key_exists('fullName', $data)) $user->name = $data['fullName'];
+        if (array_key_exists('gender', $data)) $user->gender = $data['gender'];
         if (array_key_exists('email', $data)) $user->email = $data['email'];
         if (array_key_exists('phone', $data)) $user->phone = $data['phone'];
         if (array_key_exists('password', $data)) $user->password = $data['password'];

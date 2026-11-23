@@ -12,6 +12,7 @@ class UserResource extends JsonResource
         return [
             'id' => (string) $this->id,
             'fullName' => $this->name,
+            'gender' => $this->gender === null ? null : strtoupper($this->gender),
             'email' => $this->email,
             'phone' => $this->phone,
             'dxnId' => $this->dxn_id,
