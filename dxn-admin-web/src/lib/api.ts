@@ -25,7 +25,9 @@ export async function api<T>(
     body = opts.body
   }
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+  // Production builds set VITE_API_URL="" so all calls stay on the same origin.
+  const base = import.meta.env.VITE_API_URL ?? ""
+  const res = await fetch(`${base}${path}`, {
     method: opts.method ?? (body ? "POST" : "GET"),
     headers,
     body,
@@ -34,7 +36,8 @@ export async function api<T>(
   // A failed login is also a 401; let the caller show the message instead of redirecting.
   if (res.status === 401 && path !== "/api/auth/login") {
     localStorage.removeItem(TOKEN_KEY)
-    window.location.assign("/login")
+    // Keep the redirect inside the /admin basename used in production.
+    window.location.assign("/admin/login")
   }
   if (res.status === 204) return undefined as T
   const data = await res.json().catch(() => ({}))

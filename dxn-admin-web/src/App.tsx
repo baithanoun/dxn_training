@@ -12,7 +12,7 @@ import { AuthProvider, RequireAuth } from "@/lib/auth"
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/admin">
       <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />

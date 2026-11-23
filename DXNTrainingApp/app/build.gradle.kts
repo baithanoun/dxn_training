@@ -27,8 +27,8 @@ android {
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
         }
         release {
-            // shortcut: release URL placeholder, set in F1
-            buildConfigField("String", "BASE_URL", "\"https://CHANGE-ME/\"")
+            // shortcut: release URL is a placeholder, owner must replace <domain> with the real HTTPS domain before publishing
+            buildConfigField("String", "BASE_URL", "\"https://<domain>/\"")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

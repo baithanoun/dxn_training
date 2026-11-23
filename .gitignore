@@ -7,6 +7,8 @@ jdk17/
 node_modules/
 dist/
 build/
+# React admin built into the deploy image, never committed
+dxn-api/public/admin/
 .gradle/
 .idea/
 __pycache__/
@@ -17,6 +19,8 @@ __pycache__/
 .env
 .env.*
 !.env.example
+!deploy/.env.production.example
+!dxn-admin-web/.env.production
 local.properties
 *.keystore
 *.jks
