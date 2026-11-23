@@ -28,14 +28,14 @@ fun LearnScreen(viewModel: HomeViewModel, onLevelClick: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
             text = "متابعة التعلم",
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue
+            color = BrandPlum700
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -51,7 +51,7 @@ fun LearnScreen(viewModel: HomeViewModel, onLevelClick: (String) -> Unit) {
         Text(
             text = "كل المستويات",
             style = MaterialTheme.typography.titleLarge,
-            color = DXNBlue
+            color = BrandPlum700
         )
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -92,15 +92,15 @@ private fun CurrentLevelCard(
         Text(
             text = level.title,
             style = MaterialTheme.typography.titleLarge,
-            color = DXNBlue
+            color = BrandPlum700
         )
         Spacer(modifier = Modifier.height(12.dp))
-        DxProgressBar(progress = (progress?.score ?: 0) / 100f, color = DXNGreen)
+        DxProgressBar(progress = (progress?.score ?: 0) / 100f, color = Leaf)
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = DXNRed)
+            colors = ButtonDefaults.buttonColors(containerColor = BrandPlum)
         ) {
             Text("تابع", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
         }
@@ -119,7 +119,7 @@ private fun LevelRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface)
+        colors = CardDefaults.cardColors(containerColor = Surface)
     ) {
         Row(
             modifier = Modifier
@@ -141,11 +141,11 @@ private fun LevelRow(
                 )
             }
             when (status) {
-                LevelStatus.COMPLETED -> Text("✓", color = DXNGreen)
+                LevelStatus.COMPLETED -> Text("✓", color = LeafText)
                 LevelStatus.UNLOCKED -> Button(
                     onClick = onClick,
                     modifier = Modifier.defaultMinSize(minWidth = 88.dp, minHeight = 48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DXNRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandPlum)
                 ) {
                     Text("ابدأ", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                 }

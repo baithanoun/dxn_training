@@ -7,7 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
@@ -31,7 +30,7 @@ fun LessonScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         ScreenHeader(
             title = level?.title ?: "درس",
@@ -41,7 +40,7 @@ fun LessonScreen(
 
         if (level == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("المستوى غير موجود", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+                Text("المستوى غير موجود", color = Error, style = MaterialTheme.typography.bodyLarge)
             }
             return
         }
@@ -76,20 +75,20 @@ fun LessonScreen(
                     .fillMaxWidth()
                     .height(180.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .background(Color(0xFFFFE4E1)),
+                    .background(BrandPlum50),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "DXN",
                     style = MaterialTheme.typography.displayMedium,
-                    color = DXNRed
+                    color = BrandPlum
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = card.title,
                 style = MaterialTheme.typography.headlineMedium,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

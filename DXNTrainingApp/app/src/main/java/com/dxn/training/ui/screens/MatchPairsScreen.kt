@@ -31,7 +31,7 @@ fun MatchPairsScreen(
     val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -47,7 +47,7 @@ fun MatchPairsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         ScreenHeader(title = level.title, onClose = onBack, streak = 5)
 
@@ -66,7 +66,7 @@ fun MatchPairsScreen(
         Text(
             text = round.prompt,
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -84,17 +84,17 @@ fun MatchPairsScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = when {
-                        isCorrect -> DXNGreen
-                        isWrong -> DXNRedDeep
-                        isSelected -> DXNRed
-                        else -> CardSurface
+                        isCorrect -> Leaf
+                        isWrong -> Error
+                        isSelected -> BrandPlum
+                        else -> Surface
                     }
                 )
             ) {
                 Text(
                     text = option.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (isSelected || isCorrect || isWrong) CardSurface else TextPrimary,
+                    color = if (isSelected || isCorrect || isWrong) Surface else TextPrimary,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -104,7 +104,7 @@ fun MatchPairsScreen(
             Text(
                 text = if (selected?.isCorrect == true) "صحيح!" else "اختيار خاطئ",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selected?.isCorrect == true) DXNGreen else DXNRedDeep,
+                color = if (selected?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }

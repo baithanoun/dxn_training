@@ -28,7 +28,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import com.dxn.training.ui.screens.*
-import com.dxn.training.ui.theme.DXNRed
+import com.dxn.training.ui.theme.BrandPlum
 import com.dxn.training.ui.viewmodel.*
 import kotlinx.coroutines.flow.first
 
@@ -133,7 +133,7 @@ fun AppNavigation(navController: NavHostController) {
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = DXNRed)
+            CircularProgressIndicator(color = BrandPlum)
         }
         return
     }

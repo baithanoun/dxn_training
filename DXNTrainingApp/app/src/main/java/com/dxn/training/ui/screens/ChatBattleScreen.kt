@@ -33,7 +33,7 @@ fun ChatBattleScreen(
     val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -51,13 +51,13 @@ fun ChatBattleScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         // Header
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = CardSurface)
+            colors = CardDefaults.cardColors(containerColor = Surface)
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Row(
@@ -67,7 +67,7 @@ fun ChatBattleScreen(
                 ) {
                     AvatarPlaceholder(size = 40)
                     Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text("أحمد — صديق مهتم", style = MaterialTheme.typography.bodyLarge, color = DXNBlue)
+                        Text("أحمد — صديق مهتم", style = MaterialTheme.typography.bodyLarge, color = BrandPlum700)
                         Text("متردد", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
                     }
                     CloseButton(onClick = onBack)
@@ -99,7 +99,7 @@ fun ChatBattleScreen(
             Text(
                 text = "اختر ردك التالي:",
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue,
+                color = BrandPlum700,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -111,13 +111,13 @@ fun ChatBattleScreen(
                         .clickable { selectedOption = option },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (selectedOption?.id == option.id) DXNRed else CardSurface
+                        containerColor = if (selectedOption?.id == option.id) BrandPlum else Surface
                     )
                 ) {
                     Text(
                         text = option.text,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (selectedOption?.id == option.id) CardSurface else TextPrimary,
+                        color = if (selectedOption?.id == option.id) Surface else TextPrimary,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -129,7 +129,7 @@ fun ChatBattleScreen(
             Text(
                 text = selectedOption?.feedback ?: "",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selectedOption?.isCorrect == true) DXNGreen else DXNRedDeep,
+                color = if (selectedOption?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
@@ -190,12 +190,12 @@ private fun ChatBubble(text: String, isUser: Boolean) {
                         bottomEnd = if (isUser) 16.dp else 4.dp
                     )
                 )
-                .background(if (isUser) DXNRed else CardSurface)
+                .background(if (isUser) BrandPlum else Surface)
                 .padding(12.dp)
         ) {
             Text(
                 text = text,
-                color = if (isUser) CardSurface else TextPrimary,
+                color = if (isUser) Surface else TextPrimary,
                 style = MaterialTheme.typography.bodyLarge
             )
         }

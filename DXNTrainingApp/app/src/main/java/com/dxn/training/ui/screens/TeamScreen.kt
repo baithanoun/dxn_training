@@ -33,7 +33,7 @@ fun TeamScreen(viewModel: TeamViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
     ) {
         ScreenHeader(title = "فريقي")
@@ -44,7 +44,7 @@ fun TeamScreen(viewModel: TeamViewModel) {
             Text(
                 text = "ملخص الفريق",
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -88,7 +88,7 @@ fun TeamScreen(viewModel: TeamViewModel) {
         when {
             isLoading -> {
                 CircularProgressIndicator(
-                    color = DXNRed,
+                    color = BrandPlum,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -107,7 +107,7 @@ fun TeamScreen(viewModel: TeamViewModel) {
         DxButton(
             text = "إرسال تشجيع",
             onClick = { },
-            containerColor = DXNGold,
+            containerColor = Xp,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(80.dp))
@@ -121,8 +121,8 @@ private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit, mo
         modifier = modifier.height(40.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) DXNRed else CardSurface,
-            contentColor = if (selected) CardSurface else TextMuted
+            containerColor = if (selected) BrandPlum else Surface,
+            contentColor = if (selected) Surface else TextMuted
         )
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
@@ -136,7 +136,7 @@ private fun MemberRow(member: TeamMember) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface)
+        colors = CardDefaults.cardColors(containerColor = Surface)
     ) {
         Row(
             modifier = Modifier
@@ -167,9 +167,9 @@ private fun MemberRow(member: TeamMember) {
                 )
             }
             val color = when (member.status) {
-                MemberStatus.ACTIVE -> DXNGreen
-                MemberStatus.INACTIVE -> DXNRedDeep
-                MemberStatus.COMPLETED -> DXNGold
+                MemberStatus.ACTIVE -> Leaf
+                MemberStatus.INACTIVE -> Error
+                MemberStatus.COMPLETED -> Xp
             }
             Box(
                 modifier = Modifier

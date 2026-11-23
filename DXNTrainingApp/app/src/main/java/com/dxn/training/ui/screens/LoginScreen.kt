@@ -35,7 +35,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CardSurface)
+            .background(Surface)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -43,7 +43,7 @@ fun LoginScreen(
         Text(
             text = "تسجيل الدخول",
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue
+            color = BrandPlum700
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -67,7 +67,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = error.message,
-                color = DXNRedDeep,
+                color = Error,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
@@ -84,7 +84,7 @@ fun LoginScreen(
         TextButton(onClick = onRegister) {
             Text(
                 text = "ليس لديك حساب؟ سجّل",
-                color = DXNRed,
+                color = BrandPlum,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -119,9 +119,9 @@ private fun AuthTextField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Background,
-                unfocusedContainerColor = Background,
-                focusedBorderColor = DXNRed,
+                focusedContainerColor = BrandIvory,
+                unfocusedContainerColor = BrandIvory,
+                focusedBorderColor = BrandPlum,
                 unfocusedBorderColor = Disabled
             ),
             visualTransformation = visualTransformation,

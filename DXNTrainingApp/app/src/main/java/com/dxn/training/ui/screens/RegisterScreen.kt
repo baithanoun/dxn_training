@@ -38,7 +38,7 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CardSurface)
+            .background(Surface)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -46,7 +46,7 @@ fun RegisterScreen(
         Text(
             text = "إنشاء حساب DXN",
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue
+            color = BrandPlum700
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -80,7 +80,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = error.message,
-                color = DXNRedDeep,
+                color = Error,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
@@ -122,9 +122,9 @@ private fun AuthField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Background,
-                unfocusedContainerColor = Background,
-                focusedBorderColor = DXNRed,
+                focusedContainerColor = BrandIvory,
+                unfocusedContainerColor = BrandIvory,
+                focusedBorderColor = BrandPlum,
                 unfocusedBorderColor = Disabled
             ),
             keyboardOptions = KeyboardOptions(

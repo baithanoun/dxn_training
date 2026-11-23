@@ -36,7 +36,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
     ) {
         ScreenHeader(title = "ملفي")
@@ -51,7 +51,7 @@ fun ProfileScreen(
                 Text(
                     text = user.fullName.ifBlank { "..." },
                     style = MaterialTheme.typography.headlineMedium,
-                    color = DXNBlue
+                    color = BrandPlum700
                 )
                 Text(
                     text = user.dxnId,
@@ -80,7 +80,7 @@ fun ProfileScreen(
             Text(
                 text = "الشهادات",
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (certificates.isEmpty()) {
@@ -119,7 +119,7 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = CardSurface)
+                colors = CardDefaults.cardColors(containerColor = Surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -148,7 +148,7 @@ fun ProfileScreen(
                 .padding(horizontal = 16.dp, vertical = 6.dp)
                 .clickable { onLogout() },
             shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = CardSurface)
+            colors = CardDefaults.cardColors(containerColor = Surface)
         ) {
             Row(
                 modifier = Modifier
@@ -160,12 +160,12 @@ fun ProfileScreen(
                 Text(
                     text = "تسجيل الخروج",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = DXNRedDeep
+                    color = Error
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = null,
-                    tint = DXNRedDeep
+                    tint = Error
                 )
             }
         }
@@ -177,7 +177,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DXNBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = BrandPlum900)
             ) {
                 Text("لوحة الإدارة")
             }
@@ -192,7 +192,7 @@ private fun StatBox(value: String, label: String, icon: String) {
     Card(
         modifier = Modifier.size(100.dp, 90.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Background)
+        colors = CardDefaults.cardColors(containerColor = BrandIvory)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -201,13 +201,13 @@ private fun StatBox(value: String, label: String, icon: String) {
         ) {
             Text(
                 text = icon,
-                color = DXNGold,
+                color = Xp,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Text(
                 text = label,

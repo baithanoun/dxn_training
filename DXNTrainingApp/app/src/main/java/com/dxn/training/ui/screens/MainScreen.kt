@@ -48,7 +48,7 @@ fun MainScreen(
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = CardSurface,
+                containerColor = Surface,
                 tonalElevation = 4.dp
             ) {
                 tabs.forEachIndexed { index, tab ->
@@ -65,9 +65,9 @@ fun MainScreen(
                         selected = selectedTab == index,
                         onClick = { selectedTab = index },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = CardSurface,
-                            selectedTextColor = DXNRed,
-                            indicatorColor = DXNRed,
+                            selectedIconColor = Surface,
+                            selectedTextColor = BrandPlum,
+                            indicatorColor = BrandPlum,
                             unselectedIconColor = TextMuted,
                             unselectedTextColor = TextMuted
                         )
@@ -75,7 +75,7 @@ fun MainScreen(
                 }
             }
         },
-        containerColor = Background
+        containerColor = BrandIvory
     ) { padding ->
         Box(
             modifier = Modifier

@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dxn.training.ui.components.DxButton
@@ -19,15 +18,15 @@ import com.dxn.training.ui.theme.*
 @Composable
 fun OnboardingScreen(page: Int, onNext: () -> Unit) {
     val data = when (page) {
-        1 -> Triple("تعلم بأسلوب Duolingo", "كبسولات معرفية قصيرة ومحفزة يومياً.", Color(0xFFFFE4E1))
-        2 -> Triple("اكسب XP وأوسمة", "تابع تقدمك واحتفظ بسلسلة النجاح اليومي.", Color(0xFFFFF8E1))
-        else -> Triple("ابنِ فريقك", "تابع أعضاء فريقك وشجعهم للوصول للنجاح معاً.", Color(0xFFE3EDF3))
+        1 -> Triple("تعلم بأسلوب تفاعلي", "كبسولات معرفية قصيرة ومحفزة يومياً.", BrandPlum50)
+        2 -> Triple("اكسب XP وأوسمة", "تابع تقدمك واحتفظ بسلسلة النجاح اليومي.", XpContainer)
+        else -> Triple("ابنِ فريقك", "تابع أعضاء فريقك وشجعهم للوصول للنجاح معاً.", BrandPlum100)
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CardSurface)
+            .background(Surface)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -45,21 +44,21 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .background(CardSurface)
+                        .background(Surface)
                         .padding(4.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "DXN",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = DXNRed
+                        color = BrandPlum
                     )
                 }
                 2 -> Box(
                     modifier = Modifier.size(120.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "★", style = MaterialTheme.typography.displayLarge, color = DXNGold)
+                    Text(text = "★", style = MaterialTheme.typography.displayLarge, color = Xp)
                 }
                 else -> Row {
                     repeat(3) {
@@ -67,7 +66,7 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(DXNBlue)
+                                .background(BrandPlum900)
                                 .padding(4.dp)
                         )
                         if (it < 2) Spacer(modifier = Modifier.width(8.dp))
@@ -80,7 +79,7 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
         Text(
             text = data.first,
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -100,7 +99,7 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
                     modifier = Modifier
                         .size(if (index + 1 == page) 10.dp else 8.dp)
                         .clip(CircleShape)
-                        .background(if (index + 1 == page) DXNRed else Disabled)
+                        .background(if (index + 1 == page) BrandPlum else Disabled)
                 )
                 if (index < 2) Spacer(modifier = Modifier.width(8.dp))
             }

@@ -28,7 +28,7 @@ fun OrderSequenceScreen(
     val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -45,7 +45,7 @@ fun OrderSequenceScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         ScreenHeader(title = level.title, onClose = onBack, streak = 5)
 
@@ -62,7 +62,7 @@ fun OrderSequenceScreen(
         Text(
             text = round.prompt,
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -74,7 +74,7 @@ fun OrderSequenceScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = CardSurface),
+                colors = CardDefaults.cardColors(containerColor = Surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
@@ -105,7 +105,7 @@ fun OrderSequenceScreen(
                                 },
                                 enabled = index > 0
                             ) {
-                                Text("↑", style = MaterialTheme.typography.titleLarge, color = DXNBlue)
+                                Text("↑", style = MaterialTheme.typography.titleLarge, color = BrandPlum700)
                             }
                             IconButton(
                                 onClick = {
@@ -118,7 +118,7 @@ fun OrderSequenceScreen(
                                 },
                                 enabled = index < ordered.size - 1
                             ) {
-                                Text("↓", style = MaterialTheme.typography.titleLarge, color = DXNBlue)
+                                Text("↓", style = MaterialTheme.typography.titleLarge, color = BrandPlum700)
                             }
                         }
                     }

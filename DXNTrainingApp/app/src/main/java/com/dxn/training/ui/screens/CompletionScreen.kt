@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.CompletionResult
@@ -37,7 +36,7 @@ fun CompletionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -48,7 +47,7 @@ fun CompletionScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CardSurface)
+            colors = CardDefaults.cardColors(containerColor = Surface)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -56,7 +55,7 @@ fun CompletionScreen(
             ) {
                 when {
                     state.isSubmitting || result == null -> {
-                        CircularProgressIndicator(color = DXNRed)
+                        CircularProgressIndicator(color = BrandPlum)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "جاري حفظ النتيجة...",
@@ -72,26 +71,26 @@ fun CompletionScreen(
                         Text(
                             text = if (response.passed) "ممتاز!" else "حاول مرة أخرى",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = DXNBlue
+                            color = BrandPlum700
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "+${response.xpAwarded} XP",
                             style = MaterialTheme.typography.displayMedium,
-                            color = DXNGold
+                            color = XpText
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = if (response.passed) "تم حفظ النتيجة" else "حاول مرة أخرى لتحسين النتيجة",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = if (response.passed) TextMuted else DXNRedDeep
+                            color = if (response.passed) TextMuted else Error
                         )
 
                         if (response.certificateIssued) {
                             Spacer(modifier = Modifier.height(16.dp))
                             Card(
                                 shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1))
+                                colors = CardDefaults.cardColors(containerColor = XpContainer)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
@@ -100,7 +99,7 @@ fun CompletionScreen(
                                     Text(
                                         text = "🎓 ${response.certificateTitle ?: section?.certificateTitle ?: "شهادة إتمام"}",
                                         style = MaterialTheme.typography.titleMedium,
-                                        color = DXNGold,
+                                        color = XpText,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                     )
                                     Text(
@@ -113,7 +112,10 @@ fun CompletionScreen(
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
-                        DxProgressBar(progress = response.score / 100f, color = DXNGold)
+                        DxProgressBar(
+                            progress = response.score / 100f,
+                            color = if (response.passed) Leaf else Error
+                        )
                     }
 
                     result is CompletionResult.Locked -> {
@@ -122,7 +124,7 @@ fun CompletionScreen(
                         Text(
                             text = result.message,
                             style = MaterialTheme.typography.headlineMedium,
-                            color = DXNRedDeep
+                            color = Error
                         )
                     }
 
@@ -132,7 +134,7 @@ fun CompletionScreen(
                         Text(
                             text = "لم تُحفظ النتيجة — تحقق من الاتصال",
                             style = MaterialTheme.typography.headlineMedium,
-                            color = DXNRedDeep
+                            color = Error
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -169,8 +171,8 @@ fun CompletionScreen(
         DxButton(
             text = "مشاركة الإنجاز",
             onClick = { EventSender.send("share_achievement", levelId = levelId) },
-            containerColor = Color(0xFFE3EDF3),
-            contentColor = DXNBlue
+            containerColor = BrandPlum100,
+            contentColor = BrandPlum700
         )
     }
 }
@@ -181,13 +183,13 @@ private fun ResultBadge() {
         modifier = Modifier
             .size(100.dp)
             .clip(CircleShape)
-            .background(Color(0xFFFFF8E1)),
+            .background(XpContainer),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "★",
             style = MaterialTheme.typography.displayLarge,
-            color = DXNGold
+            color = Xp
         )
     }
 }
@@ -197,7 +199,7 @@ private fun ScreenTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.bodyLarge,
-        color = DXNBlue,
+        color = BrandPlum700,
         modifier = Modifier.fillMaxWidth()
     )
 }

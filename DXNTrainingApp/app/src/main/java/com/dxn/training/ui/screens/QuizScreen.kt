@@ -32,7 +32,7 @@ fun QuizScreen(
     val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
@@ -47,7 +47,7 @@ fun QuizScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         ScreenHeader(title = level.title, onClose = onBack, streak = 5)
 
@@ -65,7 +65,7 @@ fun QuizScreen(
         Text(
             text = round.prompt,
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -74,12 +74,12 @@ fun QuizScreen(
         round.options.forEach { option ->
             val isSelected = selected?.id == option.id
             val background = when {
-                answered && option.isCorrect -> DXNGreen
-                answered && isSelected && !option.isCorrect -> DXNRedDeep
-                isSelected -> DXNRed
-                else -> CardSurface
+                answered && option.isCorrect -> Leaf
+                answered && isSelected && !option.isCorrect -> Error
+                isSelected -> BrandPlum
+                else -> Surface
             }
-            val textColor = if (answered && (option.isCorrect || isSelected)) CardSurface else TextPrimary
+            val textColor = if (answered && (option.isCorrect || isSelected)) Surface else TextPrimary
 
             Card(
                 modifier = Modifier
@@ -97,7 +97,7 @@ fun QuizScreen(
                         modifier = Modifier
                             .size(28.dp)
                             .clip(CircleShape)
-                            .background(if (isSelected) CardSurface else Background)
+                            .background(if (isSelected) Surface else BrandIvory)
                             .padding(2.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -106,7 +106,7 @@ fun QuizScreen(
                                 modifier = Modifier
                                     .size(16.dp)
                                     .clip(CircleShape)
-                                    .background(DXNRed)
+                                    .background(BrandPlum)
                             )
                         }
                     }
@@ -126,7 +126,7 @@ fun QuizScreen(
             Text(
                 text = selected?.feedback ?: "",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selected?.isCorrect == true) DXNGreen else DXNRedDeep,
+                color = if (selected?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }

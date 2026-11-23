@@ -19,7 +19,7 @@ fun AdminOverviewScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -33,7 +33,7 @@ fun AdminOverviewScreen(onBack: () -> Unit) {
             Text(
                 text = "لوحة الإدارة",
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Box(modifier = Modifier.size(40.dp))
         }
@@ -41,8 +41,8 @@ fun AdminOverviewScreen(onBack: () -> Unit) {
         KpiCard(
             title = "المستخدمون النشطون",
             value = "1,240  ↑ 12%",
-            containerColor = DXNRed,
-            contentColor = CardSurface
+            containerColor = BrandPlum,
+            contentColor = Surface
         )
 
         Row(
@@ -67,7 +67,7 @@ fun AdminOverviewScreen(onBack: () -> Unit) {
         Text(
             text = "أكثر المهارات رسوباً",
             style = MaterialTheme.typography.bodyLarge,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +79,7 @@ fun AdminOverviewScreen(onBack: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "$rate رسوب", color = DXNRedDeep, style = MaterialTheme.typography.bodyMedium)
+                    Text(text = "$rate رسوب", color = Error, style = MaterialTheme.typography.bodyMedium)
                     Text(text = skill, color = TextPrimary, style = MaterialTheme.typography.bodyLarge)
                 }
             }
@@ -94,7 +94,7 @@ private fun KpiCard(
     title: String,
     value: String,
     modifier: Modifier = Modifier,
-    containerColor: androidx.compose.ui.graphics.Color = CardSurface,
+    containerColor: androidx.compose.ui.graphics.Color = Surface,
     contentColor: androidx.compose.ui.graphics.Color = TextPrimary
 ) {
     Card(
