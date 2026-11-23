@@ -292,11 +292,11 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 
 **Interface:** `@Composable fun BrandMark(size: BrandMarkSize = BrandMarkSize.Small, onDark: Boolean = false, modifier: Modifier = Modifier)`؛ `enum class BrandMarkSize { Small, Large }` — `Image(painterResource(R.drawable.brand_logo), contentDescription = "شعار حكاية تميّز")` (40dp/96dp) + «حكاية تميّز» (`titleMedium`/`headlineMedium` Bold) + «DXN» داخل `CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr)` (`labelSmall`/`labelLarge`، `letterSpacing = 2.sp`).
 
-- [ ] `strings.xml`: `app_name` = «حكاية تميّز».
-- [ ] Splash:42 «DXN» → `BrandMark(Large, onDark = …)`؛ Login أعلى النموذج → `BrandMark(Large)`؛ LessonScreen:83 — شارة داخل البطاقة → نص «DXN» بلون `BrandRose600` أو `BrandMark(Small)` (قرار المنفّذ، يُسجَّل).
-- [ ] `colors.xml`: احذف `purple_*`/`teal_*` إن لم تُستخدم (grep)، أضف `brand_plum #FF69163D`، `brand_ivory #FFF8F8F4`؛ `themes.xml`: `statusBarColor` و`windowBackground`.
-- [ ] أيقونة adaptive: خلفية `#F8F8F4`، foreground الشعار داخل منطقة الأمان (66dp من 108dp) — إن لزم Android Studio Image Asset يدوياً، سجّل ذلك.
-- [ ] `assembleDebug`؛ `grep -rn "DXN Training" app/src` → لا نتائج. Commit `feat(android): hikaya tamayoz wordmark, logo and app icon`
+- [x] `strings.xml`: `app_name` = «حكاية تميّز».
+- [x] Splash → `BrandMark(Large, onDark = true)`؛ Login أعلى النموذج → `BrandMark(Large)`؛ LessonScreen اكتفى بنص «DXN» بلون `BrandRose600` داخل البطاقة (قرار المنفّذ: يبقي مكان الصورة غير مزدحم).
+- [x] `colors.xml`: حُذفت `purple_*`/`teal_*`، أُضيف `brand_plum`/`brand_ivory`؛ `themes.xml`: `statusBarColor` و`windowBackground` عاجيان.
+- [x] أيقونة adaptive: خلفية `@color/brand_ivory`؛ foreground عبر layer-list يعرض `brand_logo_mark.png` (الدائرة بمقياس 66/108 على لوحة شفافة) — لا حاجة لـ Android Studio. أُضيفت نسخة `res/drawable-nodpi/brand_logo.png` و`brand_logo_mark.png` من L0.
+- [x] `assembleDebug` PASS؛ لا «DXN Training» في `app/src`؛ فحص المحاكي بصرياً **لم يُشغّل**. Commit `feat(android): hikaya tamayoz wordmark, logo and app icon`
 
 ### M4 — Onboarding من بيانات الفريق (بدون Duolingo)
 

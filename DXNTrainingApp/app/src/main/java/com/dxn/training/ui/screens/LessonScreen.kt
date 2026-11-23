@@ -81,7 +81,7 @@ fun LessonScreen(
                 Text(
                     text = "DXN",
                     style = MaterialTheme.typography.displayMedium,
-                    color = BrandPlum
+                    color = BrandRose600
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))

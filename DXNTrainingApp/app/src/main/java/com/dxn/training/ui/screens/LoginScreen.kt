@@ -13,6 +13,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dxn.training.ui.components.BrandMark
+import com.dxn.training.ui.components.BrandMarkSize
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.viewmodel.AuthUiState
@@ -39,7 +41,9 @@ fun LoginScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(80.dp))
+        Spacer(modifier = Modifier.height(48.dp))
+        BrandMark(size = BrandMarkSize.Large)
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "تسجيل الدخول",
             style = MaterialTheme.typography.headlineMedium,
