@@ -283,8 +283,8 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 
 ### M2 — إزالة الألوان المباشرة
 **Files:** `ui/components/Common.kt`، `ui/screens/{CompletionScreen,LessonScreen,OnboardingScreen}.kt`، `ui/theme/Theme.kt` (الأسطر في الملحق — أعد grep).
-- [ ] `0xFFFEF3C7` → `XpContainer`؛ `0xFFE3EDF3` → `BrandPlum50`؛ `0xFFFFF8E1` → `XpContainer`؛ `0xFFFFE4E1` → `BrandRose50`؛ CompletionScreen:94 → اقرأ واستبدل بالدلالي (شهادة/نجاح → `LeafContainer`)؛ ألوان صفحات Onboarding الثلاث → `BrandPlum`، `BrandRose600`، `Leaf` (تحقق تباين النص فوقها ≥ 4.5 — النص الأبيض على `Leaf` = 3.89 ✗ → استخدم `LeafText` خلفيةً أو نصاً داكناً).
-- [ ] `grep -rn "Color(0x" app/src/main/java` → `ui/theme/Color.kt` فقط؛ `assembleDebug`. Commit `refactor(android): replace hard-coded colors with brand tokens`
+- [x] كل الألوان الخام استُبدلت في M1 بالرموز الدلالية؛ أُتمّ M2 بجعل شارة النجاح والشهادة `LeafContainer`/`LeafText` (وفق الحالة: فشل → `ErrorContainer`)، وخلفية وسط الدرس `BrandRose50`، والصفحة الثالثة في Onboarding `LeafContainer` مع أيقونات `LeafText` (تفادياً لتباين الأبيض على `Leaf` = 3.89). ذكر Duolingo أُزيل في M1.
+- [x] `grep -rn "Color(0x" app/src/main/java` → `ui/theme/Color.kt` فقط؛ `assembleDebug` PASS. Commit `refactor(android): replace hard-coded colors with brand tokens`
 
 ### M3 — الاسم، الشعار، الأيقونة
 

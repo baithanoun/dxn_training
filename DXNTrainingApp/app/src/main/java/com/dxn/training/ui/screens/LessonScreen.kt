@@ -75,7 +75,7 @@ fun LessonScreen(
                     .fillMaxWidth()
                     .height(180.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .background(BrandPlum50),
+                    .background(BrandRose50),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

@@ -66,7 +66,7 @@ fun CompletionScreen(
 
                     result is CompletionResult.Ok -> {
                         val response = result.response
-                        ResultBadge()
+                        ResultBadge(response.passed)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = if (response.passed) "ممتاز!" else "حاول مرة أخرى",
@@ -90,7 +90,7 @@ fun CompletionScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             Card(
                                 shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = XpContainer)
+                                colors = CardDefaults.cardColors(containerColor = LeafContainer)
                             ) {
                                 Column(
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
@@ -99,7 +99,7 @@ fun CompletionScreen(
                                     Text(
                                         text = "🎓 ${response.certificateTitle ?: section?.certificateTitle ?: "شهادة إتمام"}",
                                         style = MaterialTheme.typography.titleMedium,
-                                        color = XpText,
+                                        color = LeafText,
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                     )
                                     Text(
@@ -119,7 +119,7 @@ fun CompletionScreen(
                     }
 
                     result is CompletionResult.Locked -> {
-                        ResultBadge()
+                        ResultBadge(false)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = result.message,
@@ -129,7 +129,7 @@ fun CompletionScreen(
                     }
 
                     else -> {
-                        ResultBadge()
+                        ResultBadge(false)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "لم تُحفظ النتيجة — تحقق من الاتصال",
@@ -178,18 +178,18 @@ fun CompletionScreen(
 }
 
 @Composable
-private fun ResultBadge() {
+private fun ResultBadge(passed: Boolean) {
     Box(
         modifier = Modifier
             .size(100.dp)
             .clip(CircleShape)
-            .background(XpContainer),
+            .background(if (passed) LeafContainer else ErrorContainer),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "★",
             style = MaterialTheme.typography.displayLarge,
-            color = Xp
+            color = if (passed) LeafText else Error
         )
     }
 }

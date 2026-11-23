@@ -20,7 +20,7 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
     val data = when (page) {
         1 -> Triple("تعلم بأسلوب تفاعلي", "كبسولات معرفية قصيرة ومحفزة يومياً.", BrandPlum50)
         2 -> Triple("اكسب XP وأوسمة", "تابع تقدمك واحتفظ بسلسلة النجاح اليومي.", XpContainer)
-        else -> Triple("ابنِ فريقك", "تابع أعضاء فريقك وشجعهم للوصول للنجاح معاً.", BrandPlum100)
+        else -> Triple("ابنِ فريقك", "تابع أعضاء فريقك وشجعهم للوصول للنجاح معاً.", LeafContainer)
     }
 
     Column(
@@ -66,7 +66,7 @@ fun OnboardingScreen(page: Int, onNext: () -> Unit) {
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(BrandPlum900)
+                                .background(LeafText)
                                 .padding(4.dp)
                         )
                         if (it < 2) Spacer(modifier = Modifier.width(8.dp))
