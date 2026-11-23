@@ -237,14 +237,14 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 ### W2 — إزالة الألوان المباشرة
 
 **Files:** Create `dxn-admin-web/src/lib/chartColors.ts`. Modify `src/pages/{Analytics,Content,Overview,Settings,Teams,Users}.tsx` (الأسطر في الملحق؛ أعد grep لأن الأسطر قد تتغيّر).
-- [ ] `chartColors.ts`: `export const chartColors = { primary: "#69163D", secondary: "#C0648D", tertiary: "#B7791F", growth: "#5E8C61", info: "#2B6CB0", error: "#C0392B" } as const`.
-- [ ] Analytics: `#E52F12` → `chartColors.primary`؛ `#D4A017` → `chartColors.secondary`؛ `#DC3545` → `chartColors.error`. Overview: نفس الاستبدال.
-- [ ] بانرات `border-red-200 bg-red-50 text-red-*` → `border-semantic-error-border bg-semantic-error-bg text-semantic-error`.
-- [ ] `text-red-600` → `text-semantic-error`؛ `text-green-600` (Settings) → `text-game-leaf-text`.
-- [ ] مؤشرات KPI الإيجابية وشارة «منشور» → `game-leaf-*` (اللمسة الخضراء)؛ السلبية → `semantic-error`.
-- [ ] كل `dxn-*` في `src` → المكافئ في `brand-*` / `semantic-*` / `game-*`.
-- [ ] تحقق: `grep -rnE "#[0-9A-Fa-f]{6}" src` → `src/lib/chartColors.ts` فقط؛ `grep -rnE "(bg|text|border)-(red|green|blue|amber|yellow|emerald)-[0-9]" src` → لا نتائج؛ build + lint؛ فحص يدوي للصفحات السبع + بانر خطأ + الرسوم.
-- [ ] Commit `refactor(admin-web): replace hard-coded colors with brand tokens`
+- [x] `chartColors.ts`: `export const chartColors = { primary: "#69163D", secondary: "#C0648D", tertiary: "#B7791F", growth: "#5E8C61", info: "#2B6CB0", error: "#C0392B" } as const`.
+- [x] Analytics/Overview: `#E52F12` → `chartColors.primary`؛ `#D4A017` → `chartColors.secondary`؛ `#DC3545` → `chartColors.error`.
+- [x] بانرات `border-red-200 bg-red-50 text-red-*` → `border-semantic-error-border bg-semantic-error-bg text-semantic-error`.
+- [x] `text-red-600` → `text-semantic-error`؛ `text-green-600` (Settings) → `text-game-leaf-text`.
+- [x] مؤشرات KPI الإيجابية وشارة «منشور» → `game-leaf-*`؛ السلبية → `semantic-error`.
+- [x] كل `dxn-*` في `src` → المكافئ في `brand-*` / `semantic-*` / `game-*`.
+- [x] تحقق: hex فقط في `src/lib/chartColors.ts`؛ لا ألوان red/green/... مباشرة؛ لا `dxn-`؛ build + lint PASS. حُذفت أصول القالب غير المستخدمة `react.svg`/`vite.svg` هنا مبكراً (كانت مطلوبة في W3) كي يمر فحص الـ hex. الفحص البصري اليدوي للصفحات السبع والبانر والرسوم **لم يُشغّل**.
+- [x] Commit `refactor(admin-web): replace hard-coded colors with brand tokens`
 
 ### W3 — الاسم، الشعار، وإعدادات الفريق
 

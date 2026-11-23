@@ -175,7 +175,7 @@ export default function Users() {
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">المستخدمون</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">المستخدمون</h1>
           <p className="text-muted-foreground">إدارة حسابات المتدربين والقادة والمديرين</p>
         </div>
         <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ export default function Users() {
       </header>
 
       {err && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{err}</span>
           <button onClick={() => setErr(null)} aria-label="إغلاق">
             <X size={16} />
@@ -271,7 +271,7 @@ export default function Users() {
                   <TableRow key={user.id} className="cursor-pointer" onClick={() => setDetailId(user.id)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-dxn-primary/10 text-dxn-primary flex items-center justify-center font-bold">
+                        <div className="w-9 h-9 rounded-full bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center font-bold">
                           {user.fullName[0]}
                         </div>
                         <div>
@@ -400,7 +400,7 @@ function CreateUserForm({
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={(e) => void submit(e)}>
-          {err && <p className="text-sm text-red-600">{err}</p>}
+          {err && <p className="text-sm text-semantic-error">{err}</p>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="الاسم الكامل">
               <Input required value={f.fullName} onChange={set("fullName")} />
@@ -528,7 +528,7 @@ function UserPanel({
         </button>
         {loadErr ? (
           <>
-            <p className="text-red-600">{loadErr}</p>
+            <p className="text-semantic-error">{loadErr}</p>
             <Button variant="outline" onClick={() => void fetchDetail()}>
               إعادة المحاولة
             </Button>
@@ -547,10 +547,10 @@ function UserPanel({
         رجوع
       </button>
 
-      {err && <p className="text-sm text-red-600">{err}</p>}
+      {err && <p className="text-sm text-semantic-error">{err}</p>}
 
       <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-dxn-primary text-white flex items-center justify-center text-2xl font-bold">
+        <div className="w-16 h-16 rounded-full bg-brand-plum-500 text-white flex items-center justify-center text-2xl font-bold">
           {detail.fullName[0]}
         </div>
         <div>
@@ -647,7 +647,7 @@ function UserPanel({
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-dxn-success rounded-full"
+                    className="h-full bg-game-leaf rounded-full"
                     style={{ width: `${p.progressPercent}%` }}
                   />
                 </div>
@@ -670,7 +670,7 @@ function UserPanel({
           ) : (
             detail.certificates.map((c) => (
               <div key={c.code} className="flex items-center justify-between text-sm p-2 rounded-lg border">
-                <span className="text-dxn-accent font-medium">{c.sectionTitle ?? "—"}</span>
+                <span className="text-brand-plum-500 font-medium">{c.sectionTitle ?? "—"}</span>
                 <div className="text-left text-xs text-muted-foreground">
                   <p dir="ltr">{c.code}</p>
                   <p>{c.issuedAt ?? "—"}</p>

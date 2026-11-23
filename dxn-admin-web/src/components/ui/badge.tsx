@@ -8,16 +8,16 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-dxn-primary text-white hover:bg-dxn-primary/80",
+          "border-transparent bg-brand-plum-500 text-white hover:bg-brand-plum-500/80",
         secondary:
-          "border-transparent bg-dxn-secondary text-white hover:bg-dxn-secondary/80",
+          "border-transparent bg-brand-rose-600 text-white hover:bg-brand-rose-600/80",
         destructive:
-          "border-transparent bg-dxn-error text-white hover:bg-dxn-error/80",
+          "border-transparent bg-semantic-error text-white hover:bg-semantic-error/80",
         outline: "text-foreground",
         success:
-          "border-transparent bg-dxn-success text-white hover:bg-dxn-success/80",
+          "border-transparent bg-game-leaf text-white hover:bg-game-leaf/80",
         warning:
-          "border-transparent bg-dxn-warning text-white hover:bg-dxn-warning/80",
+          "border-transparent bg-semantic-warning text-white hover:bg-semantic-warning/80",
         muted:
           "border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200",
       },

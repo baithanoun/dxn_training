@@ -161,7 +161,7 @@ function findLocation(tree: Section[], levelId: string | null): { section?: Sect
 function ErrorList({ messages }: { messages?: string[] }) {
   if (!messages?.length) return null
   return (
-    <div className="space-y-1 text-xs text-dxn-error" role="alert">
+    <div className="space-y-1 text-xs text-semantic-error" role="alert">
       {messages.map((m, i) => (
         <p key={i} className="flex items-start gap-1">
           <AlertCircle size={13} className="mt-0.5 shrink-0" />
@@ -423,10 +423,10 @@ export default function ScenarioBuilder() {
     return (
       <div className="p-8 space-y-6 overflow-y-auto">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">منشئ السيناريوهات</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">منشئ السيناريوهات</h1>
           <p className="text-muted-foreground">اختر مستوى (غير درس) لبدء تحرير السيناريو</p>
         </div>
-        {treeErr && <p className="text-sm text-dxn-error">{treeErr}</p>}
+        {treeErr && <p className="text-sm text-semantic-error">{treeErr}</p>}
         {!treeErr && tree.length === 0 && <p className="text-sm text-muted-foreground">جارٍ تحميل المستويات...</p>}
         {tree.map((section) => (
           <Card key={section.id} className="border-0 shadow-sm">
@@ -451,7 +451,7 @@ export default function ScenarioBuilder() {
                           setInvalidFile(false)
                           setSearchParams({ levelId: l.id })
                         }}
-                        className="w-full flex items-center justify-between rounded-lg border px-4 py-3 text-sm hover:border-dxn-primary hover:bg-dxn-primary/5 transition-colors"
+                        className="w-full flex items-center justify-between rounded-lg border px-4 py-3 text-sm hover:border-brand-plum-500 hover:bg-brand-plum-500/5 transition-colors"
                       >
                         <span className="font-medium">{l.title}</span>
                         <Badge variant="secondary">
@@ -472,7 +472,7 @@ export default function ScenarioBuilder() {
   if (loadErr) {
     return (
       <div className="p-8 space-y-4 text-center">
-        <p className="text-dxn-error">{loadErr}</p>
+        <p className="text-semantic-error">{loadErr}</p>
         <Button variant="outline" onClick={() => { setLoadErr(null); setReloadKey((n) => n + 1) }}>
           إعادة المحاولة
         </Button>
@@ -498,11 +498,11 @@ export default function ScenarioBuilder() {
             {status === "published" ? "منشور" : "مسودة"}
           </Badge>
           {saveMessage && (
-            <span className={cn("text-xs", saveMessage === "تم الحفظ" ? "text-dxn-success" : "text-dxn-error")}>
+            <span className={cn("text-xs", saveMessage === "تم الحفظ" ? "text-game-leaf-text" : "text-semantic-error")}>
               {saveMessage}
             </span>
           )}
-          {invalidFile && <span className="text-xs text-dxn-error">ملف غير صالح</span>}
+          {invalidFile && <span className="text-xs text-semantic-error">ملف غير صالح</span>}
         </div>
 
         <div className="flex items-center gap-2">
@@ -565,7 +565,7 @@ export default function ScenarioBuilder() {
 
       <div className="flex-1 flex min-h-0">
         {/* Canvas */}
-        <div className="flex-1 overflow-y-auto p-6 bg-dxn-bg">
+        <div className="flex-1 overflow-y-auto p-6 bg-brand-ivory">
           <div className="max-w-3xl mx-auto space-y-4">
             <ErrorList messages={apiErrors["rounds"]} />
             {rounds.map((round, idx) => {
@@ -576,13 +576,13 @@ export default function ScenarioBuilder() {
                   key={round.id}
                   className={cn(
                     "border-0 shadow-sm transition-all",
-                    isSelected && "ring-2 ring-dxn-primary"
+                    isSelected && "ring-2 ring-brand-plum-500"
                   )}
                   onClick={() => setSelectedRound(round.id)}
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-dxn-primary text-white flex items-center justify-center text-sm font-bold">
+                      <div className="w-8 h-8 rounded-full bg-brand-plum-500 text-white flex items-center justify-center text-sm font-bold">
                         {idx + 1}
                       </div>
                       <Input
@@ -662,7 +662,7 @@ export default function ScenarioBuilder() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-9 w-9 text-dxn-error"
+                                className="h-9 w-9 text-semantic-error"
                                 onClick={() => deleteOption(round.id, option.id)}
                               >
                                 <Trash2 size={16} />
@@ -739,7 +739,7 @@ export default function ScenarioBuilder() {
                 <span className="font-medium">شريط الثقة</span>
                 <span className={cn(
                   "font-bold",
-                  previewTrust >= 70 ? "text-dxn-success" : previewTrust >= 40 ? "text-dxn-warning" : "text-dxn-error"
+                  previewTrust >= 70 ? "text-game-leaf-text" : previewTrust >= 40 ? "text-semantic-warning" : "text-semantic-error"
                 )}>
                   {previewTrust}%
                 </span>
@@ -748,12 +748,12 @@ export default function ScenarioBuilder() {
                 <div
                   className={cn(
                     "h-full transition-all duration-500",
-                    previewTrust >= 70 ? "bg-dxn-success" : previewTrust >= 40 ? "bg-dxn-warning" : "bg-dxn-error"
+                    previewTrust >= 70 ? "bg-game-leaf" : previewTrust >= 40 ? "bg-semantic-warning" : "bg-semantic-error"
                   )}
                   style={{ width: `${previewTrust}%` }}
                 />
               </div>
-              <div className="flex items-center gap-1 text-dxn-error">
+              <div className="flex items-center gap-1 text-semantic-error">
                 {Array.from({ length: 3 }).map((_, i) => (
                   <Heart
                     key={i}
@@ -769,7 +769,7 @@ export default function ScenarioBuilder() {
             {activePreviewRound ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3 pb-3 border-b border-gray-100">
-                  <div className="w-10 h-10 rounded-full bg-dxn-accent text-white flex items-center justify-center font-bold">أ</div>
+                  <div className="w-10 h-10 rounded-full bg-brand-plum-500 text-white flex items-center justify-center font-bold">أ</div>
                   <div>
                     <p className="font-semibold">أحمد</p>
                     <p className="text-xs text-muted-foreground">صديق مهتم بالصحة</p>
@@ -791,7 +791,7 @@ export default function ScenarioBuilder() {
                     <button
                       key={option.id}
                       onClick={() => handleOptionPreview(option)}
-                      className="w-full text-right bg-white border-2 border-gray-100 hover:border-dxn-primary rounded-xl px-4 py-3 text-sm transition-colors"
+                      className="w-full text-right bg-white border-2 border-gray-100 hover:border-brand-plum-500 rounded-xl px-4 py-3 text-sm transition-colors"
                     >
                       {option.text}
                     </button>
@@ -815,7 +815,7 @@ export default function ScenarioBuilder() {
                     }}
                     className={cn(
                       "w-full text-right px-3 py-2 rounded-lg text-sm transition-colors",
-                      previewRound === round.id ? "bg-dxn-primary/10 text-dxn-primary" : "hover:bg-gray-50"
+                      previewRound === round.id ? "bg-brand-plum-500/10 text-brand-plum-500" : "hover:bg-gray-50"
                     )}
                   >
                     {idx + 1}. {round.title}
@@ -912,20 +912,20 @@ export default function ScenarioBuilder() {
                 {showValidation && (validationErrors.length > 0 || serverErrors.length > 0) ? (
                   <div className="space-y-2">
                     {validationErrors.map((err, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-sm text-dxn-error">
+                      <div key={idx} className="flex items-start gap-2 text-sm text-semantic-error">
                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                         {err}
                       </div>
                     ))}
                     {serverErrors.map(({ key, message }, idx) => (
-                      <div key={`server-${idx}`} className="flex items-start gap-2 text-sm text-dxn-error">
+                      <div key={`server-${idx}`} className="flex items-start gap-2 text-sm text-semantic-error">
                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                         الخادم ({key}): {message}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-dxn-success flex items-center gap-2">
+                  <p className="text-sm text-game-leaf-text flex items-center gap-2">
                     <AlertCircle size={16} />
                     السيناريو جاهز للنشر
                   </p>

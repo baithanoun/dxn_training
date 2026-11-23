@@ -30,7 +30,7 @@ export default function Login() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-dxn-bg flex items-center justify-center p-4">
+    <div dir="rtl" className="min-h-screen bg-brand-ivory flex items-center justify-center p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>تسجيل الدخول</CardTitle>
@@ -45,7 +45,7 @@ export default function Login() {
               <label htmlFor="password" className="text-sm font-medium">كلمة المرور</label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
             </div>
-            {error && <p role="alert" className="text-sm text-dxn-error">{error}</p>}
+            {error && <p role="alert" className="text-sm text-semantic-error">{error}</p>}
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? "جارٍ الدخول..." : "دخول"}
             </Button>

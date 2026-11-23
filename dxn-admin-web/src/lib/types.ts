@@ -1,4 +1,4 @@
-// Mirrors dxn-api Resources (UserResource, Admin/*Resource). All ids are strings.
+// Mirrors API Resources (UserResource, Admin/*Resource). All ids are strings.
 export type Role = "ADMIN" | "LEADER" | "TRAINEE"
 export type ContentStatus = "draft" | "published"
 export type LevelType = "lesson" | "quiz" | "chat_battle" | "match_pairs" | "order_sequence"

@@ -23,6 +23,7 @@ import {
   Tooltip,
 } from "recharts"
 import { api, ApiError, TOKEN_KEY } from "@/lib/api"
+import { chartColors } from "@/lib/chartColors"
 import type { AdminUser, AnalyticsData, Paginated, Section } from "@/lib/types"
 
 const icons = [
@@ -158,7 +159,7 @@ export default function AnalyticsPage() {
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">التحليلات</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">التحليلات</h1>
           <p className="text-muted-foreground">أداء المحتوى والمتدربين والفرق</p>
         </div>
         <div className="flex gap-2">
@@ -188,7 +189,7 @@ export default function AnalyticsPage() {
       </header>
 
       {loadErr && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{loadErr}</span>
           <Button variant="outline" size="sm" onClick={() => void load()}>
             إعادة المحاولة
@@ -196,7 +197,7 @@ export default function AnalyticsPage() {
         </div>
       )}
       {exportErr && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{exportErr}</span>
           <button onClick={() => setExportErr(null)} aria-label="إغلاق">
             ×
@@ -265,20 +266,20 @@ export default function AnalyticsPage() {
             {data.summary.map((stat, idx) => {
               const Icon = summaryIcons[stat.title] ?? icons[idx] ?? BarChart3
               const changeClass =
-                stat.change > 0 ? "text-dxn-success" : stat.change < 0 ? "text-dxn-error" : "text-muted-foreground"
+                stat.change > 0 ? "text-game-leaf-text" : stat.change < 0 ? "text-semantic-error" : "text-muted-foreground"
               return (
                 <Card key={stat.title} className="border-0 shadow-sm">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-dxn-accent">{stat.value}</p>
+                        <p className="text-2xl font-bold text-brand-plum-500">{stat.value}</p>
                         <p className={cn("text-xs", changeClass)}>
                           {stat.change > 0 ? "+" : ""}
                           {stat.change}% من الفترة السابقة
                         </p>
                       </div>
-                      <div className="w-10 h-10 rounded-lg bg-dxn-primary/10 text-dxn-primary flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center">
                         <Icon size={20} />
                       </div>
                     </div>
@@ -304,7 +305,7 @@ export default function AnalyticsPage() {
                       <XAxis type="number" />
                       <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#E52F12" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="value" fill={chartColors.primary} radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -329,9 +330,9 @@ export default function AnalyticsPage() {
                       <Line
                         type="monotone"
                         dataKey="rate"
-                        stroke="#D4A017"
+                        stroke={chartColors.secondary}
                         strokeWidth={3}
-                        dot={{ r: 5, fill: "#D4A017" }}
+                        dot={{ r: 5, fill: chartColors.secondary }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -355,7 +356,7 @@ export default function AnalyticsPage() {
                       <XAxis type="number" domain={[0, 100]} />
                       <YAxis type="category" dataKey="question" width={140} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(value) => [`${value}%`, "نسبة الخطأ"]} />
-                      <Bar dataKey="errorRate" fill="#DC3545" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="errorRate" fill={chartColors.error} radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}

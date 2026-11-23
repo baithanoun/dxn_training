@@ -26,6 +26,7 @@ import {
   Bar,
 } from "recharts"
 import { api, ApiError } from "@/lib/api"
+import { chartColors } from "@/lib/chartColors"
 import type { DashboardOverview, Role } from "@/lib/types"
 
 const iconMap: Record<string, React.ElementType> = {
@@ -92,7 +93,7 @@ export default function Overview() {
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">نظرة عامة</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">نظرة عامة</h1>
           <p className="text-muted-foreground">ملخص أداء التطبيق والمتدربين</p>
         </div>
         <div className="flex items-center gap-2">
@@ -114,7 +115,7 @@ export default function Overview() {
       </header>
 
       {loadErr && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{loadErr}</span>
           <Button variant="outline" size="sm" onClick={() => void load()}>
             إعادة المحاولة
@@ -140,18 +141,18 @@ export default function Overview() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-3xl font-bold text-dxn-accent">{stat.value}</span>
-                      <div className="w-10 h-10 rounded-lg bg-dxn-primary/10 text-dxn-primary flex items-center justify-center">
+                      <span className="text-3xl font-bold text-brand-plum-500">{stat.value}</span>
+                      <div className="w-10 h-10 rounded-lg bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center">
                         <Icon size={20} />
                       </div>
                     </div>
                     <div className="flex items-center gap-1 text-sm">
                       <ChangeIcon
                         size={16}
-                        className={stat.changeType === "up" ? "text-dxn-success" : "text-dxn-error"}
+                        className={stat.changeType === "up" ? "text-game-leaf-text" : "text-semantic-error"}
                       />
                       <span
-                        className={stat.changeType === "up" ? "text-dxn-success" : "text-dxn-error"}
+                        className={stat.changeType === "up" ? "text-game-leaf-text" : "text-semantic-error"}
                       >
                         {stat.change}%
                       </span>
@@ -179,14 +180,14 @@ export default function Overview() {
                       <div key={bag.sectionId}>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <div className="flex items-center gap-2">
-                            <Layers size={16} className="text-dxn-accent" />
+                            <Layers size={16} className="text-brand-plum-500" />
                             <span className="font-medium">{bag.title}</span>
                           </div>
-                          <span className="text-dxn-accent">{bag.percent}%</span>
+                          <span className="text-brand-plum-500">{bag.percent}%</span>
                         </div>
                         <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all bg-dxn-success"
+                            className="h-full rounded-full transition-all bg-game-leaf"
                             style={{ width: `${bag.percent}%` }}
                           />
                         </div>
@@ -210,16 +211,16 @@ export default function Overview() {
                     {data.certificatesBySection.map((cert) => (
                       <div
                         key={cert.sectionId}
-                        className="flex items-center justify-between p-3 rounded-lg border hover:border-dxn-secondary transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg border hover:border-brand-rose-600 transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-dxn-secondary/10 text-dxn-secondary flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-brand-rose-600/10 text-brand-rose-600 flex items-center justify-center">
                             <Award size={20} />
                           </div>
                           <p className="font-medium text-sm">{cert.title}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-xl font-bold text-dxn-accent">{cert.issuedCount}</p>
+                          <p className="text-xl font-bold text-brand-plum-500">{cert.issuedCount}</p>
                           <p className="text-xs text-muted-foreground">شهادة</p>
                         </div>
                       </div>
@@ -250,17 +251,17 @@ export default function Overview() {
                       <Line
                         type="monotone"
                         dataKey="sessions"
-                        stroke="#E52F12"
+                        stroke={chartColors.primary}
                         strokeWidth={3}
-                        dot={{ r: 4, fill: "#E52F12" }}
+                        dot={{ r: 4, fill: chartColors.primary }}
                         name="الجلسات"
                       />
                       <Line
                         type="monotone"
                         dataKey="activeUsers"
-                        stroke="#D4A017"
+                        stroke={chartColors.secondary}
                         strokeWidth={3}
-                        dot={{ r: 4, fill: "#D4A017" }}
+                        dot={{ r: 4, fill: chartColors.secondary }}
                         name="المستخدمون النشطون"
                       />
                     </LineChart>
@@ -285,7 +286,7 @@ export default function Overview() {
                       <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 12 }} />
                       <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(value) => [`${value}%`, "نسبة الرسوب"]} />
-                      <Bar dataKey="failureRate" fill="#DC3545" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="failureRate" fill={chartColors.error} radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -332,7 +333,7 @@ export default function Overview() {
                           <Badge variant="warning">متوقف</Badge>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" className="text-dxn-primary">
+                          <Button variant="ghost" size="sm" className="text-brand-plum-500">
                             إرسال تذكير
                           </Button>
                         </TableCell>

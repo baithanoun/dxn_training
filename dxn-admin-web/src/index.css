@@ -64,6 +64,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-dxn-bg text-foreground font-sans antialiased;
+    @apply bg-brand-ivory text-foreground font-sans antialiased;
   }
 }

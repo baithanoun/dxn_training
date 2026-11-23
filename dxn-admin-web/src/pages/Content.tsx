@@ -52,11 +52,11 @@ const statusColors: Record<ContentStatus, "default" | "warning"> = {
 const statusLabel = (s: ContentStatus) => (s === "published" ? "منشور" : "مسودة")
 
 const bagColors: Record<number, string> = {
-  1: "bg-dxn-primary/10 text-dxn-primary",
-  2: "bg-dxn-success/10 text-dxn-success",
-  3: "bg-dxn-secondary/10 text-dxn-secondary",
-  4: "bg-dxn-accent/10 text-dxn-accent",
-  5: "bg-dxn-warning/10 text-dxn-warning",
+  1: "bg-brand-plum-500/10 text-brand-plum-500",
+  2: "bg-game-leaf-text/10 text-game-leaf-text",
+  3: "bg-brand-rose-600/10 text-brand-rose-600",
+  4: "bg-brand-plum-500/10 text-brand-plum-500",
+  5: "bg-semantic-warning/10 text-semantic-warning",
 }
 
 const fieldCls =
@@ -88,10 +88,10 @@ const move = <T,>(arr: T[], i: number, d: number) => {
 function Arrows({ i, n, onMove }: { i: number; n: number; onMove: (d: number) => void }) {
   return (
     <span className="flex shrink-0">
-      <button disabled={i === 0} onClick={(e) => { e.stopPropagation(); onMove(-1) }} className="p-0.5 disabled:opacity-20 hover:text-dxn-primary" aria-label="أعلى">
+      <button disabled={i === 0} onClick={(e) => { e.stopPropagation(); onMove(-1) }} className="p-0.5 disabled:opacity-20 hover:text-brand-plum-500" aria-label="أعلى">
         <ChevronUp size={14} />
       </button>
-      <button disabled={i === n - 1} onClick={(e) => { e.stopPropagation(); onMove(1) }} className="p-0.5 disabled:opacity-20 hover:text-dxn-primary" aria-label="أسفل">
+      <button disabled={i === n - 1} onClick={(e) => { e.stopPropagation(); onMove(1) }} className="p-0.5 disabled:opacity-20 hover:text-brand-plum-500" aria-label="أسفل">
         <ChevronDown size={14} />
       </button>
     </span>
@@ -180,7 +180,7 @@ export default function Content() {
     <div className="p-8 space-y-6 h-screen flex flex-col">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">المحتوى التدريبي</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">المحتوى التدريبي</h1>
           <p className="text-muted-foreground">إدارة الأقسام المبنية على الحقائب التدريبية والشهادات</p>
         </div>
         <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function Content() {
       </header>
 
       {err && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{err}</span>
           <button onClick={() => setErr(null)} aria-label="إغلاق">
             <X size={16} />
@@ -212,7 +212,7 @@ export default function Content() {
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
           {loadErr ? (
             <>
-              <p className="text-red-600">{loadErr}</p>
+              <p className="text-semantic-error">{loadErr}</p>
               <Button variant="outline" onClick={() => void load()}>
                 إعادة المحاولة
               </Button>
@@ -248,7 +248,7 @@ export default function Content() {
                         className={cn(
                           "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-colors cursor-pointer",
                           selectedSection === section.id && !selectedSkill && !selectedLevel && !creating
-                            ? "bg-dxn-primary/10 text-dxn-primary"
+                            ? "bg-brand-plum-500/10 text-brand-plum-500"
                             : "text-gray-700 hover:bg-gray-50"
                         )}
                         onClick={() => {
@@ -272,12 +272,12 @@ export default function Content() {
                           </span>
                         )}
                         {isLocked ? (
-                          <span className="flex items-center gap-1 text-dxn-error">
+                          <span className="flex items-center gap-1 text-semantic-error">
                             <Lock size={12} />
                             يتطلب: {sectionTitle(section.requiredSectionId)}
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-dxn-success">
+                          <span className="flex items-center gap-1 text-game-leaf-text">
                             <Unlock size={12} />
                             متاح من البداية
                           </span>
@@ -299,7 +299,7 @@ export default function Content() {
                                   className={cn(
                                     "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
                                     selectedSkill === skill.id && !selectedLevel && !creating
-                                      ? "bg-dxn-secondary/10 text-dxn-secondary"
+                                      ? "bg-brand-rose-600/10 text-brand-rose-600"
                                       : "text-gray-600 hover:bg-gray-50"
                                   )}
                                 >
@@ -323,7 +323,7 @@ export default function Content() {
                                           }}
                                           className={cn(
                                             "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
-                                            selectedLevel === level.id ? "bg-gray-100 text-dxn-accent font-medium" : "text-gray-500 hover:bg-gray-50"
+                                            selectedLevel === level.id ? "bg-gray-100 text-brand-plum-500 font-medium" : "text-gray-500 hover:bg-gray-50"
                                           )}
                                         >
                                           <Icon size={14} />
@@ -338,7 +338,7 @@ export default function Content() {
                                         select(section.id, skill.id, null)
                                         startCreate({ kind: "level", skillId: skill.id })
                                       }}
-                                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-dxn-primary hover:bg-gray-50"
+                                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-brand-plum-500 hover:bg-gray-50"
                                     >
                                       <Plus size={12} /> إضافة مستوى
                                     </button>
@@ -352,7 +352,7 @@ export default function Content() {
                               select(section.id, null, null)
                               startCreate({ kind: "skill", sectionId: section.id })
                             }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-dxn-primary hover:bg-gray-50"
+                            className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-brand-plum-500 hover:bg-gray-50"
                           >
                             <Plus size={12} /> إضافة مهارة
                           </button>
@@ -421,7 +421,7 @@ export default function Content() {
                       variant="outline"
                       size="sm"
                       disabled={busy}
-                      className="gap-2 text-red-600"
+                      className="gap-2 text-semantic-error"
                       onClick={() =>
                         activeSkill
                           ? void remove(`/api/admin/skills/${activeSkill.id}`, "المهارة", () => select(selectedSection, null, null))
@@ -496,7 +496,7 @@ export default function Content() {
               ) : sections.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-20">
                   <Layers size={48} className="text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium text-dxn-accent">لا توجد أقسام</p>
+                  <p className="text-lg font-medium text-brand-plum-500">لا توجد أقسام</p>
                   <p className="text-sm text-muted-foreground">أضف قسماً جديداً لبدء بناء المحتوى التدريبي.</p>
                 </div>
               ) : selectedLevel ? (
@@ -692,7 +692,7 @@ function SectionView({ section, requiredTitle, onPick }: { section: Section; req
         <Card className="border-0 shadow-sm">
           <CardContent className="p-4 space-y-1">
             <p className="text-sm text-muted-foreground">الشهادة</p>
-            <div className="flex items-center gap-2 text-dxn-secondary">
+            <div className="flex items-center gap-2 text-brand-rose-600">
               <Award size={20} />
               <span className="text-base font-bold truncate">{section.certificateTitle ?? "—"}</span>
             </div>
@@ -702,12 +702,12 @@ function SectionView({ section, requiredTitle, onPick }: { section: Section; req
           <CardContent className="p-4 space-y-1">
             <p className="text-sm text-muted-foreground">الشرط السابق</p>
             {section.requiredSectionId ? (
-              <div className="flex items-center gap-2 text-dxn-error">
+              <div className="flex items-center gap-2 text-semantic-error">
                 <Lock size={20} />
                 <span className="text-sm font-medium truncate">يتطلب إكمال: {requiredTitle}</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-dxn-success">
+              <div className="flex items-center gap-2 text-game-leaf-text">
                 <Unlock size={20} />
                 <span className="text-sm font-medium">متاح من البداية</span>
               </div>
@@ -719,8 +719,8 @@ function SectionView({ section, requiredTitle, onPick }: { section: Section; req
         <h3 className="font-semibold mb-3">المهارات والمستويات</h3>
         <div className="space-y-3">
           {(section.skills ?? []).map((skill) => (
-            <div key={skill.id} onClick={() => onPick(skill.id)} className="flex items-center gap-4 p-4 border rounded-lg hover:border-dxn-accent cursor-pointer transition-colors">
-              <div className="w-10 h-10 rounded-lg bg-dxn-accent/10 text-dxn-accent flex items-center justify-center">
+            <div key={skill.id} onClick={() => onPick(skill.id)} className="flex items-center gap-4 p-4 border rounded-lg hover:border-brand-plum-500 cursor-pointer transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center">
                 <Layers size={20} />
               </div>
               <div className="flex-1">
@@ -744,8 +744,8 @@ function SkillView({ skill, onPick }: { skill: Skill; onPick: (id: string) => vo
       {(skill.levels ?? []).map((level) => {
         const Icon = typeIcons[level.type]
         return (
-          <div key={level.id} onClick={() => onPick(level.id)} className="flex items-center gap-4 p-4 border rounded-lg hover:border-dxn-primary cursor-pointer transition-colors">
-            <div className="w-10 h-10 rounded-lg bg-dxn-primary/10 text-dxn-primary flex items-center justify-center">
+          <div key={level.id} onClick={() => onPick(level.id)} className="flex items-center gap-4 p-4 border rounded-lg hover:border-brand-plum-500 cursor-pointer transition-colors">
+            <div className="w-10 h-10 rounded-lg bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center">
               <Icon size={20} />
             </div>
             <div className="flex-1">
@@ -811,7 +811,7 @@ function LevelPanel({
   if (!detail)
     return loadErr ? (
       <div className="text-center py-20 space-y-3">
-        <p className="text-red-600">{loadErr}</p>
+        <p className="text-semantic-error">{loadErr}</p>
         <Button variant="outline" onClick={() => void fetchDetail()}>
           إعادة المحاولة
         </Button>
@@ -887,7 +887,7 @@ function LevelPanel({
             <Plus size={14} /> إضافة بطاقة
           </Button>
         </div>
-        {uploadErr && <p className="text-sm text-red-600">{uploadErr}</p>}
+        {uploadErr && <p className="text-sm text-semantic-error">{uploadErr}</p>}
         {cards.length === 0 && (
           <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center text-muted-foreground">لا توجد بطاقات</div>
         )}
@@ -897,14 +897,14 @@ function LevelPanel({
               <span className="text-xs text-muted-foreground">#{i + 1}</span>
               <Input placeholder="عنوان البطاقة" value={c.title} onChange={(e) => setCard(i, { title: e.target.value })} />
               <Arrows i={i} n={cards.length} onMove={(d) => setCards((cs) => move(cs, i, d))} />
-              <button type="button" onClick={() => setCards((cs) => cs.filter((_, j) => j !== i))} className="text-red-600 p-1" aria-label="حذف البطاقة">
+              <button type="button" onClick={() => setCards((cs) => cs.filter((_, j) => j !== i))} className="text-semantic-error p-1" aria-label="حذف البطاقة">
                 <Trash2 size={16} />
               </button>
             </div>
             <textarea className={fieldCls} rows={3} placeholder="المحتوى" value={c.body} onChange={(e) => setCard(i, { body: e.target.value })} />
             <Input placeholder="نصيحة (اختياري)" value={c.tip} onChange={(e) => setCard(i, { tip: e.target.value })} />
             <div className="flex items-center gap-3">
-              <label className="inline-flex items-center gap-1 text-sm text-dxn-primary cursor-pointer">
+              <label className="inline-flex items-center gap-1 text-sm text-brand-plum-500 cursor-pointer">
                 <ImagePlus size={16} /> {c.mediaUrl ? "تغيير الصورة" : "رفع صورة"}
                 <input
                   type="file"
@@ -920,7 +920,7 @@ function LevelPanel({
               {c.mediaUrl && (
                 <>
                   <img src={c.mediaUrl} alt="" className="h-12 w-12 rounded object-cover" />
-                  <button type="button" onClick={() => setCard(i, { mediaUrl: null })} className="text-xs text-red-600">
+                  <button type="button" onClick={() => setCard(i, { mediaUrl: null })} className="text-xs text-semantic-error">
                     إزالة
                   </button>
                 </>
@@ -932,7 +932,7 @@ function LevelPanel({
 
       <div className="flex justify-between gap-2">
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2 text-red-600" disabled={busy} onClick={() => void remove(`/api/admin/levels/${id}`, "المستوى", onDeleted)}>
+          <Button variant="outline" className="gap-2 text-semantic-error" disabled={busy} onClick={() => void remove(`/api/admin/levels/${id}`, "المستوى", onDeleted)}>
             <Trash2 size={16} /> حذف المستوى
           </Button>
           {detail.type !== "lesson" && (

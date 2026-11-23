@@ -35,7 +35,7 @@ function errMessage(e: unknown) {
 const ProgressBar = ({ value }: { value: number }) => (
   <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
     <div
-      className="h-full bg-dxn-success rounded-full transition-all"
+      className="h-full bg-game-leaf rounded-full transition-all"
       style={{ width: `${value}%` }}
     />
   </div>
@@ -91,7 +91,7 @@ export default function Teams() {
     <div className="p-8 space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-dxn-accent">الفرق</h1>
+          <h1 className="text-2xl font-bold text-brand-plum-500">الفرق</h1>
           <p className="text-muted-foreground">متابعة أداء القادة والأعضاء التابعين</p>
         </div>
         <Button variant="outline" className="gap-2" disabled={!list.length} onClick={exportReport}>
@@ -101,7 +101,7 @@ export default function Teams() {
       </header>
 
       {(err || loadErr) && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{err ?? loadErr}</span>
           <button onClick={() => { setErr(null); setLoadErr(null) }} aria-label="إغلاق">
             <X size={16} />
@@ -126,9 +126,9 @@ export default function Teams() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-dxn-accent">{stat.value}</p>
+                        <p className="text-2xl font-bold text-brand-plum-500">{stat.value}</p>
                       </div>
-                      <div className="w-10 h-10 rounded-lg bg-dxn-secondary/10 text-dxn-secondary flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-lg bg-brand-rose-600/10 text-brand-rose-600 flex items-center justify-center">
                         <Icon size={20} />
                       </div>
                     </div>
@@ -147,13 +147,13 @@ export default function Teams() {
               {list.map((team) => (
                 <Card
                   key={team.leaderId}
-                  className="border-0 shadow-sm cursor-pointer hover:border-dxn-accent transition-colors"
+                  className="border-0 shadow-sm cursor-pointer hover:border-brand-plum-500 transition-colors"
                   onClick={() => setDetailId(team.leaderId)}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-dxn-accent/10 text-dxn-accent flex items-center justify-center text-lg font-bold">
+                        <div className="w-12 h-12 rounded-full bg-brand-plum-500/10 text-brand-plum-500 flex items-center justify-center text-lg font-bold">
                           {team.leaderName[0]}
                         </div>
                         <div>
@@ -229,7 +229,7 @@ function TeamDetailPanel({ id, onClose }: { id: string; onClose: () => void }) {
       {!detail ? (
         loadErr ? (
           <div className="text-center space-y-3">
-            <p className="text-red-600">{loadErr}</p>
+            <p className="text-semantic-error">{loadErr}</p>
             <Button variant="outline" onClick={() => void fetchDetail()}>
               إعادة المحاولة
             </Button>
@@ -240,7 +240,7 @@ function TeamDetailPanel({ id, onClose }: { id: string; onClose: () => void }) {
       ) : (
         <>
           <div>
-            <h2 className="text-xl font-bold text-dxn-accent">{detail.leader.fullName}</h2>
+            <h2 className="text-xl font-bold text-brand-plum-500">{detail.leader.fullName}</h2>
             <p className="text-sm text-muted-foreground">قائد الفريق · {detail.members.length} عضو</p>
           </div>
 

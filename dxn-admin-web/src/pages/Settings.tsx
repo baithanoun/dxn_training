@@ -150,12 +150,12 @@ export default function SettingsPage() {
   return (
     <div className="p-8 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-dxn-accent">الإعدادات</h1>
+        <h1 className="text-2xl font-bold text-brand-plum-500">الإعدادات</h1>
         <p className="text-muted-foreground">إعدادات التطبيق العامة والأمان والتلعيب</p>
       </header>
 
       {loadErr && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-4 py-2 text-sm text-semantic-error">
           <span>{loadErr}</span>
           <Button variant="outline" size="sm" onClick={() => void loadSettings()}>
             إعادة المحاولة
@@ -172,7 +172,7 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? "border-dxn-primary text-dxn-primary"
+                  ? "border-brand-plum-500 text-brand-plum-500"
                   : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {adminsErr && (
-                    <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                    <div className="flex items-center justify-between rounded-lg border border-semantic-error-border bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
                       <span>{adminsErr}</span>
                       <Button variant="outline" size="sm" onClick={() => void loadAdmins()}>
                         إعادة المحاولة
@@ -250,7 +250,7 @@ export default function SettingsPage() {
                     admins.map((admin) => (
                       <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-dxn-accent text-white flex items-center justify-center font-bold">
+                          <div className="w-9 h-9 rounded-full bg-brand-plum-500 text-white flex items-center justify-center font-bold">
                             {admin.fullName[0]}
                           </div>
                           <div>
@@ -439,8 +439,8 @@ export default function SettingsPage() {
       )}
 
       <div className="flex items-center justify-end gap-3">
-        {saveMsg && <p className="text-sm text-green-600">{saveMsg}</p>}
-        {saveErr && <p className="text-sm text-red-600">{saveErr}</p>}
+        {saveMsg && <p className="text-sm text-game-leaf-text">{saveMsg}</p>}
+        {saveErr && <p className="text-sm text-semantic-error">{saveErr}</p>}
         <Button className="gap-2" onClick={() => void saveSettings()} disabled={saving || loading}>
           <Save size={16} />
           {saving ? "جارٍ الحفظ..." : "حفظ الإعدادات"}
@@ -500,7 +500,7 @@ function AddAdminForm({
           <X size={16} />
         </button>
       </div>
-      {err && <p className="text-sm text-red-600">{err}</p>}
+      {err && <p className="text-sm text-semantic-error">{err}</p>}
       <div className="space-y-2">
         <Input placeholder="الاسم الكامل" required value={f.fullName} onChange={set("fullName")} />
         <Input placeholder="البريد الإلكتروني" type="email" value={f.email} onChange={set("email")} />
