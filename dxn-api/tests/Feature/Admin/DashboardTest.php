@@ -261,4 +261,125 @@ class DashboardTest extends TestCase
         $this->assertSame(0, $byId['s' . $draft->id]['issuedCount']);
         $this->assertFalse($byId['s' . $draft->id]['isActive']);
     }
+
+    private function certificate(User $user, Section $section, string $code, string $at): void
+    {
+        Certificate::create([
+            'user_id' => $user->id,
+            'section_id' => $section->id,
+            'code' => $code,
+            'issued_at' => $at,
+            'created_at' => $at,
+        ]);
+    }
+
+    public function test_overview_stats_exact_titles_and_streak_format(): void
+    {
+        Carbon::setTestNow('2026-11-22 12:00:00');
+        $this->seed(ContentSeeder::class);
+        User::factory()->create(['role' => 'trainee', 'current_streak' => 5]);
+        User::factory()->create(['role' => 'trainee', 'current_streak' => 6]);
+
+        $overview = $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->getJson('/api/admin/dashboard/overview')
+            ->assertOk()->json();
+
+        $this->assertSame([
+            ['المستخدمون النشطون اليوم', 'Users'],
+            ['معدل الإكمال العام', 'BarChart3'],
+            ['متوسط طول الـ Streak', 'Flame'],
+            ['الشهادات الصادرة اليوم', 'Award'],
+        ], collect($overview['stats'])->map(fn ($s) => [$s['title'], $s['icon']])->all());
+        $this->assertSame('5.5 يوم', $overview['stats'][2]['value']);
+        $this->assertStringEndsWith(' يوم', $overview['stats'][2]['value']);
+        $this->assertStringNotContainsString('أيام', $overview['stats'][2]['value']);
+    }
+
+    public function test_overview_counts_certificates_issued_today_only(): void
+    {
+        Carbon::setTestNow('2026-11-22 12:00:00');
+        $this->seed(ContentSeeder::class);
+        $section = Section::orderBy('order_index')->firstOrFail();
+
+        foreach ([1, 2] as $i) {
+            $this->certificate(
+                User::factory()->create(['role' => 'trainee']),
+                $section,
+                'CERT-TODAY-'.$i,
+                '2026-11-22 0'.$i.':00:00'
+            );
+        }
+        $this->certificate(
+            User::factory()->create(['role' => 'trainee']),
+            $section,
+            'CERT-OLD',
+            '2026-11-20 10:00:00'
+        );
+
+        $overview = $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->getJson('/api/admin/dashboard/overview')
+            ->assertOk()->json();
+
+        $this->assertSame(2, $overview['stats'][3]['value']);
+    }
+
+    public function test_overview_change_compares_previous_period(): void
+    {
+        Carbon::setTestNow('2026-11-22 12:00:00');
+        $this->seed(ContentSeeder::class);
+        $section = Section::orderBy('order_index')->firstOrFail();
+        [$a, $b, $c] = [
+            User::factory()->create(['role' => 'trainee']),
+            User::factory()->create(['role' => 'trainee']),
+            User::factory()->create(['role' => 'trainee']),
+        ];
+
+        // Current window: one active user and one certificate today.
+        $this->event($a, 'app_opened');
+        $this->certificate($a, $section, 'CERT-TODAY', '2026-11-22 09:00:00');
+        // Previous window (2026-09-22..2026-10-22): three active users and two certificates.
+        foreach ([$a, $b, $c] as $user) {
+            $this->event($user, 'app_opened', null, [], Carbon::parse('2026-10-10 09:00:00'));
+        }
+        $this->certificate($b, $section, 'CERT-PREV-1', '2026-10-05 09:00:00');
+        $this->certificate($c, $section, 'CERT-PREV-2', '2026-10-06 09:00:00');
+
+        $stats = $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->getJson('/api/admin/dashboard/overview')
+            ->assertOk()->json()['stats'];
+
+        $this->assertSame(1, $stats[0]['value']);
+        $this->assertSame(-67, $stats[0]['change']);
+        $this->assertSame('down', $stats[0]['changeType']);
+        $this->assertSame(1, $stats[3]['value']);
+        $this->assertSame(-50, $stats[3]['change']);
+        $this->assertSame('down', $stats[3]['changeType']);
+    }
+
+    public function test_overview_change_zero_when_no_prior_data(): void
+    {
+        Carbon::setTestNow('2026-11-22 12:00:00');
+        $this->seed(ContentSeeder::class);
+        $section = Section::orderBy('order_index')->firstOrFail();
+        [$a, $b] = [
+            User::factory()->create(['role' => 'trainee']),
+            User::factory()->create(['role' => 'trainee']),
+        ];
+
+        $this->event($a, 'app_opened');
+        $this->event($b, 'app_opened');
+        $this->certificate($a, $section, 'CERT-TODAY-1', '2026-11-22 09:00:00');
+        $this->certificate($b, $section, 'CERT-TODAY-2', '2026-11-22 10:00:00');
+
+        $stats = $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->getJson('/api/admin/dashboard/overview')
+            ->assertOk()->json()['stats'];
+
+        $this->assertSame(2, $stats[0]['value']);
+        $this->assertSame(2, $stats[3]['value']);
+        foreach ($stats as $stat) {
+            $this->assertSame(0, $stat['change']);
+            $this->assertSame('up', $stat['changeType']);
+        }
+    }
 }

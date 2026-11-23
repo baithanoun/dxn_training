@@ -20,22 +20,53 @@ class DashboardController extends Controller
     {
         $from = $request->input('from', now()->subDays(30)->toDateString());
         $to = $request->input('to', now()->toDateString());
-        $prevFrom = now()->parse($from)->subDays(now()->parse($to)->diffInDays(now()->parse($from)) + 1)->toDateString();
+        $days = (int) abs(now()->parse($from)->diffInDays(now()->parse($to)));
         $prevTo = now()->parse($from)->subDay()->toDateString();
+        $prevFrom = now()->parse($from)->subDays($days + 1)->toDateString();
 
         // Stats
-        $todayUsers = AnalyticsEvent::whereDate('created_at', now()->toDateString())->distinct('user_id')->count('user_id');
         $trainees = User::where('role', 'trainee')->get();
         $avgCompletion = $trainees->count() > 0 ? round($trainees->avg(fn ($u) => app(\App\Services\ProgressService::class)->completionPercent($u)), 1) : 0;
         $avgStreak = $trainees->count() > 0 ? round($trainees->avg('current_streak'), 1) : 0;
-        $certCount = Certificate::count();
 
-        $stats = [
-            ['title' => 'المستخدمون النشطون اليوم', 'value' => $todayUsers, 'change' => 0, 'changeType' => 'up', 'icon' => 'Users'],
-            ['title' => 'متوسط إكمال التدريب', 'value' => $avgCompletion . '%', 'change' => 0, 'changeType' => 'up', 'icon' => 'BarChart3'],
-            ['title' => 'متوسط Streak', 'value' => $avgStreak . ' أيام', 'change' => 0, 'changeType' => 'up', 'icon' => 'Flame'],
-            ['title' => 'الشهادات الصادرة', 'value' => $certCount, 'change' => 0, 'changeType' => 'up', 'icon' => 'Award'],
+        // shortcut: completion/streak are current snapshots with no stored history, so the previous
+        // period reuses their current averages; when to upgrade: persist per-trainee progress snapshots.
+        $windowMetrics = function (string $fromDate, string $toDate) use ($avgCompletion, $avgStreak): array {
+            $start = Carbon::parse($fromDate)->startOfDay()->toDateTimeString();
+            $end = Carbon::parse($toDate)->endOfDay()->toDateTimeString();
+
+            return [
+                AnalyticsEvent::whereBetween('created_at', [$start, $end])->distinct('user_id')->count('user_id'),
+                $avgCompletion,
+                $avgStreak,
+                Certificate::whereBetween('issued_at', [$start, $end])->count(),
+            ];
+        };
+
+        $today = now()->toDateString();
+        $current = $windowMetrics($today, $today);
+        $previous = $windowMetrics($prevFrom, $prevTo);
+
+        $statMeta = [
+            ['title' => 'المستخدمون النشطون اليوم', 'format' => fn ($v) => $v, 'icon' => 'Users'],
+            ['title' => 'معدل الإكمال العام', 'format' => fn ($v) => $v . '%', 'icon' => 'BarChart3'],
+            ['title' => 'متوسط طول الـ Streak', 'format' => fn ($v) => $v . ' يوم', 'icon' => 'Flame'],
+            ['title' => 'الشهادات الصادرة اليوم', 'format' => fn ($v) => $v, 'icon' => 'Award'],
         ];
+
+        $stats = [];
+        foreach ($statMeta as $index => $meta) {
+            $change = $previous[$index] > 0
+                ? (int) round(($current[$index] - $previous[$index]) / $previous[$index] * 100)
+                : 0;
+            $stats[] = [
+                'title' => $meta['title'],
+                'value' => $meta['format']($current[$index]),
+                'change' => $change,
+                'changeType' => $change >= 0 ? 'up' : 'down',
+                'icon' => $meta['icon'],
+            ];
+        }
 
         // Activity per day
         $activity = [];
