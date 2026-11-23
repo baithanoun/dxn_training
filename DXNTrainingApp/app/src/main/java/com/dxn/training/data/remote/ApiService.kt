@@ -114,6 +114,11 @@ interface ApiService {
     @POST("api/auth/logout")
     suspend fun logout(): Response<Unit>
 
+    // ===================  إعدادات التطبيق العامة  ===================
+
+    @GET("api/app/config")
+    suspend fun getAppConfig(): Response<AppConfigResponse>
+
     // ===================  المحتوى  ===================
 
     /**

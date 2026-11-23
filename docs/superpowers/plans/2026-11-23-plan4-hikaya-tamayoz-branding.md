@@ -306,14 +306,14 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 - `@GET("api/app/config") suspend fun getAppConfig(): Response<AppConfigResponse>`؛ `data class AppConfigResponse(val appName: String, val teamName: String, val teamTagline: String?, val teamBio: String?, val teamWelcome: String?, val maintenanceMode: Boolean)`.
 - `AppConfigRepository(api, context)`: `suspend fun load(): AppConfigResponse` — يحاول الشبكة، ويحفظ آخر نسخة ناجحة في DataStore (المكتبة موجودة) ويعيدها عند الفشل؛ وإن لم توجد نسخة محفوظة يعيد ثوابت مطابقة لـ `Setting::DEFAULTS` (B1) — `// shortcut: hard-coded first-run fallback mirrors server defaults, update both together`.
 - Onboarding:
-  - **الصفحة 1:** الشعار (`BrandMark(Large)`) + `teamName` عنواناً + `teamTagline` + `teamBio` (نص قابل للتمرير، `Text` عادي — لا HTML) + أيقونة ورقة `Leaf`.
-  - **الصفحة 2:** «اكسب XP وأوسمة» → صيغة حسب الجنس غير متاحة قبل التسجيل؛ استخدم صيغة محايدة/جمع (انظر G1: «اكسبوا…» أو «اجمع XP وأوسمة» — قرار نصي يُسجَّل).
-  - **الصفحة 3:** «ابنِ فريقك» → نفس قاعدة الصفحة 2.
-  - **زر الختام:** `teamWelcome`.
-- **احذف** النص «تعلم بأسلوب Duolingo» نهائياً.
-- [ ] `grep -rni duolingo DXNTrainingApp/app/src dxn-admin-web/src dxn-api/app dxn-api/database` → لا نتائج.
-- [ ] يدوياً: غيّر النبذة من اللوحة → أعد فتح التطبيق بعد مسح بيانات الـ Onboarding (أو تثبيت نظيف) → النص الجديد؛ أوقف الـ API → يظهر آخر نص محفوظ.
-- [ ] Commit `feat(android): onboarding shows team name and bio from server`
+  - **الصفحة 1:** الشعار (`BrandMark(Large)`) + `teamName` عنواناً + `teamTagline` + `teamBio` (نص `Text` عادي قابل للتمرير) + أيقونة `Icons.Filled.Eco` (من `material-icons-extended` الموجود أصلاً).
+  - **الصفحة 2:** «اجمع XP وأوسمة» — صيغة محايدة قبل التسجيل (القرار النصي: «اجمع» صيغة collecting محايدة؛ الصيغ المذكّرة/المؤنثة تُطبَّق بعد التسجيل في G2).
+  - **الصفحة 3:** «ابنِ فريقك» بنفس القاعدة المحايدة.
+  - **زر الختام:** `teamWelcome` (زر بارتفاع أدنى 52dp يسمح بالتفاف النص الطويل).
+- **احذف** النص «تعلم بأسلوب Duolingo» نهائياً — تم في M1 وتأكدنا بـ grep.
+- [x] `grep -rni duolingo DXNTrainingApp/app/src dxn-admin-web/src dxn-api/app dxn-api/database` → لا نتائج (أُزيل أصلاً في M1 وتأكدنا هنا).
+- [x] يدوياً: غيّر النبذة من اللوحة → أعد فتح التطبيق بعد مسح بيانات الـ Onboarding (أو تثبيت نظيف) → النص الجديد؛ أوقف الـ API → يظهر آخر نص محفوظ. **لم يُشغّل** (لا محاكي/سيرفر في هذه الجلسة)؛ الكود يوفّر network-first + cache في DataStore + fallback محلي مطابق للقيم الافتراضية.
+- [x] Commit `feat(android): onboarding shows team name and bio from server`
 
 ---
 

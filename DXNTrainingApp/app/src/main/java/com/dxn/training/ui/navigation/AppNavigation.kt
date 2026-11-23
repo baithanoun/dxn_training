@@ -1,5 +1,6 @@
 package com.dxn.training.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -24,7 +25,9 @@ import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
 import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.AppConfigResponse
 import com.dxn.training.data.remote.EventSender
+import com.dxn.training.data.repository.AppConfigRepository
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import com.dxn.training.ui.screens.*
@@ -98,6 +101,8 @@ fun AppNavigation(navController: NavHostController) {
     val sessionStore = remember { ApiClient.getSessionStore() ?: SessionStore(context.applicationContext) }
     val userRepository = remember { UserRepository(api) }
     val contentRepository = remember { ContentRepository.getInstance(api, sessionStore, userRepository) }
+    val appConfigRepository = remember { AppConfigRepository(ApiClient.api, context.applicationContext) }
+    var appConfig by remember { mutableStateOf<AppConfigResponse?>(null) }
     val completionViewModel: CompletionViewModel = viewModel(
         factory = CompletionViewModelFactory(contentRepository)
     )
@@ -109,6 +114,10 @@ fun AppNavigation(navController: NavHostController) {
     val profileViewModel: ProfileViewModel = viewModel(
         factory = ProfileViewModelFactory(userRepository, sessionStore)
     )
+
+    LaunchedEffect(Unit) {
+        appConfig = appConfigRepository.load()
+    }
 
     val session by sessionStore.session.collectAsState(initial = null)
     var sessionChecked by remember { mutableStateOf(false) }
@@ -157,18 +166,29 @@ fun AppNavigation(navController: NavHostController) {
             arguments = listOf(navArgument("page") { type = NavType.IntType })
         ) { backStackEntry ->
             val page = backStackEntry.arguments?.getInt("page") ?: 1
-            OnboardingScreen(
-                page = page,
-                onNext = {
-                    if (page < 3) {
-                        navController.navigate(Screen.Onboarding.createRoute(page + 1))
-                    } else {
-                        navController.navigate(Screen.Login.route) {
-                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+            val config = appConfig
+            if (config == null) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = BrandPlum)
+                }
+            } else {
+                OnboardingScreen(
+                    page = page,
+                    config = config,
+                    onNext = {
+                        if (page < 3) {
+                            navController.navigate(Screen.Onboarding.createRoute(page + 1))
+                        } else {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Onboarding.route) { inclusive = true }
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         }
 
         composable(Screen.Login.route) {
