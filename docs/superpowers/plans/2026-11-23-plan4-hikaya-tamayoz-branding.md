@@ -229,10 +229,10 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 ### W1 — tokens
 
 **Files:** Modify `dxn-admin-web/tailwind.config.js`، `src/index.css`.
-- [ ] تحت `theme.extend.colors`: `brand: { plum: {50..900}, rose: {50..900}, ivory, surface, text, muted }`، `semantic: { success, error, "error-bg", "error-border", warning, "warning-text", info }`، `game: { xp, "xp-text", "xp-container", heart, streak, locked, "locked-text", leaf, "leaf-text", "leaf-container" }` بالقيم من الجداول.
-- [ ] أبقِ مفتاح `dxn` مؤقتاً موجّهاً للقيم الجديدة: `primary→plum-500`، `primary-deep→plum-700`، `primary-light→rose-500`، `secondary→rose-600`، `secondary-light→rose-300`، `accent→plum-500`، `accent-light→plum-400`، `success→leaf-text`، `success-light→leaf`، `error→error`، `warning→warning`، `bg→ivory`، `card→#FFFFFF`؛ مع `// shortcut: legacy dxn alias pointing to brand tokens, remove in W3`.
-- [ ] `src/index.css` `:root`: `--background 60 22% 96%`، `--foreground 327 35% 12%`، `--card 0 0% 100%`، `--card-foreground 327 35% 12%`، `--popover`/`--popover-foreground` مثل card، `--primary 332 65% 25%`، `--primary-foreground 0 0% 100%`، `--secondary 333 32% 49%`، `--secondary-foreground 0 0% 100%`، `--muted 332 21% 88%`، `--muted-foreground 330 10% 39%`، `--accent 334 41% 97%`، `--accent-foreground 332 65% 25%`، `--destructive 6 63% 46%`، `--destructive-foreground 0 0% 100%`، `--border 332 21% 88%`، `--input 332 21% 88%`، `--ring 332 65% 25%`. `--radius` بلا تغيير. إن وُجد `.dark` — verify — اتركه وسجّل ذلك.
-- [ ] `npm run build && npm run lint`؛ فحص سريع لـ `/admin/login` و`/admin/`. Commit `feat(admin-web): hikaya tamayoz color tokens`
+- [x] تحت `theme.extend.colors`: `brand: { plum: {50..900}, rose: {50..900}, ivory, surface, text, muted }`، `semantic`، `game` بالقيم من الجداول.
+- [x] أبقِ مفتاح `dxn` مؤقتاً موجّهاً للقيم الجديدة؛ مع تعليق `// shortcut: legacy dxn alias pointing to brand tokens, remove in W3`.
+- [x] `src/index.css` `:root` بالقيم HSL المطلوبة؛ `--radius` بلا تغيير. تحقّق: لا يوجد قسم `.dark`.
+- [x] `npm run build && npm run lint` PASS؛ الـ CSS المُنتَج يحوي `#69163D` والقيم الجديدة. الفحص اليدوي لـ `/admin/login` و`/admin/` **لم يُشغّل** في هذه البيئة. Commit `feat(admin-web): hikaya tamayoz color tokens`
 
 ### W2 — إزالة الألوان المباشرة
 
