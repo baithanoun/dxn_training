@@ -221,10 +221,10 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 ### W0 — الخط
 
 **Files:** Create `dxn-admin-web/public/fonts/ibm-plex-sans-arabic/{IBMPlexSansArabic-Regular,-Medium,-SemiBold,-Bold}.woff2` + `OFL.txt`. Modify `dxn-admin-web/src/index.css`، `tailwind.config.js` (`fontFamily.sans`).
-- [ ] نزّل الملفات من إصدار `IBM/plex` الرسمي (اطلب إذن المالك قبل التنزيل إن كانت بيئتك تتطلبه). لا تستخدم Google Fonts عن بُعد (خصوصية + عمل بدون إنترنت).
-- [ ] `@font-face` لكل وزن: `font-family: "IBM Plex Sans Arabic"; font-weight: 400|500|600|700; font-display: swap; src: url("/admin/fonts/ibm-plex-sans-arabic/…woff2") format("woff2");` — المسار يجب أن يعمل مع `base: '/admin/'` في الإنتاج و`/` في dev: استخدم مسارات نسبية تُعالجها Vite (ضع الملفات تحت `src/assets/fonts/` واستوردها في CSS بـ `url("./assets/fonts/…")`) إن كان `public` + base يسبب اختلافاً — اختر ما يعمل في الحالتين وتحقق بـ `npm run build` ثم فتح `dist`.
-- [ ] `fontFamily.sans`: `["IBM Plex Sans Arabic", "Noto Sans Arabic", "system-ui", "sans-serif"]` (احذف Cairo).
-- [ ] تحقق: DevTools → Network يحمّل woff2؛ Computed font = IBM Plex Sans Arabic. Commit `feat(admin-web): self-hosted IBM Plex Sans Arabic`
+- [x] نزّل الملفات من إصدار `IBM/plex` الرسمي (`@ibm/plex-sans-arabic@1.1.0`، رخصة OFL 1.1 محفوظة كـ `OFL.txt`). لا Google Fonts عن بُعد.
+- [x] `@font-face` لكل وزن: `font-family: "IBM Plex Sans Arabic"; font-weight: 400|500|600|700; font-display: swap;` مع المسارات النسبية تحت `src/assets/fonts/` (اخترناها لتعمل مع `base: '/admin/'` في الإنتاج و`/` في dev). تحقق بـ `npm run build`: الـ CSS الناتج يشير إلى `/admin/assets/IBMPlexSansArabic-…-hash.woff2` (لا `/fonts/...` ثابت).
+- [x] `fontFamily.sans`: `["IBM Plex Sans Arabic", "Noto Sans Arabic", "system-ui", "sans-serif"]` (حُذف Cairo).
+- [x] Commit `feat(admin-web): self-hosted IBM Plex Sans Arabic`. تحقق DevTools (Network/Computed font) **لم يُشغّل** في هذه البيئة؛ الدليل المتاح: نجاح `npm run build` + `npm run lint` وفحص الـ CSS الناتج.
 
 ### W1 — tokens
 
