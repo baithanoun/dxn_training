@@ -27,6 +27,7 @@ import type {
 type ApiRole = "admin" | "leader" | "trainee"
 type RoleFilter = ApiRole | ""
 type StatusFilter = "active" | "inactive" | "disabled" | ""
+type GenderValue = "" | "male" | "female"
 type StatusVariant = "success" | "warning" | "muted"
 
 const PER_PAGE = 20
@@ -40,6 +41,12 @@ const roleVariants: Record<Role, "default" | "secondary" | "warning"> = {
   TRAINEE: "default",
   LEADER: "secondary",
   ADMIN: "warning",
+}
+
+function genderLabel(gender: AdminUser["gender"]) {
+  if (gender === "MALE") return "ذكر"
+  if (gender === "FEMALE") return "أنثى"
+  return "غير محدد"
 }
 
 const fieldCls =
@@ -61,11 +68,12 @@ function statusOf(u: AdminUser): { label: string; variant: StatusVariant } {
   return { label: "متوقف", variant: "warning" }
 }
 
-function buildParams(query: string, role: RoleFilter, status: StatusFilter, withPage?: number) {
+function buildParams(query: string, role: RoleFilter, status: StatusFilter, gender: GenderValue, withPage?: number) {
   const p = new URLSearchParams()
   if (query) p.set("search", query)
   if (role) p.set("role", role)
   if (status) p.set("status", status)
+  if (gender) p.set("gender", gender)
   if (withPage !== undefined) p.set("page", String(withPage))
   p.set("perPage", String(PER_PAGE))
   return p.toString()
@@ -85,6 +93,7 @@ export default function Users() {
   const [query, setQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("")
+  const [genderFilter, setGenderFilter] = useState<GenderValue>("")
   const [page, setPage] = useState(1)
   const [rows, setRows] = useState<AdminUser[]>([])
   const [meta, setMeta] = useState<Paginated<AdminUser>["meta"] | null>(null)
@@ -107,7 +116,7 @@ export default function Users() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await api<Paginated<AdminUser>>(`/api/admin/users?${buildParams(query, roleFilter, statusFilter, page)}`)
+      const res = await api<Paginated<AdminUser>>(`/api/admin/users?${buildParams(query, roleFilter, statusFilter, genderFilter, page)}`)
       setRows(res.data)
       setMeta(res.meta)
       setLoadErr(null)
@@ -116,7 +125,7 @@ export default function Users() {
     } finally {
       setLoading(false)
     }
-  }, [query, roleFilter, statusFilter, page])
+  }, [query, roleFilter, statusFilter, genderFilter, page])
 
   useEffect(() => {
     void load()
@@ -142,7 +151,7 @@ export default function Users() {
     setExporting(true)
     try {
       const token = localStorage.getItem(TOKEN_KEY)
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/export?${buildParams(query, roleFilter, statusFilter)}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/export?${buildParams(query, roleFilter, statusFilter, "")}`, {
         headers: {
           Accept: "text/csv",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -248,6 +257,19 @@ export default function Users() {
           <option value="inactive">متوقف</option>
           <option value="disabled">معطّل</option>
         </select>
+        <select
+          className={cn(fieldCls, "w-auto")}
+          aria-label="تصفية حسب الجنس"
+          value={genderFilter}
+          onChange={(e) => {
+            setGenderFilter(e.target.value as GenderValue)
+            setPage(1)
+          }}
+        >
+          <option value="">الكل</option>
+          <option value="male">ذكر</option>
+          <option value="female">أنثى</option>
+        </select>
       </div>
 
       <Card className="border-0 shadow-sm">
@@ -258,6 +280,7 @@ export default function Users() {
                 <TableHead>الاسم</TableHead>
                 <TableHead>رقم العضوية</TableHead>
                 <TableHead>الدور</TableHead>
+                <TableHead>الجنس</TableHead>
                 <TableHead>القائد</TableHead>
                 <TableHead>XP</TableHead>
                 <TableHead>آخر نشاط</TableHead>
@@ -284,6 +307,7 @@ export default function Users() {
                     <TableCell>
                       <Badge variant={roleVariants[user.role]}>{roleLabels[user.role]}</Badge>
                     </TableCell>
+                    <TableCell>{genderLabel(user.gender)}</TableCell>
                     <TableCell>{user.leaderName ?? "—"}</TableCell>
                     <TableCell>{user.totalXp.toLocaleString("ar-SA")}</TableCell>
                     <TableCell>{user.lastActivityDate ?? "—"}</TableCell>
@@ -295,7 +319,7 @@ export default function Users() {
               })}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-10">
                     {loadErr ? loadErr : "لا يوجد مستخدمون مطابقون"}
                   </TableCell>
                 </TableRow>
@@ -362,6 +386,7 @@ function CreateUserForm({
     password: "",
     dxnId: "",
     role: "trainee" as ApiRole,
+    gender: "" as GenderValue,
     leaderId: "",
   })
   const [err, setErr] = useState<string | null>(null)
@@ -382,6 +407,7 @@ function CreateUserForm({
           password: f.password,
           dxnId: f.dxnId || null,
           role: f.role,
+          gender: f.gender || null,
           leaderId: f.leaderId || null,
         },
       })
@@ -422,6 +448,13 @@ function CreateUserForm({
                 <option value="trainee">متدرب</option>
                 <option value="leader">قائد</option>
                 <option value="admin">مدير</option>
+              </select>
+            </Field>
+            <Field label="الجنس">
+              <select className={fieldCls} value={f.gender} onChange={set("gender")}>
+                <option value="">غير محدد</option>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
               </select>
             </Field>
             <Field label="القائد">
@@ -466,6 +499,7 @@ function UserPanel({
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [role, setRole] = useState<ApiRole>("trainee")
+  const [gender, setGender] = useState<GenderValue>("")
   const [leaderId, setLeaderId] = useState("")
 
   const fetchDetail = useCallback(async () => {
@@ -484,6 +518,7 @@ function UserPanel({
   useEffect(() => {
     if (!detail) return
     setRole(detail.role.toLowerCase() as ApiRole)
+    setGender(detail.gender ? (detail.gender.toLowerCase() as GenderValue) : "")
     setLeaderId(detail.leaderId ?? "")
   }, [detail])
 
@@ -492,7 +527,7 @@ function UserPanel({
     setBusy(true)
     setErr(null)
     try {
-      await api(`/api/admin/users/${id}`, { method: "PUT", json: { role, leaderId: leaderId || null } })
+      await api(`/api/admin/users/${id}`, { method: "PUT", json: { role, gender: gender || null, leaderId: leaderId || null } })
       await fetchDetail()
       onChanged()
     } catch (e) {
@@ -573,6 +608,10 @@ function UserPanel({
             <span className="font-medium">{detail.dxnId ?? "—"}</span>
           </div>
           <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">الجنس</span>
+            <span className="font-medium">{genderLabel(detail.gender)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">القائد</span>
             <span className="font-medium">{detail.leaderName ?? "—"}</span>
           </div>
@@ -601,6 +640,13 @@ function UserPanel({
               <option value="trainee">متدرب</option>
               <option value="leader">قائد</option>
               <option value="admin">مدير</option>
+            </select>
+          </Field>
+          <Field label="الجنس">
+            <select className={fieldCls} value={gender} disabled={busy} onChange={(e) => setGender(e.target.value as GenderValue)}>
+              <option value="">غير محدد</option>
+              <option value="male">ذكر</option>
+              <option value="female">أنثى</option>
             </select>
           </Field>
           <Field label="القائد">

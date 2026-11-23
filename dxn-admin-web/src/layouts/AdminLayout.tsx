@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { BrandMark } from "@/components/BrandMark"
 import { useAuth } from "@/lib/auth"
 
 const navItems = [
@@ -32,16 +33,9 @@ export default function AdminLayout() {
     <div dir="rtl" className="min-h-screen bg-brand-ivory flex">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-l border-gray-200 fixed inset-y-0 right-0 z-50 flex flex-col shadow-sm">
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-plum-500 flex items-center justify-center text-white font-bold text-sm">
-              DXN
-            </div>
-            <div>
-              <h1 className="font-bold text-brand-plum-500 text-lg leading-tight">DXN Training</h1>
-              <p className="text-xs text-muted-foreground">لوحة الإدارة</p>
-            </div>
-          </div>
+        <div className="p-6 border-b border-gray-100 space-y-2">
+          <BrandMark size="sm" tone="light" />
+          <p className="text-xs text-muted-foreground">لوحة الإدارة</p>
         </div>
 
         <div className="px-4 py-4 border-b border-gray-100">

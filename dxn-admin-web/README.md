@@ -1,6 +1,6 @@
-# DXN Training — لوحة إدارة الويب
+# حكاية تميّز | DXN — لوحة إدارة الويب
 
-موقع إدارة تفاعلي (Admin Dashboard) لتطبيق DXN Training، مبني باستخدام React + TypeScript + Vite + Tailwind CSS، مع دعم كامل للغة العربية واتجاه RTL. **كل البيانات تأتي من واجهة Laravel API** عبر `src/lib/api.ts`؛ لا توجد بيانات وهمية ولا ربط بـ NestJS.
+موقع إدارة تفاعلي (Admin Dashboard) لتطبيق حكاية تميّز | DXN، مبني باستخدام React + TypeScript + Vite + Tailwind CSS، مع دعم كامل للغة العربية واتجاه RTL. **كل البيانات تأتي من واجهة Laravel API** عبر `src/lib/api.ts`؛ لا توجد بيانات وهمية ولا ربط بـ NestJS.
 
 ## الميزات
 

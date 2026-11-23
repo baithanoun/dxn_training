@@ -253,14 +253,14 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 **Interface:** `export function BrandMark({ size = "sm", tone = "light" }: { size?: "sm" | "lg"; tone?: "light" | "dark" })` — `<img src={`${import.meta.env.BASE_URL}brand/logo.png`} alt="شعار حكاية تميّز">` (sm 40px، lg 96px) + `<span>حكاية تميّز</span>` (sm `text-lg font-bold`، lg `text-3xl font-bold`) + `<span dir="ltr">DXN</span>` (sm `text-xs`، lg `text-sm`، `tracking-widest font-semibold`)؛ الألوان من جدول BrandMark.
 > قرار المالك: BrandMark يعرض «حكاية تميّز» ثابتاً؛ `team_name` يُستخدم في Onboarding فقط.
 
-- [ ] `AdminLayout` → `<BrandMark size="sm" tone=…/>` بدل «DXN» و«DXN Training» (tone حسب لون الشريط الجانبي الفعلي).
-- [ ] `Login.tsx` → `<BrandMark size="lg" tone="light"/>` أعلى البطاقة.
-- [ ] `index.html`: `<title>حكاية تميّز | DXN</title>`، `<html lang="ar" dir="rtl">` (verify)، `<link rel="icon" href="%BASE_URL%favicon.png">`.
-- [ ] **Settings.tsx — قسم جديد «هوية الفريق»** (أول تبويب أو بطاقة في «إعدادات عامة»): حقول `اسم الفريق` (Input)، `الشعار النصي` (Input)، `نبذة الفريق` (textarea، عدّاد أحرف /1000)، `رسالة الترحيب` (Input)؛ تُحمَّل وتُحفظ عبر `GET/PUT /api/admin/settings` الموجودين؛ معاينة نصية بسيطة أسفل الحقول بخط وألوان التطبيق. `app_name` الافتراضي في Settings.tsx:37 → «حكاية تميّز». أضف المفاتيح إلى نوع الإعدادات في `src/lib/types.ts`.
-- [ ] Users page: عمود/حقل «الجنس» (ذكر/أنثى/غير محدد) في الجدول ونموذج الإضافة والتعديل (يستخدم B2).
-- [ ] احذف `dxn` من tailwind بعد `grep -rn "dxn-" src` = لا نتائج.
-- [ ] تحقق: build + lint؛ `grep -rn "DXN Training" dxn-admin-web --exclude-dir=node_modules --exclude-dir=dist` → لا نتائج؛ يدوياً: الشريط الجانبي، الدخول، عنوان التبويب وأيقونته، حفظ نبذة جديدة ثم إعادة تحميل → محفوظة، تكبير 200% بلا قصّ.
-- [ ] Commit `feat(admin-web): hikaya tamayoz wordmark, team profile settings and gender field`
+- [x] `AdminLayout` → `<BrandMark size="sm" tone="light"/>` بدل «DXN» و«DXN Training» (الشريط الجانبي أبيض).
+- [x] `Login.tsx` → `<BrandMark size="lg" tone="light"/>` أعلى البطاقة.
+- [x] `index.html`: `<title>حكاية تميّز | DXN</title>`، `<html lang="ar" dir="rtl">`، `<link rel="icon" type="image/png" href="%BASE_URL%favicon.png">`؛ تحقّق أن dist/index.html يشير إلى `/admin/favicon.png`. وُجدت 64×64 favicon.png من الشعار.
+- [x] **Settings.tsx — قسم «هوية الفريق»** أول بطاقة في «إعدادات عامة»: اسم الفريق، الشعار النصي، نبذة الفريق (textarea بعدّاد /1000)، رسالة الترحيب؛ GET/PUT عبر `/api/admin/settings`؛ معاينة نص عادي (لا `dangerouslySetInnerHTML`)؛ `app_name` الافتراضي «حكاية تميّز»؛ النوع نُقل إلى `src/lib/types.ts`.
+- [x] Users page: عمود «الجنس» + اختيار في الإضافة والتعديل + مرشح `?gender=` (ذكر/أنثى/غير محدد).
+- [x] حُذف `dxn` من tailwind؛ `grep dxn-` = لا نتائج.
+- [x] تحقق: build + lint PASS؛ لا «DXN Training» في `dxn-admin-web`. الفحص اليدوي (الشريط، الدخول، العنوان، الحفظ بعد إعادة التحميل، تكبير 200%) **لم يُشغّل**.
+- [x] Commit `feat(admin-web): hikaya tamayoz wordmark, team profile settings and gender field`
 
 ---
 

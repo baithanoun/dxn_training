@@ -13,28 +13,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { api, ApiError } from "@/lib/api"
-import type { AdminUser, Paginated } from "@/lib/types"
-
-interface AppSettings {
-  app_name: string
-  default_language: "ar"
-  maintenance_mode: boolean
-  xp_lesson_default: number
-  hearts_default: number
-  heart_refill_hours: number
-  streak_reminder_days: number
-  xp_first_try_multiplier: number
-  xp_replay_ratio: number
-  notify_streak: boolean
-  notify_reengage: boolean
-  notify_leagues: boolean
-  notify_leaders: boolean
-  session_minutes: number
-  quiz_rate_limit_per_minute: number
-}
+import type { AdminUser, AppSettings, Paginated } from "@/lib/types"
 
 const DEFAULTS: AppSettings = {
-  app_name: "DXN Training",
+  app_name: "حكاية تميّز",
+  team_name: "حكاية تميّز",
+  team_tagline: "لأن كل طموح يستحق أن يُروى!",
+  team_bio:
+    "في حكاية تميّز، نجمع بين ثقافة الحياة الصحية مع DXN وقوة العمل الجماعي الذكي عبر الإنترنت. نوفّر بيئة تدريبية داعمة ترافق كل متدرب ومتدربة من البداية حتى الاحتراف، لبناء مشروع خاص بمرونة تامة، ولتصبح كل حكاية قادمة حكاية تميّز.",
+  team_welcome: "أهلاً بك في عائلتك الثانية.. رحلتك نحو التميّز تبدأ الآن!",
   default_language: "ar",
   maintenance_mode: false,
   xp_lesson_default: 20,
@@ -189,6 +176,60 @@ export default function SettingsPage() {
         <>
           {activeTab === "general" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">هوية الفريق</CardTitle>
+                  <CardDescription>الاسم والشعار والنبذة المعروضة للمتدربين</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">اسم الفريق</label>
+                      <Input
+                        value={settings.team_name ?? ""}
+                        onChange={(e) => setField("team_name", e.target.value)}
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">الشعار النصي</label>
+                      <Input
+                        value={settings.team_tagline ?? ""}
+                        onChange={(e) => setField("team_tagline", e.target.value)}
+                        maxLength={150}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">رسالة الترحيب</label>
+                    <Input
+                      value={settings.team_welcome ?? ""}
+                      onChange={(e) => setField("team_welcome", e.target.value)}
+                      maxLength={200}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">نبذة الفريق</label>
+                    <textarea
+                      className={`${fieldCls} min-h-28 resize-y`}
+                      value={settings.team_bio ?? ""}
+                      onChange={(e) => setField("team_bio", e.target.value)}
+                      maxLength={1000}
+                    />
+                    <p dir="ltr" className="text-left text-xs text-muted-foreground">
+                      {(settings.team_bio ?? "").length}/1000
+                    </p>
+                  </div>
+                  <div className="space-y-1 rounded-lg border bg-brand-ivory p-4">
+                    <p className="text-xs font-medium text-muted-foreground">معاينة</p>
+                    <p className="text-lg font-bold text-brand-plum-500">{settings.team_name}</p>
+                    <p className="text-sm text-brand-rose-600">{settings.team_tagline}</p>
+                    <p className="text-sm font-medium text-brand-text">{settings.team_welcome}</p>
+                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{settings.team_bio}</p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">معلومات التطبيق</CardTitle>

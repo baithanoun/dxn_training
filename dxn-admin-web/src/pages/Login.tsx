@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react"
 import { Navigate, useNavigate } from "react-router-dom"
 import { useAuth } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BrandMark } from "@/components/BrandMark"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -32,7 +33,8 @@ export default function Login() {
   return (
     <div dir="rtl" className="min-h-screen bg-brand-ivory flex items-center justify-center p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
+        <CardHeader className="items-center space-y-4">
+          <BrandMark size="lg" tone="light" />
           <CardTitle>تسجيل الدخول</CardTitle>
         </CardHeader>
         <CardContent>

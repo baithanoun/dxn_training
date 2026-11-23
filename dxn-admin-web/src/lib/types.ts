@@ -3,6 +3,29 @@ export type Role = "ADMIN" | "LEADER" | "TRAINEE"
 export type ContentStatus = "draft" | "published"
 export type LevelType = "lesson" | "quiz" | "chat_battle" | "match_pairs" | "order_sequence"
 
+// Mirrors GET/PUT /api/admin/settings; keys stay snake_case as the API sends them.
+export interface AppSettings {
+  app_name: string
+  team_name: string
+  team_tagline: string | null
+  team_bio: string | null
+  team_welcome: string | null
+  default_language: "ar"
+  maintenance_mode: boolean
+  xp_lesson_default: number
+  hearts_default: number
+  heart_refill_hours: number
+  streak_reminder_days: number
+  xp_first_try_multiplier: number
+  xp_replay_ratio: number
+  notify_streak: boolean
+  notify_reengage: boolean
+  notify_leagues: boolean
+  notify_leaders: boolean
+  session_minutes: number
+  quiz_rate_limit_per_minute: number
+}
+
 export interface User {
   id: string
   fullName: string
@@ -10,6 +33,7 @@ export interface User {
   phone: string | null
   dxnId: string | null
   role: Role
+  gender: "MALE" | "FEMALE" | null
   sponsorId: string | null
   totalXp: number
   currentStreak: number
@@ -96,6 +120,7 @@ export interface AdminUser {
   phone: string | null
   dxnId: string | null
   role: Role
+  gender: "MALE" | "FEMALE" | null
   leaderId: string | null
   leaderName: string | null
   totalXp: number
