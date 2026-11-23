@@ -10,6 +10,10 @@ class SettingsController extends Controller
 {
     private const RULES = [
         'app_name' => 'string|max:100',
+        'team_name' => 'string|max:100',
+        'team_tagline' => 'nullable|string|max:150',
+        'team_bio' => 'nullable|string|max:1000',
+        'team_welcome' => 'nullable|string|max:200',
         'default_language' => 'in:ar',
         'maintenance_mode' => 'boolean',
         'xp_lesson_default' => 'integer|min:0|max:1000',

@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\Level;
 use App\Models\Section;
+use App\Models\Setting;
 use App\Models\Skill;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,7 +25,7 @@ class SettingsTest extends TestCase
             ->getJson('/api/admin/settings')
             ->assertOk()->json();
 
-        $this->assertSame('DXN Training', $settings['app_name']);
+        $this->assertSame('حكاية تميّز', $settings['app_name']);
         $this->assertSame('ar', $settings['default_language']);
         $this->assertFalse($settings['maintenance_mode']);
         $this->assertSame(20, $settings['xp_lesson_default']);
@@ -33,7 +34,32 @@ class SettingsTest extends TestCase
         $this->assertSame(0.25, $settings['xp_replay_ratio']);
         $this->assertSame(60, $settings['session_minutes']);
         $this->assertSame(10, $settings['quiz_rate_limit_per_minute']);
-        $this->assertCount(15, $settings);
+        $this->assertCount(19, $settings);
+    }
+
+    public function test_defaults_include_team_keys(): void
+    {
+        $this->assertSame('حكاية تميّز', Setting::DEFAULTS['team_name']);
+        $this->assertSame('لأن كل طموح يستحق أن يُروى!', Setting::DEFAULTS['team_tagline']);
+        $this->assertSame(
+            'في حكاية تميّز، نجمع بين ثقافة الحياة الصحية مع DXN وقوة العمل الجماعي الذكي عبر الإنترنت. نوفّر بيئة تدريبية داعمة ترافق كل متدرب ومتدربة من البداية حتى الاحتراف، لبناء مشروع خاص بمرونة تامة، ولتصبح كل حكاية قادمة حكاية تميّز.',
+            Setting::DEFAULTS['team_bio'],
+        );
+        $this->assertSame('أهلاً بك في عائلتك الثانية.. رحلتك نحو التميّز تبدأ الآن!', Setting::DEFAULTS['team_welcome']);
+    }
+
+    public function test_team_bio_max_1000(): void
+    {
+        $admin = $this->admin();
+        $response = $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/admin/settings', ['team_bio' => str_repeat('a', 1001)])
+            ->assertStatus(422)->assertJsonValidationErrors('team_bio');
+
+        $this->assertNotSame('مفتاح غير معروف', $response->json('errors.team_bio.0'));
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson('/api/admin/settings', ['team_bio' => str_repeat('a', 1000)])
+            ->assertOk();
     }
 
     public function test_invalid_value_422(): void

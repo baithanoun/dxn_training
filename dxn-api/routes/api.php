@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AppConfigController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Mobile\TreeController;
 use App\Http\Controllers\Mobile\ProgressController;
@@ -21,6 +22,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware(['throttle:5,1', 'maintenance']);
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+
+// Public, throttled, and deliberately outside the maintenance middleware so the app can render its locked state.
+Route::get('/app/config', [AppConfigController::class, 'index'])->middleware('throttle:60,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);

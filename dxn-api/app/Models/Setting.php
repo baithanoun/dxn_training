@@ -7,7 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Setting extends Model
 {
     public const DEFAULTS = [
-        'app_name' => 'DXN Training',
+        'app_name' => 'حكاية تميّز',
+        'team_name' => 'حكاية تميّز',
+        'team_tagline' => 'لأن كل طموح يستحق أن يُروى!',
+        'team_bio' => 'في حكاية تميّز، نجمع بين ثقافة الحياة الصحية مع DXN وقوة العمل الجماعي الذكي عبر الإنترنت. نوفّر بيئة تدريبية داعمة ترافق كل متدرب ومتدربة من البداية حتى الاحتراف، لبناء مشروع خاص بمرونة تامة، ولتصبح كل حكاية قادمة حكاية تميّز.',
+        'team_welcome' => 'أهلاً بك في عائلتك الثانية.. رحلتك نحو التميّز تبدأ الآن!',
         'default_language' => 'ar',
         'maintenance_mode' => false,
         'xp_lesson_default' => 20,

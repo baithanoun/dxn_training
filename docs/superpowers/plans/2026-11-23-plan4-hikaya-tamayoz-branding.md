@@ -196,9 +196,9 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 - `GET /api/app/config` — **بدون auth**، `throttle:60,1`، **خارج** middleware الصيانة → `{appName, teamName, teamTagline, teamBio, teamWelcome, maintenanceMode}` فقط.
 - لا تعدّل صفوف `settings` الموجودة في قاعدة البيانات؛ القيم الافتراضية تُطبَّق عبر `Setting::get` حين لا يوجد صف. إن كان صف `app_name` محفوظاً بقيمة «DXN Training» يحدّثه المالك من اللوحة (سجّل ذلك في رسالة الـ commit).
 
-- [ ] Tests (`AppConfigTest`): `test_config_is_public` (بدون توكن → 200)، `test_config_returns_only_whitelisted_keys` (مفاتيح الاستجابة = الستة بالضبط)، `test_config_reflects_updated_settings` (PUT كمدير ثم GET → القيم الجديدة)، `test_html_bio_returned_raw` (`<script>x</script>` يعود كما هو كنص)، `test_config_available_during_maintenance`.
-- [ ] `SettingsTest`: `test_team_bio_max_1000` (1001 حرف → 422)، `test_defaults_include_team_keys`.
-- [ ] `php artisan test` → PASS. Commit `feat(api): team profile settings and public app config endpoint`
+- [x] Tests (`AppConfigTest`): `test_config_is_public` (بدون توكن → 200)، `test_config_returns_only_whitelisted_keys` (مفاتيح الاستجابة = الستة بالضبط)، `test_config_reflects_updated_settings` (PUT كمدير ثم GET → القيم الجديدة)، `test_html_bio_returned_raw` (`<script>x</script>` يعود كما هو كنص)، `test_config_available_during_maintenance`.
+- [x] `SettingsTest`: `test_team_bio_max_1000` (1001 حرف → 422)، `test_defaults_include_team_keys`.
+- [x] `php artisan test` → PASS (`122 tests, 588 assertions`). Commit `feat(api): team profile settings and public app config endpoint` — ملاحظة: صف `app_name` المحفوظ مسبقاً في قاعدة التطوير قد لا يزال يحمل `DXN Training` ويُحدَّث من اللوحة بواسطة المالك.
 
 ### B2 — جنس المستخدم
 
