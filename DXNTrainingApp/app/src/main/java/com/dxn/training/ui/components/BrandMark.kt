@@ -31,39 +31,62 @@ fun BrandMark(
     modifier: Modifier = Modifier
 ) {
     val large = size == BrandMarkSize.Large
+    val nameColor = if (onDark) Surface else BrandPlum
+    val dxnColor = if (onDark) BrandRose300 else BrandRose600
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Row(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(R.drawable.brand_logo),
-                contentDescription = "شعار حكاية تميّز",
-                modifier = Modifier.size(if (large) 96.dp else 40.dp)
-            )
-            Spacer(modifier = Modifier.width(if (large) 16.dp else 8.dp))
-            Column(horizontalAlignment = Alignment.Start) {
+        if (large) {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.brand_logo),
+                    contentDescription = "شعار حكاية تميّز",
+                    modifier = Modifier.size(128.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "حكاية تميّز",
-                    style = if (large) {
-                        MaterialTheme.typography.headlineMedium
-                    } else {
-                        MaterialTheme.typography.titleMedium
-                    },
+                    style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (onDark) Surface else BrandPlum
+                    color = nameColor
                 )
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     Text(
                         text = "DXN",
-                        style = if (large) {
-                            MaterialTheme.typography.labelLarge
-                        } else {
-                            MaterialTheme.typography.labelSmall
-                        },
+                        style = MaterialTheme.typography.labelLarge,
                         letterSpacing = 2.sp,
-                        color = if (onDark) BrandRose300 else BrandRose600
+                        color = dxnColor
                     )
+                }
+            }
+        } else {
+            Row(
+                modifier = modifier,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.brand_logo),
+                    contentDescription = "شعار حكاية تميّز",
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = "حكاية تميّز",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = nameColor
+                    )
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        Text(
+                            text = "DXN",
+                            style = MaterialTheme.typography.labelSmall,
+                            letterSpacing = 2.sp,
+                            color = dxnColor
+                        )
+                    }
                 }
             }
         }
