@@ -170,17 +170,17 @@
 ## L0 — تجهيز ملفات الشعار من JPEG (لا يوجد PNG/SVG — قرار المالك)
 
 **Files:** Create `docs/brand/build_logo_assets.py` (سكربت، لا يُشغَّل في الإنتاج)، المخرجات: `docs/brand/logo-512.png`، `docs/brand/logo-mark-512.png`، `docs/brand/logo-1024.png`.
-**المصدر الوحيد:** `docs/brand/hikaya-tamayoz-logo.jpg` (770×744، خلفية عاجية، ظل رمادي خفيف حول الحلقة).
+**المصدر الوحيد:** `docs/brand/hikaya-tamayoz-logo.jpg` (الحجم الفعلي 770×772؛ خلفية عاجية، ظل رمادي خفيف حول الحلقة).
 
-- [ ] السكربت بـ Pillow من `.venv` الموجود (`.venv\Scripts\python.exe -I docs\brand\build_logo_assets.py`):
+- [x] السكربت بـ Pillow من `.venv` الموجود (`.venv\Scripts\python.exe -I docs\brand\build_logo_assets.py`):
   1. قصّ مربّع حول الدائرة (احسب حدودها من بكسلات الحلقة الوردية: R>170 وG<130 وB>100)، مع هامش 2%.
   2. قناع دائري: كل ما خارج الدائرة شفاف (يزيل الظل الرمادي والزوايا).
   3. داخل الدائرة: الخلفية العاجية تُترك كما هي (لا إزالة بالعتبة — تفادياً لهالات JPEG حول الحروف) → الناتج شعار دائري بخلفية عاجية داخلية وحواف شفافة.
   4. `logo-512.png` و`logo-1024.png` (resample LANCZOS).
   5. `logo-mark-512.png` لأيقونة Android: نفس الدائرة مكبّرة لتملأ 66/108 من اللوحة (منطقة الأمان) على خلفية شفافة.
-- [ ] افحص بصرياً عند 48px و192px: النص «حكاية تميّز» داخل الشعار يصبح غير مقروء عند 48px — هذا مقبول للأيقونة (الاسم مكتوب بجانبها في BrandMark).
-- [ ] `// shortcut: logo assets upscaled from a 770px JPEG, replace with vector when the owner has one` في رأس السكربت.
-- [ ] Commit `docs(brand): logo PNG assets derived from owner JPEG`
+- [x] افحص بصرياً عند 48px و192px: النص «حكاية تميّز» داخل الشعار يصبح غير مقروء عند 48px — هذا مقبول للأيقونة (الاسم مكتوب بجانبها في BrandMark). تحقّق كمياً: تباين الحواف 94.65 عند 48px مقابل 38.16 عند 192px، أي أن الحروف تتداخل عند الحجم الصغير.
+- [x] `// shortcut: logo assets upscaled from a 770px JPEG, replace with vector when the owner has one` في رأس السكربت (كتعليق Python يبدأ بـ`# //` لتفادي خطأ الصياغة).
+- [x] Commit `docs(brand): logo PNG assets derived from owner JPEG`
 
 W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` لصفحة الدخول، وتولّد favicon 64px منه. M3 تستخدم `logo-512.png` (→ `res/drawable-nodpi/brand_logo.png`) و`logo-mark-512.png` كـ foreground للأيقونة.
 
