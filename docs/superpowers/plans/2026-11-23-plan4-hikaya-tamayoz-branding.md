@@ -269,8 +269,8 @@ W3 تستخدم `logo-512.png` (→ `public/brand/logo.png`) و`logo-1024.png` �
 ### M0 — الخط
 
 **Files:** Create `DXNTrainingApp/app/src/main/res/font/ibm_plex_sans_arabic_regular.ttf`, `_medium.ttf`, `_semibold.ttf`, `_bold.ttf` (أسماء lowercase بـ underscore فقط)، `res/font/ibm_plex_sans_arabic.xml` (font-family)، `app/src/main/assets/licenses/OFL-IBM-Plex.txt`. Modify `ui/theme/Type.kt`.
-- [ ] `Type.kt`: `val PlexArabic = FontFamily(Font(R.font.ibm_plex_sans_arabic_regular, FontWeight.Normal), Font(…_medium, FontWeight.Medium), Font(…_semibold, FontWeight.SemiBold), Font(…_bold, FontWeight.Bold))`؛ استبدل كل `FontFamily.Default` (7 مواضع) بـ `PlexArabic`.
-- [ ] `assembleDebug` نجاح. Commit `feat(android): IBM Plex Sans Arabic typography`
+- [x] `Type.kt`: `val PlexArabic = FontFamily(Font(R.font.ibm_plex_sans_arabic_regular, FontWeight.Normal), Font(…_medium, FontWeight.Medium), Font(…_semibold, FontWeight.SemiBold), Font(…_bold, FontWeight.Bold))`؛ استُبدلت كل `FontFamily.Default` (7 مواضع) بـ `PlexArabic`. أُضيف `res/font/ibm_plex_sans_arabic.xml` وترخيص `assets/licenses/OFL-IBM-Plex.txt`.
+- [x] `assembleDebug` نجاح. Commit `feat(android): IBM Plex Sans Arabic typography`
 
 ### M1 — tokens والثيم
 
