@@ -74,7 +74,8 @@ class AuthViewModel(
         contact: String,
         password: String,
         dxnId: String,
-        leaderDxnId: String
+        leaderDxnId: String,
+        gender: String
     ) {
         viewModelScope.launch {
             _state.value = AuthUiState.Loading
@@ -88,6 +89,7 @@ class AuthViewModel(
                         phone = if (isEmail) null else value,
                         password = password,
                         dxnId = dxnId.trim(),
+                        gender = gender,
                         leaderDxnId = leaderDxnId.trim().takeIf { it.isNotEmpty() }
                     )
                 )

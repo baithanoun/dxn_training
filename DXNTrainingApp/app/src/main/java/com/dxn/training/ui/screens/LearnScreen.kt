@@ -18,6 +18,7 @@ import com.dxn.training.data.model.UserProgress
 import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.HomeViewModel
 
 @Composable
@@ -84,7 +85,7 @@ private fun CurrentLevelCard(
 ) {
     DxCard {
         Text(
-            text = "استمر من حيث توقفت",
+            text = g("استمر من حيث توقفتَ", "استمري من حيث توقفتِ"),
             style = MaterialTheme.typography.bodyLarge,
             color = TextMuted
         )
@@ -102,7 +103,7 @@ private fun CurrentLevelCard(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = BrandPlum)
         ) {
-            Text("تابع", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+            Text(g("تابع", "تابعي"), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
         }
     }
 }
@@ -147,7 +148,7 @@ private fun LevelRow(
                     modifier = Modifier.defaultMinSize(minWidth = 88.dp, minHeight = 48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BrandPlum)
                 ) {
-                    Text("ابدأ", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    Text(g("ابدأ", "ابدئي"), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                 }
                 LevelStatus.LOCKED -> Text("L", color = Locked)
             }

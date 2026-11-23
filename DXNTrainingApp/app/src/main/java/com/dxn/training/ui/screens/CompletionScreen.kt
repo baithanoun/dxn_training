@@ -19,6 +19,7 @@ import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxOutlinedButton
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.CompletionViewModel
 
 @Composable
@@ -69,7 +70,7 @@ fun CompletionScreen(
                         ResultBadge(response.passed)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (response.passed) "ممتاز!" else "حاول مرة أخرى",
+                            text = if (response.passed) g("أحسنتَ!", "أحسنتِ!") else g("حاول مرة أخرى", "حاولي مرة أخرى"),
                             style = MaterialTheme.typography.headlineMedium,
                             color = BrandPlum700
                         )
@@ -81,7 +82,7 @@ fun CompletionScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = if (response.passed) "تم حفظ النتيجة" else "حاول مرة أخرى لتحسين النتيجة",
+                            text = if (response.passed) "تم حفظ النتيجة" else g("حاول مرة أخرى لتحسين النتيجة", "حاولي مرة أخرى لتحسين النتيجة"),
                             style = MaterialTheme.typography.bodyMedium,
                             color = if (response.passed) TextMuted else Error
                         )
@@ -103,7 +104,7 @@ fun CompletionScreen(
                                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                                     )
                                     Text(
-                                        text = "تم منحك الشهادة بنجاح",
+                                        text = g("تم منحكَ الشهادة بنجاح", "تم منحكِ الشهادة بنجاح"),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TextMuted
                                     )
@@ -132,7 +133,7 @@ fun CompletionScreen(
                         ResultBadge(false)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "لم تُحفظ النتيجة — تحقق من الاتصال",
+                            text = g("لم تُحفظ النتيجة — تحقق من الاتصال", "لم تُحفظ النتيجة — تحققي من الاتصال"),
                             style = MaterialTheme.typography.headlineMedium,
                             color = Error
                         )
@@ -152,13 +153,13 @@ fun CompletionScreen(
         when (result) {
             is CompletionResult.Ok -> {
                 DxButton(
-                    text = if (result.response.passed) "المستوى التالي" else "إعادة المحاولة",
+                    text = if (result.response.passed) "المستوى التالي" else g("أعد المحاولة", "أعيدي المحاولة"),
                     onClick = onNextLevel,
                     enabled = result.response.passed
                 )
             }
             is CompletionResult.Offline, is CompletionResult.Failed -> {
-                DxButton(text = "إعادة المحاولة", onClick = { completionViewModel.retry() })
+                DxButton(text = g("أعد المحاولة", "أعيدي المحاولة"), onClick = { completionViewModel.retry() })
             }
             is CompletionResult.Locked -> {
                 DxButton(text = "العودة", onClick = onReview)

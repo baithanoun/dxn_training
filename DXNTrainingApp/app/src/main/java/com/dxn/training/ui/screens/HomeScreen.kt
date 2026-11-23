@@ -29,6 +29,7 @@ import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.HomeViewModel
 
 @Composable
@@ -108,15 +109,19 @@ fun HomeScreen(
         }
 
         uiState.sections.forEachIndexed { index, section ->
+            val requiredTitle = uiState.sections
+                .find { it.id == section.requiredSectionId }?.title ?: "القسم السابق"
+            val lockedSectionText = g(
+                "يجب أن تُكمل $requiredTitle وتحصل على شهادته لفتح هذا القسم",
+                "يجب أن تُكملي $requiredTitle وتحصلي على شهادته لفتح هذا القسم"
+            )
             SectionCard(
                 section = section,
                 index = index,
                 sectionProgress = uiState.sectionProgress[section.id],
                 onContinue = { shouldOpen ->
                     if (!shouldOpen) {
-                        val required = section.requiredSectionId
-                        val requiredTitle = uiState.sections.find { it.id == required }?.title ?: "القسم السابق"
-                        lockedSectionMessage = "يجب إكمال $requiredTitle والحصول على شهادته لفتح هذا القسم"
+                        lockedSectionMessage = lockedSectionText
                         return@SectionCard
                     }
 

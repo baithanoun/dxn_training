@@ -2,12 +2,17 @@ package com.dxn.training.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -29,6 +34,7 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var dxnId by remember { mutableStateOf("") }
     var leaderDxnId by remember { mutableStateOf("") }
+    var gender by remember { mutableStateOf<String?>(null) }
     val state by authViewModel.state.collectAsState()
 
     LaunchedEffect(state) {
@@ -39,6 +45,7 @@ fun RegisterScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Surface)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -75,6 +82,30 @@ fun RegisterScreen(
             onValueChange = { leaderDxnId = it },
             label = "رقم عضوية القائد (اختياري)"
         )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "الجنس *",
+            style = MaterialTheme.typography.bodyMedium,
+            color = TextMuted,
+            modifier = Modifier.padding(bottom = 6.dp)
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            GenderChoice(
+                label = "ذكر",
+                selected = gender == "male",
+                onClick = { gender = "male" },
+                modifier = Modifier.weight(1f)
+            )
+            GenderChoice(
+                label = "أنثى",
+                selected = gender == "female",
+                onClick = { gender = "female" },
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         (state as? AuthUiState.Error)?.let { error ->
             Spacer(modifier = Modifier.height(12.dp))
@@ -90,9 +121,10 @@ fun RegisterScreen(
         DxButton(
             text = if (state is AuthUiState.Loading) "جاري إنشاء الحساب..." else "إنشاء الحساب",
             onClick = {
-                authViewModel.register(name, contact, password, dxnId, leaderDxnId)
+                val selectedGender = gender ?: return@DxButton
+                authViewModel.register(name, contact, password, dxnId, leaderDxnId, selectedGender)
             },
-            enabled = state !is AuthUiState.Loading
+            enabled = gender != null && state !is AuthUiState.Loading
         )
         Spacer(modifier = Modifier.height(12.dp))
         TextButton(onClick = onBack) {
@@ -134,5 +166,34 @@ private fun AuthField(
             visualTransformation = visualTransformation,
             singleLine = true
         )
+    }
+}
+
+@Composable
+private fun GenderChoice(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .heightIn(min = 52.dp)
+            .selectable(selected = selected, onClick = onClick)
+            .semantics { contentDescription = label },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (selected) BrandPlum100 else BrandIvory,
+            contentColor = if (selected) BrandPlum700 else TextMuted
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+        }
     }
 }

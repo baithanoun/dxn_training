@@ -19,6 +19,7 @@ import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.TeamViewModel
 
 @Composable
@@ -105,7 +106,7 @@ fun TeamScreen(viewModel: TeamViewModel) {
 
         Spacer(modifier = Modifier.height(12.dp))
         DxButton(
-            text = "إرسال تشجيع",
+            text = g("شجّع فريقك", "شجّعي فريقك"),
             onClick = { },
             containerColor = Xp,
             modifier = Modifier.padding(horizontal = 16.dp)

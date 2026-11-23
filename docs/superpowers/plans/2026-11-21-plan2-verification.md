@@ -91,3 +91,30 @@
 - بناء صورة Docker **`NOT RUN`** (Docker غير مثبّت على هذه البيئة كما سُجّل في `deploy/README.md`).
 - فحوص المتصفح والمحاكي اليدوية للواجهات: **PASS** — الخطوات 1–9 في القسم 3 وخطوات Arabic round-trip في القسم 2 نُفّذت فعلياً؛ لم تعد `NOT RUN`.
 - إصلاح بيانات الـ seed: الالتزام `e595a30` على الفرع `feat/plan1-api-content`؛ لم يُدفع أو يُدمج.
+
+## 5. سجل تحقق Plan 4 — هوية «حكاية تميّز»
+
+> تاريخ التنفيذ: 2026-11-23 · الفرع: `feat/plan1-api-content`. الأقسام 1–3 أعلاه سُجّلت **قبل** تغييرات Plan 4؛ نتائجها اليدوية لا تُحتسب كتحقق من الهوية الجديدة. كل فحص أدناه نُفّذ فعلياً أو وُسم **`NOT RUN`** صراحةً.
+
+### 5.1 الفحوص الحتمية (نُفّذت بعد اكتمال Plan 4)
+
+| # | الأمر / الفحص | النتيجة | الدليل |
+|---|---|---|---|
+| 1 | `cd dxn-api && php artisan test` | **PASS** | `129 tests, 620 assertions`، exit code `0`. شمل اختبارات `/api/app/config` وجنس المستخدم. |
+| 2 | `cd dxn-admin-web && npm run build` | **PASS** | `tsc -b && vite build` نجح (`✓ built in 1.23s`). تحذير حجم الحزمة `806.57 kB` (> 500 kB) فقط. |
+| 3 | `cd dxn-admin-web && npm run lint` | **PASS** | `oxlint`، exit code `0`؛ تحذيرات `react/set-state-in-effect` سابقة في `Settings/Analytics/Users/Content`، بلا أخطاء. |
+| 4 | `cd DXNTrainingApp && $env:JAVA_HOME="D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7"; .\gradlew.bat :app:assembleDebug --no-daemon` | **PASS** | `BUILD SUCCESSFUL` بعد G1 وبعد G2، exit code `0`. |
+| 5 | `git diff --check` | **PASS** | بلا أخطاء (تحذيرات CRLF فقط). |
+| 6 | grep `duolingo` في `DXNTrainingApp/app/src`, `dxn-admin-web/src`, `dxn-api/app`, `dxn-api/database` | **PASS** | لا نتائج. |
+| 7 | grep `DXN Training` في `DXNTrainingApp/app/src`, `dxn-admin-web/src`, `dxn-admin-web/index.html`, `dxn-api/app` | **PASS** | لا نتائج. |
+| 8 | grep `Color(0x` في `DXNTrainingApp/app/src` | **PASS** | النتائج كلها في `ui/theme/Color.kt` فقط. |
+| 9 | grep hex في `dxn-admin-web/src` | **PASS** | النتائج كلها في `lib/chartColors.ts` فقط. |
+| 10 | فحص خانات Plan 4 | **PASS** | لا توجد خانات `- [ ]` متبقية في `docs/superpowers/plans/2026-11-23-plan4-hikaya-tamayoz-branding.md`. |
+
+### 5.2 فحوص يدوية / بيئية — **NOT RUN**
+
+- المعاينة البصرية للوحة الإدارة بالهوية الجديدة، وحفظ/إعادة تحميل نبذة الفريق، وعرض 200%، وفحص DevTools لخط IBM Plex Sans Arabic وشبكة التحميل (W0): **NOT RUN**.
+- رحلة المحاكي بعد الهوية: تسجيل متدربة ← «أحسنتِ»، متدرب ← «أحسنتَ»، حساب قديم بلا جنس ← صيغة مذكّرة بلا انهيار، وكذلك تدفق الـ offline cached-config: **NOT RUN** (لا محاكي في بيئة التنفيذ هذه).
+- Arabic round-trip على MySQL بعد تغييرات الهوية: **PASS سابقاً** في القسم 2 قبل Plan 4؛ **NOT RUN** بعد Plan 4. أي تحقق جديد مسؤولية المالك.
+- نقطة توقف الموافقة على الألوان/الـ wordmark في P0: تجاوزها المالك صراحةً باختيار «أكمل تلقائياً»؛ لم يُجرَ عرض موافقة منفصل.
+- الالتزامات Plan 4 كلها محلية على الفرع `feat/plan1-api-content`؛ **لم يُدفع أو يُدمج** أي منها.

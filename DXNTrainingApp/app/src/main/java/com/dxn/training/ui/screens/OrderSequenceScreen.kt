@@ -14,6 +14,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun OrderSequenceScreen(
@@ -131,7 +132,7 @@ fun OrderSequenceScreen(
 
         DxButton(
             text = if (checked && roundIndex < rounds.lastIndex) "التالي"
-                   else if (checked) "متابعة" else "تحقق",
+                   else if (checked) "متابعة" else g("تحقق", "تحققي"),
             onClick = {
                 if (checked) {
                     answers.add(AnswerDto(round.id, orderedOptionIds = ordered.map { it.id }))

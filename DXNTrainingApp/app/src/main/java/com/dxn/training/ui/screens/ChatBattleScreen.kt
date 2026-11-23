@@ -19,6 +19,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun ChatBattleScreen(
@@ -97,7 +98,7 @@ fun ChatBattleScreen(
         // Options
         if (!answered) {
             Text(
-                text = "اختر ردك التالي:",
+                text = g("اختر ردك التالي:", "اختاري ردكِ التالي:"),
                 style = MaterialTheme.typography.bodyLarge,
                 color = BrandPlum700,
                 modifier = Modifier.padding(horizontal = 16.dp)

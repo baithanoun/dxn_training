@@ -12,6 +12,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun LessonScreen(
@@ -114,7 +115,7 @@ fun LessonScreen(
             } else if (level.type == "lesson") {
                 "إنهاء الدرس"
             } else {
-                "ابدأ الاختبار"
+                g("ابدأ الاختبار", "ابدئي الاختبار")
             },
             onClick = {
                 if (currentIndex < cards.size - 1) {

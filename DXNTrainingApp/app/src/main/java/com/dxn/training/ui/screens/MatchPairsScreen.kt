@@ -17,6 +17,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun MatchPairsScreen(
@@ -112,7 +113,7 @@ fun MatchPairsScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
-            text = if (answered && roundIndex < rounds.lastIndex) "التالي" else if (answered) "متابعة" else "تحقق",
+            text = if (answered && roundIndex < rounds.lastIndex) "التالي" else if (answered) "متابعة" else g("تحقق", "تحققي"),
             onClick = {
                 if (answered) {
                     val chosen = selected ?: return@DxButton

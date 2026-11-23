@@ -42,6 +42,7 @@ data class RegisterRequest(
     val phone: String? = null,
     val password: String,
     val dxnId: String,
+    val gender: String,
     val leaderDxnId: String? = null
 )
 

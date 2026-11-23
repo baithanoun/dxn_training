@@ -17,6 +17,7 @@ import com.dxn.training.ui.components.BrandMark
 import com.dxn.training.ui.components.BrandMarkSize
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.AuthUiState
 import com.dxn.training.ui.viewmodel.AuthViewModel
 
@@ -87,13 +88,13 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(24.dp))
         TextButton(onClick = onRegister) {
             Text(
-                text = "ليس لديك حساب؟ سجّل",
+                text = g("ليس لديك حساب؟ سجّل", "ليس لديكِ حساب؟ سجّلي"),
                 color = BrandPlum,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
         Text(
-            text = "أو سجل عبر Google / Apple",
+            text = g("أو سجّل عبر Google / Apple", "أو سجّلي عبر Google / Apple"),
             color = TextMuted,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
