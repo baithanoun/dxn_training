@@ -199,6 +199,83 @@ export default function ScenarioBuilder() {
   const [passThreshold, setPassThreshold] = useState(80)
   const [showValidation, setShowValidation] = useState(false)
 
+  // Undo/redo history for the rounds canvas. Snapshots are immutable copies of `rounds`.
+  const historyRef = useRef<{ past: Round[][]; future: Round[][] }>({ past: [], future: [] })
+  const [historyCounts, setHistoryCounts] = useState({ past: 0, future: 0 })
+  const lastEditRef = useRef<{ key: string; at: number }>({ key: "", at: 0 })
+
+  const syncHistoryCounts = useCallback(() => {
+    setHistoryCounts({ past: historyRef.current.past.length, future: historyRef.current.future.length })
+  }, [])
+
+  const resetHistory = useCallback(() => {
+    historyRef.current = { past: [], future: [] }
+    lastEditRef.current = { key: "", at: 0 }
+    syncHistoryCounts()
+  }, [syncHistoryCounts])
+
+  /**
+   * Replaces the rounds and records the previous value for undo. Consecutive edits
+   * that share an `editKey` within a second collapse into one history entry so that
+   * typing a title is undone in a single step.
+   */
+  const commitRounds = useCallback(
+    (updater: (prev: Round[]) => Round[], editKey?: string) => {
+      const next = updater(rounds)
+      if (next === rounds) return
+      const now = Date.now()
+      const coalesce =
+        editKey !== undefined && lastEditRef.current.key === editKey && now - lastEditRef.current.at < 1000
+      if (!coalesce) {
+        historyRef.current.past = [...historyRef.current.past.slice(-49), rounds]
+      }
+      historyRef.current.future = []
+      lastEditRef.current = { key: editKey ?? "", at: now }
+      setRounds(next)
+      syncHistoryCounts()
+    },
+    [rounds, syncHistoryCounts]
+  )
+
+  const undo = useCallback(() => {
+    const { past, future } = historyRef.current
+    const previous = past[past.length - 1]
+    if (!previous) return
+    historyRef.current = { past: past.slice(0, -1), future: [rounds, ...future].slice(0, 50) }
+    lastEditRef.current = { key: "", at: 0 }
+    setRounds(previous)
+    syncHistoryCounts()
+  }, [rounds, syncHistoryCounts])
+
+  const redo = useCallback(() => {
+    const { past, future } = historyRef.current
+    const next = future[0]
+    if (!next) return
+    historyRef.current = { past: [...past, rounds].slice(-50), future: future.slice(1) }
+    lastEditRef.current = { key: "", at: 0 }
+    setRounds(next)
+    syncHistoryCounts()
+  }, [rounds, syncHistoryCounts])
+
+  // Keyboard shortcuts for undo/redo (ignored while typing in inputs).
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!(event.ctrlKey || event.metaKey)) return
+      const target = event.target as HTMLElement | null
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
+      const key = event.key.toLowerCase()
+      if (key === "z" && !event.shiftKey) {
+        event.preventDefault()
+        undo()
+      } else if ((key === "z" && event.shiftKey) || key === "y") {
+        event.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [undo, redo])
+
   useEffect(() => {
     let active = true
     void (async () => {
@@ -230,7 +307,8 @@ export default function ScenarioBuilder() {
     setShowValidation(false)
     setInvalidFile(false)
     setLoadErr(null)
-  }, [setLevel, setScenarioName, setStatus, setPassThreshold, setRounds, setSelectedRound, setExpanded, setPreviewRound, setPreviewTrust, setPreviewHearts, setApiErrors, setShowValidation, setInvalidFile, setLoadErr])
+    resetHistory()
+  }, [setLevel, setScenarioName, setStatus, setPassThreshold, setRounds, setSelectedRound, setExpanded, setPreviewRound, setPreviewTrust, setPreviewHearts, setApiErrors, setShowValidation, setInvalidFile, setLoadErr, resetHistory])
 
   useEffect(() => {
     if (!levelId) return
@@ -294,27 +372,49 @@ export default function ScenarioBuilder() {
       initialTrust: 50,
       options: [{ id: `o${Date.now()}`, text: "", type: "correct", trust: 0, feedback: "" }],
     }
-    setRounds([...rounds, newRound])
+    commitRounds((prev) => [...prev, newRound])
     setExpanded((prev) => ({ ...prev, [newRound.id]: true }))
     setSelectedRound(newRound.id)
   }
 
+  /** Duplicates the selected round (or the last one) right below its source. */
+  const duplicateRound = () => {
+    const source = rounds.find((r) => r.id === selectedRound) ?? rounds[rounds.length - 1]
+    if (!source) return
+    const stamp = Date.now()
+    const copy: Round = {
+      ...source,
+      id: `r${stamp}`,
+      title: source.title ? `${source.title} (نسخة)` : "نسخة",
+      options: source.options.map((option, index) => ({ ...option, id: `o${stamp}_${index}` })),
+    }
+    const sourceIndex = rounds.findIndex((r) => r.id === source.id)
+    commitRounds((prev) => [...prev.slice(0, sourceIndex + 1), copy, ...prev.slice(sourceIndex + 1)])
+    setExpanded((prev) => ({ ...prev, [copy.id]: true }))
+    setSelectedRound(copy.id)
+  }
+
   const updateRound = (id: string, updates: Partial<Round>) => {
-    setRounds((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)))
+    commitRounds(
+      (prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)),
+      `round:${id}:${Object.keys(updates).sort().join(",")}`
+    )
   }
 
   const updateOption = (roundId: string, optionId: string, updates: Partial<Option>) => {
-    setRounds((prev) =>
-      prev.map((r) =>
-        r.id === roundId
-          ? { ...r, options: r.options.map((o) => (o.id === optionId ? { ...o, ...updates } : o)) }
-          : r
-      )
+    commitRounds(
+      (prev) =>
+        prev.map((r) =>
+          r.id === roundId
+            ? { ...r, options: r.options.map((o) => (o.id === optionId ? { ...o, ...updates } : o)) }
+            : r
+        ),
+      `option:${roundId}:${optionId}:${Object.keys(updates).sort().join(",")}`
     )
   }
 
   const addOption = (roundId: string) => {
-    setRounds((prev) =>
+    commitRounds((prev) =>
       prev.map((r) =>
         r.id === roundId
           ? {
@@ -331,7 +431,7 @@ export default function ScenarioBuilder() {
 
   const deleteOption = (roundId: string, optionId: string) => {
     if (!window.confirm("هل أنت متأكد من حذف هذا الخيار؟")) return
-    setRounds((prev) =>
+    commitRounds((prev) =>
       prev.map((r) => (r.id === roundId ? { ...r, options: r.options.filter((o) => o.id !== optionId) } : r))
     )
   }
@@ -406,7 +506,7 @@ export default function ScenarioBuilder() {
         setInvalidFile(true)
         return
       }
-      setRounds(imported)
+      commitRounds(() => imported)
       const firstId = imported[0]?.id ?? null
       setSelectedRound(firstId)
       setExpanded(Object.fromEntries(imported.map((r) => [r.id, true])))
@@ -506,11 +606,10 @@ export default function ScenarioBuilder() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* shortcut: undo/redo/copy buttons remain placeholders as before this task; upgrade with an editor history. */}
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" title="تراجع (Ctrl+Z)" aria-label="تراجع" disabled={historyCounts.past === 0} onClick={undo}>
             <Undo2 size={18} />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" title="إعادة (Ctrl+Shift+Z)" aria-label="إعادة" disabled={historyCounts.future === 0} onClick={redo}>
             <Redo2 size={18} />
           </Button>
           <div className="w-px h-6 bg-gray-200 mx-1" />
@@ -537,7 +636,7 @@ export default function ScenarioBuilder() {
             <Download size={16} />
             تصدير
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" disabled={rounds.length === 0} onClick={duplicateRound}>
             <Copy size={16} />
             نسخ
           </Button>
