@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Level;
 use App\Models\User;
+use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +53,65 @@ class MediaTest extends TestCase
             ->postJson('/api/admin/media', ['file' => UploadedFile::fake()->image('a.jpg')->size(6000)])
             ->assertStatus(422)
             ->assertJsonValidationErrors('file');
+    }
+
+    public function test_replacing_cards_deletes_unreferenced_media_file(): void
+    {
+        Storage::fake('public');
+        $this->seed(ContentSeeder::class);
+        $admin = $this->admin();
+        $level = Level::firstOrFail();
+
+        Storage::disk('public')->put('media/old.jpg', 'x');
+        $url = Storage::disk('public')->url('media/old.jpg');
+        $level->cards()->create(['title' => 'Old', 'body' => 'body', 'media_url' => $url, 'order_index' => 1]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/levels/{$level->id}/cards", [
+                'cards' => [['title' => 'New', 'body' => 'new body']],
+            ])->assertOk();
+
+        Storage::disk('public')->assertMissing('media/old.jpg');
+    }
+
+    public function test_kept_card_media_is_not_deleted(): void
+    {
+        Storage::fake('public');
+        $this->seed(ContentSeeder::class);
+        $admin = $this->admin();
+        $level = Level::firstOrFail();
+
+        Storage::disk('public')->put('media/keep.jpg', 'x');
+        $url = Storage::disk('public')->url('media/keep.jpg');
+        $level->cards()->create(['title' => 'Keep', 'body' => 'body', 'media_url' => $url, 'order_index' => 1]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/levels/{$level->id}/cards", [
+                'cards' => [['title' => 'Keep', 'body' => 'body', 'mediaUrl' => $url]],
+            ])->assertOk();
+
+        Storage::disk('public')->assertExists('media/keep.jpg');
+    }
+
+    public function test_media_shared_with_another_card_is_not_deleted(): void
+    {
+        Storage::fake('public');
+        $this->seed(ContentSeeder::class);
+        $admin = $this->admin();
+        $level = Level::firstOrFail();
+        $otherLevel = Level::where('id', '!=', $level->id)->firstOrFail();
+
+        Storage::disk('public')->put('media/shared.jpg', 'x');
+        $url = Storage::disk('public')->url('media/shared.jpg');
+        $level->cards()->create(['title' => 'First', 'body' => 'body', 'media_url' => $url, 'order_index' => 1]);
+        $otherLevel->cards()->create(['title' => 'Second', 'body' => 'body', 'media_url' => $url, 'order_index' => 1]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/levels/{$level->id}/cards", [
+                'cards' => [['title' => 'Replaced', 'body' => 'body']],
+            ])->assertOk();
+
+        Storage::disk('public')->assertExists('media/shared.jpg');
     }
 
     public function test_requires_admin(): void

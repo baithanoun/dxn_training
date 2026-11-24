@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\LevelDetailResource;
 use App\Http\Resources\Admin\LevelResource;
 use App\Models\Level;
 use App\Models\Skill;
+use App\Services\MediaService;
 use Illuminate\Support\Facades\DB;
 
 class LevelController extends Controller
@@ -49,9 +50,11 @@ class LevelController extends Controller
         return response()->noContent();
     }
 
-    public function saveCards(CardsRequest $request, string $id)
+    public function saveCards(CardsRequest $request, string $id, MediaService $media)
     {
         $l = Level::findOrFail($id);
+        $previousUrls = $l->cards()->pluck('media_url')->filter()->all();
+
         DB::transaction(function () use ($l, $request) {
             $l->cards()->delete();
             foreach ($request->validated('cards') as $i => $c) {
@@ -64,6 +67,10 @@ class LevelController extends Controller
                 ]);
             }
         });
+
+        foreach ($previousUrls as $url) {
+            $media->deleteIfUnreferenced($url);
+        }
 
         return $this->detail($l);
     }
