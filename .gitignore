@@ -22,6 +22,8 @@ __pycache__/
 !deploy/.env.production.example
 !dxn-admin-web/.env.production
 local.properties
+keystore.properties
+!keystore.properties.example
 *.keystore
 *.jks
 .superpowers/

@@ -1,7 +1,28 @@
+import java.io.FileInputStream
+import java.util.Properties
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Release signing is read from DXNTrainingApp/keystore.properties (gitignored).
+// The owner creates the keystore; never commit it or its passwords.
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+}
+
+// Set the real HTTPS origin via DXN_RELEASE_BASE_URL (env) or -PDXN_RELEASE_BASE_URL=...
+// or a `dxn.releaseBaseUrl` entry in local.properties. The placeholder is rejected for release builds.
+val releaseBaseUrl = (
+    System.getenv("DXN_RELEASE_BASE_URL")
+        ?: (project.findProperty("DXN_RELEASE_BASE_URL") as String?)
+        ?: "https://<domain>/"
+    ).trim().let { if (it.endsWith("/")) it else "$it/" }
 
 android {
     namespace = "com.dxn.training"
@@ -21,15 +42,33 @@ android {
 
     }
 
+    signingConfigs {
+        if (hasKeystore) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             // debug: emulator (10.0.2.2 = host machine)
             buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
         }
         release {
-            // shortcut: release URL is a placeholder, owner must replace <domain> with the real HTTPS domain before publishing
-            buildConfigField("String", "BASE_URL", "\"https://<domain>/\"")
-            isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"$releaseBaseUrl\"")
+            // Falls back to debug signing only so CI/local release builds work before the
+            // owner supplies a keystore. Never publish an APK signed with the debug key.
+            signingConfig = if (hasKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -89,4 +128,14 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// Fail fast on release builds that still use the placeholder origin.
+gradle.taskGraph.whenReady {
+    val isRelease = allTasks.any { it.name.contains("Release", ignoreCase = true) }
+    if (isRelease && releaseBaseUrl.contains("<domain>")) {
+        throw GradleException(
+            "DXN_RELEASE_BASE_URL is still the placeholder. Set it to the real https://... origin before building a release."
+        )
+    }
 }

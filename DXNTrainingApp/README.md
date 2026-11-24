@@ -23,9 +23,23 @@
 | النمط | القيمة | ملاحظات |
 |---|---|---|
 | `debug` | `"http://10.0.2.2:8000/"` | `10.0.2.2` هو عنوان الجهاز المضيف من محاكي Android. |
-| `release` | `"https://<domain>/"` | **عنصر نائب**؛ يجب على المالك استبدال `<domain>` بنطاق HTTPS الحقيقي قبل النشر (`shortcut: release URL placeholder, set in F1`). |
+| `release` | `DXN_RELEASE_BASE_URL` أو `https://<domain>/` | يُقرأ من متغير البيئة `DXN_RELEASE_BASE_URL` أو `-PDXN_RELEASE_BASE_URL=...`. طالما بقي `<domain>` سيفشل بناء release عمداً. |
 
 الاتصال بنصّ (cleartext) مسموح **في debug فقط** عبر `app/src/debug/AndroidManifest.xml`؛ لا يُسمح به في إصدار الإنتاج.
+
+## توقيع إصدار النشر
+
+1. أنشئ keystore مرة واحدة (لا تُلتزم في Git):
+   ```powershell
+   keytool -genkeypair -v -keystore dxn-release.jks -alias dxn -keyalg RSA -keysize 2048 -validity 10000
+   ```
+2. انسخ `keystore.properties.example` إلى `DXNTrainingApp/keystore.properties` واملأ القيم. الملف مستبعد من Git.
+3. ابنِ الإصدار:
+   ```powershell
+   $env:DXN_RELEASE_BASE_URL = "https://your-real-domain.example/"
+   .\gradlew.bat :app:bundleRelease
+   ```
+   R8/ProGuard مفعّل، وقواعد `app/proguard-rules.pro` تحافظ على نماذج Gson/Retrofit. إن لم يوجد `keystore.properties` يُوقَّع الإصدار بمفتاح debug مؤقتاً — **لا تنشر APK موقّعاً بمفتاح debug**.
 
 ## البناء من سطر الأوامر
 
