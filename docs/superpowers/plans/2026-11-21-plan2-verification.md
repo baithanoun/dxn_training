@@ -101,9 +101,9 @@
 | # | الأمر / الفحص | النتيجة | الدليل |
 |---|---|---|---|
 | 1 | `cd dxn-api && php artisan test` | **PASS** | `129 tests, 620 assertions`، exit code `0`. شمل اختبارات `/api/app/config` وجنس المستخدم. |
-| 2 | `cd dxn-admin-web && npm run build` | **PASS** | `tsc -b && vite build` نجح (`✓ built in 1.23s`). تحذير حجم الحزمة `806.57 kB` (> 500 kB) فقط. |
-| 3 | `cd dxn-admin-web && npm run lint` | **PASS** | `oxlint`، exit code `0`؛ تحذيرات `react/set-state-in-effect` سابقة في `Settings/Analytics/Users/Content`، بلا أخطاء. |
-| 4 | `cd DXNTrainingApp && $env:JAVA_HOME="D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7"; .\gradlew.bat :app:assembleDebug --no-daemon` | **PASS** | `BUILD SUCCESSFUL` بعد G1 وبعد G2، exit code `0`. |
+| 2 | `cd dxn-admin-web && npm run build` | **PASS** | `tsc -b && vite build` نجح (`✓ built in 1.23s`)؛ أُعيد بعد تغيير BrandMark فنجح (`✓ built in 1.44s`). تحذير حجم الحزمة (> 500 kB) فقط. |
+| 3 | `cd dxn-admin-web && npm run lint` | **PASS** | `oxlint`، exit code `0`؛ تحذيرات `react/set-state-in-effect` سابقة في `Settings/Analytics/Users/Content`، بلا أخطاء (أُعيد بعد BrandMark). |
+| 4 | `cd DXNTrainingApp && $env:JAVA_HOME="D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7"; .\gradlew.bat :app:assembleDebug --no-daemon` | **PASS** | `BUILD SUCCESSFUL` بعد G1 وبعد G2، exit code `0`؛ أُعيد تشغيله أيضاً بعد تغيير BrandMark فنجح. |
 | 5 | `git diff --check` | **PASS** | بلا أخطاء (تحذيرات CRLF فقط). |
 | 6 | grep `duolingo` في `DXNTrainingApp/app/src`, `dxn-admin-web/src`, `dxn-api/app`, `dxn-api/database` | **PASS** | لا نتائج. |
 | 7 | grep `DXN Training` في `DXNTrainingApp/app/src`, `dxn-admin-web/src`, `dxn-admin-web/index.html`, `dxn-api/app` | **PASS** | لا نتائج. |
@@ -111,10 +111,18 @@
 | 9 | grep hex في `dxn-admin-web/src` | **PASS** | النتائج كلها في `lib/chartColors.ts` فقط. |
 | 10 | فحص خانات Plan 4 | **PASS** | لا توجد خانات `- [ ]` متبقية في `docs/superpowers/plans/2026-11-23-plan4-hikaya-tamayoz-branding.md`. |
 
-### 5.2 فحوص يدوية / بيئية — **NOT RUN**
+### 5.2 فحوص يدوية / بيئية — **PASS** (باستثناء Arabic round-trip بعد Plan 4)
 
-- المعاينة البصرية للوحة الإدارة بالهوية الجديدة، وحفظ/إعادة تحميل نبذة الفريق، وعرض 200%، وفحص DevTools لخط IBM Plex Sans Arabic وشبكة التحميل (W0): **NOT RUN**.
-- رحلة المحاكي بعد الهوية: تسجيل متدربة ← «أحسنتِ»، متدرب ← «أحسنتَ»، حساب قديم بلا جنس ← صيغة مذكّرة بلا انهيار، وكذلك تدفق الـ offline cached-config: **NOT RUN** (لا محاكي في بيئة التنفيذ هذه).
-- Arabic round-trip على MySQL بعد تغييرات الهوية: **PASS سابقاً** في القسم 2 قبل Plan 4؛ **NOT RUN** بعد Plan 4. أي تحقق جديد مسؤولية المالك.
-- نقطة توقف الموافقة على الألوان/الـ wordmark في P0: تجاوزها المالك صراحةً باختيار «أكمل تلقائياً»؛ لم يُجرَ عرض موافقة منفصل.
-- الالتزامات Plan 4 كلها محلية على الفرع `feat/plan1-api-content`؛ **لم يُدفع أو يُدمج** أي منها.
+| الفحص | النتيجة | الدليل |
+|---|---|---|
+| لوحة الإدارة بالهوية الجديدة + BrandMark الكبير | **PASS** | فُتحت `http://localhost:5173/admin/login`؛ الشعار `128×128`، الحاوية `flex-direction: column` و`align-items: center` و`text-align: center`، والترتيب «حكاية تميّز» ثم «DXN». لا overflow أفقي عند عرض 768px. نسخة الشريط الجانبي الصغيرة بقيت كما هي. (فحص 200% zoom المستقل **NOT RUN**؛ فُحص التصميم الضيّق بعرض 768px بدلاً منه.) |
+| خط IBM Plex Sans Arabic وشبكة التحميل (W0) | **PASS** | أربع طلبات `woff2` محلية بحالة `200/304`، ولا اعتماد على Google Fonts أو CDN خارجي. |
+| حفظ/إعادة تحميل نبذة الفريق من اللوحة | **PASS** | أُضيفت علامة اختبار إلى `team_bio` من لوحة الإدارة،ظهرت بعد إعادة التحميل، ثم أُعيدت القيمة الأصلية. النص يُعرض خاماً ولا يُنفَّذ كـ HTML. |
+| BrandMark الكبير في Android | **PASS** | في المحاكي: حدود الشعار `[372,126][708,462]` مركزته عند `x=540`، «حكاية تميّز» عند `y=494`، ثم «DXN» عند `y=573` في شاشتي الدخول و Onboarding. |
+| متدربة (`female2.qa@example.com`) | **PASS** | التسجيل من الواجهة باختيار «أنثى»، إكمال المستوى 1 → «أحسنتِ!» و`+60 XP`؛ وظهرت صيغ «تحققي» و«ابدئي الاختبار». |
+| متدرب (`male.qa@example.com`) | **PASS** | تسجيل الدخول وإكمال المستوى 1 → «أحسنتَ!» و`+60 XP`. |
+| حساب قديم بلا جنس (`legacy.qa@example.com`) | **PASS** | `gender=NULL` في قاعدة البيانات؛ تسجيل الدخول وإكمال المستوى 1 → «أحسنتَ!» و`+60 XP` بلا انهيار. كلمة المرور المؤقتة التي استُخدمت أثناء الفحص أُعيدت إلى قيمتها الأصلية. |
+| تدفق الـ offline cached-config | **PASS** | عُيّنت قيم مميزة لـ `team_name/team_tagline/team_bio` عبر API الإدارة، وظهرت في Onboarding متصلاً؛ ثم عُطّل WiFi/البيانات وأُعيد تشغيل التطبيق، فظهرت القيم نفسها من الكاش المحلي. بعد الفحص أُعيدت الإعدادات الأصلية والشبكة. |
+| Arabic round-trip على MySQL بعد تغييرات الهوية | **NOT RUN** | **PASS سابقاً** في القسم 2 قبل Plan 4؛ لم يُعَد بعد Plan 4. أي تحقق جديد مسؤولية المالك. |
+| نقطة توقف الموافقة على الألوان/الـ wordmark في P0 | — | تجاوزها المالك صراحةً باختيار «أكمل تلقائياً»؛ لم يُجرَ عرض موافقة منفصل. |
+| الالتزامات | — | Plan 4 وBrandMark محلية على الفرع `feat/plan1-api-content`؛ **لم يُدفع أو يُدمج** أي منها. |
