@@ -41,39 +41,54 @@ class ProfileViewModel(
             sessionStore?.session
                 ?.map { it?.userId }
                 ?.distinctUntilChanged()
-                ?.collect { userId ->
-                    if (userId == null) {
-                        _certificates.value = emptyList()
-                        return@collect
+                ?.collect { userId -> loadProfile(userId) }
+        }
+    }
+
+    /**
+     * Reloads the profile and its certificates from the server.
+     *
+     * Called whenever the profile screen resumes so a certificate issued after
+     * finishing a section shows up without restarting the app.
+     */
+    fun refresh() {
+        viewModelScope.launch {
+            val userId = sessionStore?.session?.first()?.userId
+            loadProfile(userId)
+        }
+    }
+
+    private suspend fun loadProfile(userId: String?) {
+        if (userId == null) {
+            _certificates.value = emptyList()
+            return
+        }
+        _isLoading.value = true
+        try {
+            userRepository.loadUserProfile(userId)
+            val response = api.getSectionProgress(userId)
+            if (response.isSuccessful) {
+                val titles = contentRepository.sections.first()
+                    .associate { it.id to it.certificateTitle }
+                _certificates.value = response.body().orEmpty()
+                    .filter { it.value.certificateIssued }
+                    .map { (sectionId, progress) ->
+                        Certificate(
+                            id = progress.certificateId ?: sectionId,
+                            title = titles[sectionId]?.takeIf { it.isNotBlank() }
+                                ?: "شهادة إتمام",
+                            issuedAt = progress.completedAt.orEmpty()
+                        )
                     }
-                    _isLoading.value = true
-                    try {
-                        userRepository.loadUserProfile(userId)
-                        val response = api.getSectionProgress(userId)
-                        if (response.isSuccessful) {
-                            val titles = contentRepository.sections.first()
-                                .associate { it.id to it.certificateTitle }
-                            _certificates.value = response.body().orEmpty()
-                                .filter { it.value.certificateIssued }
-                                .map { (sectionId, progress) ->
-                                    Certificate(
-                                        id = progress.certificateId ?: sectionId,
-                                        title = titles[sectionId]?.takeIf { it.isNotBlank() }
-                                            ?: "شهادة إتمام",
-                                        issuedAt = progress.completedAt.orEmpty()
-                                    )
-                                }
-                        } else {
-                            Log.w(TAG, "getSectionProgress failed with HTTP ${response.code()}")
-                        }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Unable to load profile certificates", e)
-                    } finally {
-                        _isLoading.value = false
-                    }
-                }
+            } else {
+                Log.w(TAG, "getSectionProgress failed with HTTP ${response.code()}")
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to load profile certificates", e)
+        } finally {
+            _isLoading.value = false
         }
     }
 }

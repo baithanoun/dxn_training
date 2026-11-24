@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
 import com.dxn.training.ui.components.DxCard
@@ -32,6 +33,13 @@ fun ProfileScreen(
 ) {
     val user by viewModel.user.collectAsState()
     val certificates by viewModel.certificates.collectAsState()
+
+    // Refresh certificates each time the screen comes back to the foreground
+    // (e.g. after completing a section and receiving a certificate).
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     Column(
         modifier = Modifier
