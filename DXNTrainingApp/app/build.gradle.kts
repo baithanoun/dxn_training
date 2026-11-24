@@ -60,13 +60,8 @@ android {
         }
         release {
             buildConfigField("String", "BASE_URL", "\"$releaseBaseUrl\"")
-            // Falls back to debug signing only so CI/local release builds work before the
-            // owner supplies a keystore. Never publish an APK signed with the debug key.
-            signingConfig = if (hasKeystore) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // Release builds require a real keystore (see README). No debug fallback.
+            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else null
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -132,10 +127,16 @@ dependencies {
 
 // Fail fast on release builds that still use the placeholder origin.
 gradle.taskGraph.whenReady {
-    val isRelease = allTasks.any { it.name.contains("Release", ignoreCase = true) }
+    val releaseTasks = allTasks.filter { it.name.contains("Release", ignoreCase = true) }
+    val isRelease = releaseTasks.isNotEmpty()
     if (isRelease && releaseBaseUrl.contains("<domain>")) {
         throw GradleException(
             "DXN_RELEASE_BASE_URL is still the placeholder. Set it to the real https://... origin before building a release."
+        )
+    }
+    if (isRelease && !hasKeystore) {
+        throw GradleException(
+            "Release signing keystore missing: copy keystore.properties.example to keystore.properties (outside git) and fill it — see README. Publishing without a real keystore is not allowed."
         )
     }
 }
