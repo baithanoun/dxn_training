@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-21-dxn-laravel-backend-design.md` (stages 1–2 of §5.7). Later plans: Plan 2 users & teams, Plan 3 mobile API + Android, Plan 4 analytics/overview/settings/export, Plan 5 deployment to dockhosting.dev.
 
+> **حالة التنفيذ (تحديث 2026-11-24):** جميع خطوات المهام 1–10 أُنجزت محلياً؛ الأدلة في سجل الالتزامات و`docs/superpowers/plans/2026-11-21-plan2-verification.md`. المهام 8–10 استُبدلت لاحقاً بـ Plan 2 A1–A3 ونُفّذت عبرها. الاستثناء الوحيد هو `git push` في Task 10 Step 4: الالتزام تم محلياً لكن الدفع لم يُنفَّذ وفق قاعدة المالك (لا push ولا merge).
+
 ## Global Constraints
 - API JSON uses **camelCase** keys; every `id` and foreign id is serialized as a **string** (`"12"`).
 - Roles stored lowercase `admin|leader|trainee`; serialized uppercase `ADMIN|LEADER|TRAINEE` (Android `UserRole`).
@@ -43,17 +45,17 @@
 - Produces: middleware alias `role` → `EnsureRole::handle($request, $next, string ...$roles)` returns 403 if `$request->user()->role` not in `$roles`.
 - Produces: `User::hashDxnId(string $dxnId): string` (static) — the HMAC from Global Constraints.
 
-- [ ] **Step 1: Create the project and install Sanctum**
+- [x] **Step 1: Create the project and install Sanctum**
 
 Run (from `D:\webserver\appp`): `composer create-project laravel/laravel dxn-api` then `cd dxn-api && php artisan install:api` (answer "no" to running migrations).
 Expected: `routes/api.php` exists, `laravel/sanctum` in `composer.json`.
 
-- [ ] **Step 2: Configure MySQL (Laragon) for dev**
+- [x] **Step 2: Configure MySQL (Laragon) for dev**
 
 Start MySQL: run `C:\laragon\laragon.exe` and click *Start All* (or start `mysqld` from `C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin`). Create DB: `C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql -u root -e "CREATE DATABASE dxn_training CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"`.
 In `.env` and `.env.example`: `DB_CONNECTION=mysql`, `DB_DATABASE=dxn_training`, `DB_USERNAME=root`, `DB_PASSWORD=`, plus `ADMIN_EMAIL=admin@dxn.local`, `ADMIN_PASSWORD=change-me-locally`, `FRONTEND_URL=http://localhost:5173`. Leave `phpunit.xml` on SQLite `:memory:`.
 
-- [ ] **Step 3: Write the failing tests** in `tests/Feature/AuthTest.php`
+- [x] **Step 3: Write the failing tests** in `tests/Feature/AuthTest.php`
 
 ```php
 test_admin_can_login_with_email(): create user role=admin, password 'secret123';
@@ -68,11 +70,11 @@ test_dxn_id_is_encrypted_and_hashed(): create user dxn_id 'dxn-123'; raw DB colu
 test_role_middleware_blocks_non_admin(): trainee token on a temp route Route::get('/api/admin/ping')->middleware(['auth:sanctum','role:admin']) → 403; admin → 200
 ```
 
-- [ ] **Step 4: Run tests to verify they fail**
+- [x] **Step 4: Run tests to verify they fail**
 
 Run: `php artisan test --filter=AuthTest` — Expected: FAIL (routes/columns missing).
 
-- [ ] **Step 5: Implement**
+- [x] **Step 5: Implement**
 - Users migration: keep `name`; make `email` nullable+unique; add `phone` nullable unique, `dxn_id` text nullable, `dxn_id_hash` string(64) nullable unique, `role` string(16) default `trainee` indexed, `sponsor_id` nullable FK→users nullOnDelete, `total_xp` uint default 0, `current_streak` uint default 0, `last_activity_date` date nullable, `hearts` tinyint default 3, `gems` uint default 0, `is_active` bool default true.
 - `User`: `HasApiTokens`; casts `dxn_id => 'encrypted'`, `password => 'hashed'`; a `saving` hook sets `dxn_id_hash` from `dxn_id`.
 - `AuthController@login`: find by email or phone; `Hash::check`; 403 if inactive; `createToken('dashboard')`. Route throttled with `throttle:5,1`.
@@ -80,11 +82,11 @@ Run: `php artisan test --filter=AuthTest` — Expected: FAIL (routes/columns mis
 - `AdminSeeder`: `updateOrCreate` by `ADMIN_EMAIL` with role admin; called from `DatabaseSeeder`.
 - Remove the temp ping route after tests are rewritten to use a real admin route in Task 4 (keep it until then, under `/api/admin/ping`).
 
-- [ ] **Step 6: Run tests to verify they pass**
+- [x] **Step 6: Run tests to verify they pass**
 
 Run: `php artisan test` — Expected: all PASS. Then `php artisan migrate --seed` against MySQL — Expected: no errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add dxn-api
@@ -110,11 +112,11 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - Produces relations (all ordered by `order_index`): `Section::skills()`, `Section::requiredSection()`, `Skill::levels()`, `Skill::section()`, `Level::cards()`, `Level::rounds()`, `Level::skill()`, `GameRound::options()`.
 - Produces constants: `Level::TYPES = ['lesson','quiz','chat_battle','match_pairs','order_sequence']`, `Section::STATUSES = ['draft','published']`.
 
-- [ ] **Step 1: Write the failing test** `test_relations_are_ordered_and_soft_delete_hides_children_from_tree()`: create section with 2 skills (order 2,1) → `$section->skills->pluck('order_index')` === `[1,2]`; soft-delete a level → `$skill->levels()->count()` drops by 1 and `Level::withTrashed()->count()` unchanged.
-- [ ] **Step 2: Run** `php artisan test --filter=ContentModelTest` — Expected: FAIL.
-- [ ] **Step 3: Implement** migrations + models (`$fillable`, casts for bools, `SoftDeletes` on the three parents).
-- [ ] **Step 4: Run** `php artisan test` — Expected: PASS; `php artisan migrate` on MySQL OK.
-- [ ] **Step 5: Commit** `git commit -m "feat(api): content schema and models"`
+- [x] **Step 1: Write the failing test** `test_relations_are_ordered_and_soft_delete_hides_children_from_tree()`: create section with 2 skills (order 2,1) → `$section->skills->pluck('order_index')` === `[1,2]`; soft-delete a level → `$skill->levels()->count()` drops by 1 and `Level::withTrashed()->count()` unchanged.
+- [x] **Step 2: Run** `php artisan test --filter=ContentModelTest` — Expected: FAIL.
+- [x] **Step 3: Implement** migrations + models (`$fillable`, casts for bools, `SoftDeletes` on the three parents).
+- [x] **Step 4: Run** `php artisan test` — Expected: PASS; `php artisan migrate` on MySQL OK.
+- [x] **Step 5: Commit** `git commit -m "feat(api): content schema and models"`
 
 ---
 
@@ -129,15 +131,15 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - Consumes: Task 2 models.
 - `content.json` = array of sections in the **same camelCase shape** as Android `SectionResponse` (see `DXNTrainingApp/app/src/main/java/com/dxn/training/data/remote/NetworkModels.kt`), converted by hand from `DXNTrainingApp/app/src/main/java/com/dxn/training/data/repository/MockData.kt` (`MockData.sections`, all 5 sections, all cards, rounds and options). Android string ids are dropped; `requiredSectionId` becomes the **orderIndex** of the required section.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
   - `test_seeds_five_published_sections_with_levels_cards_and_rounds()`: after `$this->seed(ContentSeeder::class)` → `Section::count() === 5`, all `status === 'published'`, every level has `cards` ≥ 1, every non-lesson level has `rounds` ≥ 1 with ≥ 1 `is_correct` option; section with orderIndex 2 has `required_section_id` = id of section orderIndex 1.
   - `test_seeder_is_idempotent()`: seed twice → `Section::count() === 5`.
   - `test_last_level_of_each_section_is_final_quiz()`.
-- [ ] **Step 2: Run** — Expected: FAIL.
-- [ ] **Step 3: Write `content.json`** (mechanical conversion of `MockData.sections`; options keep their list order as `order_index`, which is also the correct order for `order_sequence`).
-- [ ] **Step 4: Implement `ContentSeeder::run()`**: return early if `Section::exists()`; otherwise insert in a transaction; set `is_final_quiz=true` on the last level (by skill then level order) of each section; all statuses `published`.
-- [ ] **Step 5: Run** `php artisan test` — PASS; `php artisan db:seed` on MySQL OK.
-- [ ] **Step 6: Commit** `git commit -m "feat(api): seed training content from Android mock data"`
+- [x] **Step 2: Run** — Expected: FAIL.
+- [x] **Step 3: Write `content.json`** (mechanical conversion of `MockData.sections`; options keep their list order as `order_index`, which is also the correct order for `order_sequence`).
+- [x] **Step 4: Implement `ContentSeeder::run()`**: return early if `Section::exists()`; otherwise insert in a transaction; set `is_final_quiz=true` on the last level (by skill then level order) of each section; all statuses `published`.
+- [x] **Step 5: Run** `php artisan test` — PASS; `php artisan db:seed` on MySQL OK.
+- [x] **Step 6: Commit** `git commit -m "feat(api): seed training content from Android mock data"`
 
 ---
 
@@ -157,7 +159,7 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - `PUT levels/{id}/cards` body `{cards: [{title(≤255, required), body(required, ≤5000), tip, mediaUrl}]}` → replaces all cards in list order; returns `LevelDetailResource`.
 - `POST reorder` body `{type: 'sections'|'skills'|'levels', parentId?: string, ids: string[]}` → sets `order_index` = position+1; `204`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
   - `test_tree_requires_admin()`: no token 401, trainee 403, admin 200.
   - `test_tree_includes_drafts_and_excludes_deleted()`.
   - `test_create_section_appends_order_index()`.
@@ -168,10 +170,10 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
   - `test_put_cards_replaces_in_order()`: PUT 2 cards → GET level shows exactly those 2 with orderIndex 1,2.
   - `test_reorder_rejects_foreign_ids()` *(Review Focus 3)*: reorder skills of section A including a skill of section B → 422, original order unchanged.
   - `test_reorder_rejects_partial_list()`: ids missing one sibling → 422.
-- [ ] **Step 2: Run** `php artisan test --filter=ContentCrudTest` — FAIL.
-- [ ] **Step 3: Implement** controllers, FormRequests (validation above; reorder validates `ids` equals exactly the set of sibling ids), resources (`(string)` ids).
-- [ ] **Step 4: Run** `php artisan test` — all PASS.
-- [ ] **Step 5: Commit** `git commit -m "feat(api): admin content CRUD and reorder"`
+- [x] **Step 2: Run** `php artisan test --filter=ContentCrudTest` — FAIL.
+- [x] **Step 3: Implement** controllers, FormRequests (validation above; reorder validates `ids` equals exactly the set of sibling ids), resources (`(string)` ids).
+- [x] **Step 4: Run** `php artisan test` — all PASS.
+- [x] **Step 5: Commit** `git commit -m "feat(api): admin content CRUD and reorder"`
 
 ---
 
@@ -186,16 +188,16 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - `PUT /api/admin/levels/{id}/rounds` body `{rounds: [{title?, prompt, initialTrust, options: [{text, isCorrect, isNeutral, trustImpact, feedback?, xpBonus?}]}]}` → replaces all rounds+options in one DB transaction, list order = `order_index`; returns `LevelDetailResource` (Task 4).
 - Validation: `rounds` array min 1; `prompt` required ≤2000; `initialTrust` int 0–100; `options` min 2; option `text` required ≤1000; `trustImpact` int −100..100; `xpBonus` int 0–100; `isCorrect` and `isNeutral` not both true; for level types `quiz|chat_battle|match_pairs` each round needs ≥1 `isCorrect=true` (error key `rounds.{i}.options`). `lesson` levels → 422 (lessons have no rounds).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
   - `test_put_rounds_replaces_and_orders()`.
   - `test_round_without_correct_option_returns_422()` *(Review Focus 2)*: error key `rounds.0.options`.
   - `test_empty_option_text_returns_422()`: error key `rounds.0.options.1.text`.
   - `test_failed_save_keeps_previous_rounds()`: existing 2 rounds, invalid PUT → still 2 rounds.
   - `test_lesson_level_rejects_rounds()`.
-- [ ] **Step 2: Run** — FAIL.
-- [ ] **Step 3: Implement.**
-- [ ] **Step 4: Run** `php artisan test` — PASS.
-- [ ] **Step 5: Commit** `git commit -m "feat(api): save chat/quiz rounds with validation"`
+- [x] **Step 2: Run** — FAIL.
+- [x] **Step 3: Implement.**
+- [x] **Step 4: Run** `php artisan test` — PASS.
+- [x] **Step 5: Commit** `git commit -m "feat(api): save chat/quiz rounds with validation"`
 
 ---
 
@@ -209,10 +211,10 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 **Interfaces:**
 - `POST /api/admin/media` multipart `file` → `201 {url: string}` (absolute URL via `Storage::disk('public')->url`). Rule: `required|image|max:5120`.
 
-- [ ] **Step 1: Tests** (`Storage::fake('public')`): `test_uploads_image_returns_url()`; `test_rejects_non_image()` (pdf → 422); `test_rejects_over_5mb()` (`UploadedFile::fake()->image('a.jpg')->size(6000)` → 422); `test_requires_admin()`.
-- [ ] **Step 2: Run** — FAIL. **Step 3: Implement** (store under `media/`). Run `php artisan storage:link` once on dev.
-- [ ] **Step 4: Run** `php artisan test` — PASS.
-- [ ] **Step 5: Commit** `git commit -m "feat(api): admin image upload"`
+- [x] **Step 1: Tests** (`Storage::fake('public')`): `test_uploads_image_returns_url()`; `test_rejects_non_image()` (pdf → 422); `test_rejects_over_5mb()` (`UploadedFile::fake()->image('a.jpg')->size(6000)` → 422); `test_requires_admin()`.
+- [x] **Step 2: Run** — FAIL. **Step 3: Implement** (store under `media/`). Run `php artisan storage:link` once on dev.
+- [x] **Step 4: Run** `php artisan test` — PASS.
+- [x] **Step 5: Commit** `git commit -m "feat(api): admin image upload"`
 
 ---
 
@@ -228,10 +230,10 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - `types.ts`: TS types mirroring Task 1 `UserResource` and Task 4 `SectionResource`/`LevelDetailResource` exactly.
 - `Login.tsx`: RTL card in the existing UI kit (`Card`, `Input`, `Button`), fields "البريد الإلكتروني أو الهاتف" / "كلمة المرور", shows API error text, disables button while submitting.
 
-- [ ] **Step 1: Implement** the files above; in `App.tsx` add `<Route path="/login">` outside the layout and wrap the layout route with `RequireAuth`.
-- [ ] **Step 2: Type-check/build** — Run: `npm run build` in `dxn-admin-web` — Expected: success.
-- [ ] **Step 3: Manual check** (API: `php artisan serve`; web: `npm run dev`): wrong password shows error; admin login lands on `/`; reload keeps session; logout returns to `/login`; then in DevTools set `localStorage.dxn_admin_token='bad'`, reload `/content` → lands on `/login` *(Review Focus 4)*.
-- [ ] **Step 4: Commit** `git commit -m "feat(admin-web): API client, auth context and login page"`
+- [x] **Step 1: Implement** the files above; in `App.tsx` add `<Route path="/login">` outside the layout and wrap the layout route with `RequireAuth`.
+- [x] **Step 2: Type-check/build** — Run: `npm run build` in `dxn-admin-web` — Expected: success.
+- [x] **Step 3: Manual check** (API: `php artisan serve`; web: `npm run dev`): wrong password shows error; admin login lands on `/`; reload keeps session; logout returns to `/login`; then in DevTools set `localStorage.dxn_admin_token='bad'`, reload `/content` → lands on `/login` *(Review Focus 4)*.
+- [x] **Step 4: Commit** `git commit -m "feat(admin-web): API client, auth context and login page"`
 
 ---
 
@@ -243,7 +245,7 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 **Interfaces:**
 - Consumes: Task 4 endpoints, Task 6 upload, Task 7 `api()` + types.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Load `GET /api/admin/content/tree`; loading, error (with retry) and existing empty states.
   - "إضافة قسم" opens an inline form (title, description, bag, certificate title, required section) → `POST sections`; add skill / add level buttons inside the tree (`POST skills` / `POST levels`, type select from `Level::TYPES` with Arabic labels: درس، اختبار، محاكي محادثة، مطابقة، ترتيب).
   - Level panel: controlled inputs (replace `defaultValue`) for title, type, passThreshold, xpReward, isFinalQuiz, status → "حفظ التغييرات" = `PUT levels/{id}`; "إلغاء" reverts to loaded values.
@@ -251,9 +253,9 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
   - Section/skill edit + publish toggle (`PUT` with `status`), delete with `window.confirm` → `DELETE`; show API 422 `message` (Review Focus 1) in a red banner.
   - Up/down arrows on siblings → `POST reorder`.
   - Remove the `sections` import from `@/data/mockData` in this file.
-- [ ] **Step 2: Build** `npm run build` — success.
-- [ ] **Step 3: Manual check:** create section → skill → level → 2 cards with an image; reload page, all persist; reorder two skills, reload, order kept; try deleting a section another depends on → red banner with message.
-- [ ] **Step 4: Commit** `git commit -m "feat(admin-web): content management on live API"`
+- [x] **Step 2: Build** `npm run build` — success.
+- [x] **Step 3: Manual check:** create section → skill → level → 2 cards with an image; reload page, all persist; reorder two skills, reload, order kept; try deleting a section another depends on → red banner with message.
+- [x] **Step 4: Commit** `git commit -m "feat(admin-web): content management on live API"`
 
 ---
 
@@ -266,15 +268,15 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - Consumes: `GET levels/{id}`, `PUT levels/{id}/rounds`, `PUT levels/{id}` (Task 4/5).
 - Mapping between the page's existing local types and the API: `Round.message ↔ prompt`, `Round.title ↔ title`, `Option.type 'correct'|'wrong'|'neutral' ↔ isCorrect/isNeutral`, `Option.trust ↔ trustImpact`, `Option.xp ↔ xpBonus`, scenario name ↔ level `title`, `passThreshold` ↔ level `passThreshold`, publish/unpublish ↔ level `status`.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Read `levelId` from the query string; without it, show a level picker (non-lesson levels from `content/tree`, grouped by section/skill) instead of `initialRounds`.
   - Load the level → fill rounds, name, threshold; "حفظ مسودة" → `PUT levels/{id}` (title, passThreshold) then `PUT levels/{id}/rounds`; "نشر/إلغاء النشر" (keep existing confirm) → `PUT levels/{id}` with `status`.
   - Server 422 `errors` (`rounds.{i}.options...`) are shown under the matching round/option, alongside the existing client validation and `hasXss` check.
   - Settings drawer: linked section/skill becomes read-only text from the level's location (moving a level is out of scope); keep the threshold input.
   - Export button: download the current rounds as JSON (client-side `Blob`); remove the unused mock `initialRounds` and the `sections` mock import.
-- [ ] **Step 2: Build** `npm run build` — success.
-- [ ] **Step 3: Manual check:** open a seeded chat_battle level, edit an option's text and trust, save, reload → persisted; remove all correct options from a round, save → error shown under that round (Review Focus 2); publish toggle persists.
-- [ ] **Step 4: Commit** `git commit -m "feat(admin-web): scenario builder on live API"`
+- [x] **Step 2: Build** `npm run build` — success.
+- [x] **Step 3: Manual check:** open a seeded chat_battle level, edit an option's text and trust, save, reload → persisted; remove all correct options from a round, save → error shown under that round (Review Focus 2); publish toggle persists.
+- [x] **Step 4: Commit** `git commit -m "feat(admin-web): scenario builder on live API"`
 
 ---
 
@@ -284,7 +286,8 @@ git commit -m "feat(api): scaffold Laravel API with Sanctum auth and admin role"
 - Create: `dxn-api/README.md` (Arabic: requirements, Laragon MySQL start, `.env`, `migrate --seed`, `serve`, `test`, default admin from `.env`)
 - Modify: `dxn-admin-web/README.md` (add `VITE_API_URL` and login step)
 
-- [ ] **Step 1:** `php artisan migrate:fresh --seed` on MySQL → OK; `php artisan test` → all PASS; `npm run build` → OK.
-- [ ] **Step 2 (Review Focus 5):** via the dashboard create a section titled `اختبار الترميز — ١٢٣ ✓`, then `mysql -u root dxn_training -e "SELECT title FROM sections ORDER BY id DESC LIMIT 1"` shows the same text; reload dashboard shows it unchanged. Delete it.
-- [ ] **Step 3:** Write the two READMEs.
-- [ ] **Step 4: Commit** `git commit -m "docs: run instructions for API and admin web"` and `git push`.
+- [x] **Step 1:** `php artisan migrate:fresh --seed` on MySQL → OK; `php artisan test` → all PASS; `npm run build` → OK.
+- [x] **Step 2 (Review Focus 5):** via the dashboard create a section titled `اختبار الترميز — ١٢٣ ✓`, then `mysql -u root dxn_training -e "SELECT title FROM sections ORDER BY id DESC LIMIT 1"` shows the same text; reload dashboard shows it unchanged. Delete it.
+- [x] **Step 3:** Write the two READMEs.
+- [x] **Step 4: Commit** `git commit -m "docs: run instructions for API and admin web"` (نُفّذ محلياً؛ غطّاه لاحقاً `8ffca03 docs: run and verification docs for the full system`).
+- [ ] `git push` — **NOT RUN**: الالتزامات محلية على `feat/plan1-api-content` وفق قاعدة المالك (لا push ولا merge).

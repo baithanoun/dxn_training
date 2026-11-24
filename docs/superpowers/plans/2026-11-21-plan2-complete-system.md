@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-21-dxn-laravel-backend-design.md` (binding — esp. §5.3 and §5.9). Plan 1 (`docs/superpowers/plans/2026-11-21-plan1-api-foundation-and-content-admin.md`) Tasks 8–10 are **superseded** by Tasks A1–A3 below.
 
+> **حالة التنفيذ (تحديث 2026-11-24):** جميع المهام A1–F2 أُنجزت محلياً؛ الأدلة والتفاصيل في `docs/superpowers/plans/2026-11-21-plan2-verification.md` و`deploy/README.md`. ما زال **`NOT RUN`** ومسؤولية المالك: بناء صورة Docker، النشر الفعلي على dockhosting.dev، DNS وأسرار المضيف، وتسجيل الدخول بعد النشر. لا push ولا merge.
+
 ---
 
 ## 0. Current state (read before Task A1)
@@ -81,8 +83,8 @@ Existing patterns to reuse (read these files once; do not reinvent):
 - `POST media` multipart `file` → `{url}`.
 - After any mutation: **refetch the tree** (store/update responses omit `cardsCount`/`roundsCount`).
 
-- [ ] **Step 1: Decide about the uncommitted WIP.** Run `git diff --stat dxn-admin-web/src/pages/Content.tsx` and `npm run build`. If it builds AND satisfies every bullet of Step 2 when checked in the browser, keep it and fix gaps. Otherwise `git checkout -- dxn-admin-web/src/pages/Content.tsx` and implement from the committed version. State which in the commit body.
-- [ ] **Step 2: Implement**
+- [x] **Step 1: Decide about the uncommitted WIP.** Run `git diff --stat dxn-admin-web/src/pages/Content.tsx` and `npm run build`. If it builds AND satisfies every bullet of Step 2 when checked in the browser, keep it and fix gaps. Otherwise `git checkout -- dxn-admin-web/src/pages/Content.tsx` and implement from the committed version. State which in the commit body.
+- [x] **Step 2: Implement**
   - Load tree; loading text "جارٍ التحميل…", error banner with "إعادة المحاولة" button, keep the existing empty state.
   - "إضافة قسم" → inline form (title*, description, bag number, certificate title, required section select) → POST.
   - In the tree: "إضافة مهارة" per section, "إضافة مستوى" per skill (type select labels: `lesson`=درس، `quiz`=اختبار، `chat_battle`=محاكي محادثة، `match_pairs`=مطابقة، `order_sequence`=ترتيب).
@@ -92,9 +94,9 @@ Existing patterns to reuse (read these files once; do not reinvent):
   - Up/down arrows on sections, skills, levels → POST reorder with the full sibling list.
   - Non-lesson level panel: link "فتح في منشئ السيناريوهات" → `/scenario?levelId=<id>`.
   - No import from `@/data/mockData`.
-- [ ] **Step 3:** `npm run build` → success.
-- [ ] **Step 4: Manual (API `php artisan serve`, web `npm run dev`, open `http://localhost:5173`):** create section → skill → level → 2 cards with an image; reload → persisted. Reorder two skills; reload → kept. Delete a section another one requires → red banner. Edit a level's passThreshold to 150 → field error.
-- [ ] **Step 5: Commit** `feat(admin-web): content management on live API`
+- [x] **Step 3:** `npm run build` → success.
+- [x] **Step 4: Manual (API `php artisan serve`, web `npm run dev`, open `http://localhost:5173`):** create section → skill → level → 2 cards with an image; reload → persisted. Reorder two skills; reload → kept. Delete a section another one requires → red banner. Edit a level's passThreshold to 150 → field error.
+- [x] **Step 5: Commit** `feat(admin-web): content management on live API`
 
 ### Task A2: Scenario Builder on the API
 
@@ -104,7 +106,7 @@ Existing patterns to reuse (read these files once; do not reinvent):
 
 Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔prompt`, (new local field) `Round.initialTrust↔initialTrust` default 50, `Option.type 'correct'|'wrong'|'neutral' ↔ isCorrect/isNeutral`, `Option.trust↔trustImpact`, `Option.xp↔xpBonus`, `Option.feedback↔feedback`, scenario name↔level `title`, `passThreshold`↔level `passThreshold`, status `published|draft`↔level `status`.
 
-- [ ] **Step 1: Implement**
+- [x] **Step 1: Implement**
   - Read `levelId` from `useSearchParams()`. Without it: a picker listing non-lesson levels from `content/tree` grouped "القسم › المهارة › المستوى"; choosing one sets `?levelId=`.
   - Load level → fill state; delete the mock `initialRounds` and the `sections` mock import.
   - "حفظ مسودة": `PUT levels/{id}` (title, passThreshold) then `PUT levels/{id}/rounds`; success toast/text "تم الحفظ".
@@ -112,9 +114,9 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
   - Map server 422 keys onto the matching round/option and show them next to the existing client validation and `hasXss` check.
   - Settings drawer: section/skill shown read-only from the level's location; threshold editable.
   - "تصدير" downloads current rounds as `scenario-<levelId>.json` via `Blob`; "استيراد" (Upload icon) reads such a file into state (validate it is an array of rounds; otherwise show "ملف غير صالح").
-- [ ] **Step 2:** `npm run build` → success.
-- [ ] **Step 3: Manual:** open seeded chat_battle level, change an option's text/trust, save, reload → persisted. Remove all correct options in a round, save → error under that round. Toggle publish → persisted after reload. Export then import the same file → identical rounds.
-- [ ] **Step 4: Commit** `feat(admin-web): scenario builder on live API`
+- [x] **Step 2:** `npm run build` → success.
+- [x] **Step 3: Manual:** open seeded chat_battle level, change an option's text/trust, save, reload → persisted. Remove all correct options in a round, save → error under that round. Toggle publish → persisted after reload. Export then import the same file → identical rounds.
+- [x] **Step 4: Commit** `feat(admin-web): scenario builder on live API`
 
 ---
 
@@ -133,8 +135,8 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
 - `DELETE users/{id}` → not provided (deactivate instead).
 - `GET users/export` → CSV download (`text/csv; charset=UTF-8` with BOM), columns: الاسم، البريد، الهاتف، رقم العضوية، الدور، القائد، XP، آخر نشاط، الحالة. Same filters as list. Register this route **before** `users/{id}`.
 
-- [ ] **Step 1: Tests** — `test_list_paginates_and_filters_by_role_and_search()`, `test_search_by_exact_dxn_id()`, `test_status_filter_inactive_uses_3_days()`, `test_create_user_validates_unique_email_and_phone()`, `test_leader_must_have_leader_role()`, `test_deactivate_revokes_tokens()` (old token → 401 on `/api/auth/me`), `test_admin_cannot_demote_self()`, `test_export_csv_has_bom_and_header()`, `test_non_admin_forbidden()`.
-- [ ] **Step 2:** run `php artisan test --filter=UsersTest` → FAIL. **Step 3:** implement (role/is_active are not mass-assignable — set them explicitly). **Step 4:** full suite PASS. **Step 5: Commit** `feat(api): admin users management`
+- [x] **Step 1: Tests** — `test_list_paginates_and_filters_by_role_and_search()`, `test_search_by_exact_dxn_id()`, `test_status_filter_inactive_uses_3_days()`, `test_create_user_validates_unique_email_and_phone()`, `test_leader_must_have_leader_role()`, `test_deactivate_revokes_tokens()` (old token → 401 on `/api/auth/me`), `test_admin_cannot_demote_self()`, `test_export_csv_has_bom_and_header()`, `test_non_admin_forbidden()`.
+- [x] **Step 2:** run `php artisan test --filter=UsersTest` → FAIL. **Step 3:** implement (role/is_active are not mass-assignable — set them explicitly). **Step 4:** full suite PASS. **Step 5: Commit** `feat(api): admin users management`
 
 ### Task B2: Admin teams API
 
@@ -145,15 +147,15 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
 - `GET /api/admin/teams/{leaderId}` → `{leader: AdminUser, members: AdminUser[] each + progressPercent}`.
 - Until Task C2 lands, "completed levels" = count of `user_level_progress` rows with `status='completed'`; this task therefore **depends on C2's table** — implement B2 after C2 if executing strictly in order, or create the `user_level_progress` migration here (Task C2 then reuses it). Executor's choice; record it in the commit body.
 
-- [ ] Tests: `test_team_aggregates()` (2 leaders, members with progress → exact numbers), `test_team_detail_404_for_non_leader()`. Implement, suite PASS, **Commit** `feat(api): admin teams overview`
+- [x] Tests: `test_team_aggregates()` (2 leaders, members with progress → exact numbers), `test_team_detail_404_for_non_leader()`. Implement, suite PASS, **Commit** `feat(api): admin teams overview`
 
 ### Task B3: Users & Teams pages
 
 **Files:** Modify `dxn-admin-web/src/pages/Users.tsx`, `dxn-admin-web/src/pages/Teams.tsx`, `dxn-admin-web/src/lib/types.ts` (add `AdminUser`, `Paginated<T>`, `TeamSummary`).
 
-- [ ] **Users:** table from `GET users` with search box (debounced 300 ms), role select (الكل/متدرب/قائد/مدير), status select (الكل/نشط/متوقف/معطّل), pagination ("السابق"/"التالي", "صفحة X من Y"). Role labels: TRAINEE=متدرب, LEADER=قائد, ADMIN=مدير. "إضافة مستخدم" opens a form (POST). Row click → side panel from `GET users/{id}`: edit role, leader (select from `GET users?role=leader&perPage=100`), activate/deactivate ("تعطيل"/"تفعيل" with confirm), certificates list, sections progress bars. "تصدير CSV" → fetch `users/export` with the token and save the blob as `users.csv` (cannot use a plain link because of the bearer token). Remove mock imports.
-- [ ] **Teams:** cards/table from `GET teams`; click → members from `GET teams/{leaderId}`; "تصدير تقرير" → CSV built client-side from the loaded data. Remove mock import.
-- [ ] `npm run build`; manual: create a leader and a trainee linked to them; deactivate the trainee; filters and export work. **Commit** `feat(admin-web): users and teams on live API`
+- [x] **Users:** table from `GET users` with search box (debounced 300 ms), role select (الكل/متدرب/قائد/مدير), status select (الكل/نشط/متوقف/معطّل), pagination ("السابق"/"التالي", "صفحة X من Y"). Role labels: TRAINEE=متدرب, LEADER=قائد, ADMIN=مدير. "إضافة مستخدم" opens a form (POST). Row click → side panel from `GET users/{id}`: edit role, leader (select from `GET users?role=leader&perPage=100`), activate/deactivate ("تعطيل"/"تفعيل" with confirm), certificates list, sections progress bars. "تصدير CSV" → fetch `users/export` with the token and save the blob as `users.csv` (cannot use a plain link because of the bearer token). Remove mock imports.
+- [x] **Teams:** cards/table from `GET teams`; click → members from `GET teams/{leaderId}`; "تصدير تقرير" → CSV built client-side from the loaded data. Remove mock import.
+- [x] `npm run build`; manual: create a leader and a trainee linked to them; deactivate the trainee; filters and export work. **Commit** `feat(admin-web): users and teams on live API`
 
 ---
 
@@ -168,7 +170,7 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
 - `POST /api/auth/login` unchanged; tokens named `mobile` when header `X-Client: android` is sent, else `dashboard`.
 - Also fix parked minor: `User` saving hook normalizes blank `dxn_id` (`trim() === ''`) to null.
 
-- [ ] Tests: `test_register_trainee_returns_token()`, `test_register_requires_email_or_phone()`, `test_duplicate_dxn_id_422()`, `test_leader_dxn_id_links_sponsor()`, `test_leader_dxn_id_of_trainee_rejected()` *(Review Focus 4)*, `test_register_cannot_set_role()` (sending `role:"admin"` is ignored → TRAINEE). **Commit** `feat(api): trainee registration with leader link`
+- [x] Tests: `test_register_trainee_returns_token()`, `test_register_requires_email_or_phone()`, `test_duplicate_dxn_id_422()`, `test_leader_dxn_id_links_sponsor()`, `test_leader_dxn_id_of_trainee_rejected()` *(Review Focus 4)*, `test_register_cannot_set_role()` (sending `role:"admin"` is ignored → TRAINEE). **Commit** `feat(api): trainee registration with leader link`
 
 ### Task C2: Progress model, tree and read endpoints
 
@@ -191,8 +193,8 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
 - `GET /api/users/{userId}/profile` → `UserResource->resolve()` (unwrapped; superset of Android `UserProfileResponse`).
 - Access rule from Global Constraints → 403 otherwise; unknown user → 404.
 
-- [ ] Also fill `sectionsProgress` and `certificates` in `GET /api/admin/users/{id}` (Task B1) using `ProgressService`, and extend `UsersTest` with one assertion for it.
-- [ ] Tests: tree hides drafts/trashed and has exact keys; new user: first level of section 1 UNLOCKED, everything else LOCKED, section 1 UNLOCKED, others LOCKED; after inserting a `completed` row for level 1 → level 2 UNLOCKED; certificate for section 1 → section 2 UNLOCKED; access: self 200, own leader 200, admin 200, other trainee **403** *(Review Focus 1)*. **Commit** `feat(api): mobile tree and progress endpoints`
+- [x] Also fill `sectionsProgress` and `certificates` in `GET /api/admin/users/{id}` (Task B1) using `ProgressService`, and extend `UsersTest` with one assertion for it.
+- [x] Tests: tree hides drafts/trashed and has exact keys; new user: first level of section 1 UNLOCKED, everything else LOCKED, section 1 UNLOCKED, others LOCKED; after inserting a `completed` row for level 1 → level 2 UNLOCKED; certificate for section 1 → section 2 UNLOCKED; access: self 200, own leader 200, admin 200, other trainee **403** *(Review Focus 1)*. **Commit** `feat(api): mobile tree and progress endpoints`
 
 ### Task C3: Level completion with server-side scoring
 
@@ -215,7 +217,7 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
   6. Write `analytics_events` row `level_completed` or `level_failed` (table from Task E1 — if E1 is not done yet, create its migration here and E1 reuses it).
 - Response: `{success: true, score, passed, xpAwarded, totalXp, currentStreak, certificateIssued, certificateTitle (section certificate_title|null), certificateId (code|null)}`.
 
-- [ ] Tests (unit): each type scored correctly incl. chat clamp and order mismatch. Tests (feature): first-try pass gives `round(40×1.5)=60`; second identical pass gives 0 *(Review Focus 3)*; improved replay gives `floor(40×0.25)=10`; fail gives 0 and status stays/attempted; locked level 409 with no row; final level pass issues certificate once and next section unlocks; streak yesterday→+1, today→same, older→1 (use `Carbon::setTestNow`); old body `{score:100, passed:true}` → 422; foreign optionId → 422. **Commit** `feat(api): server-side level completion, XP, streak, certificates`
+- [x] Tests (unit): each type scored correctly incl. chat clamp and order mismatch. Tests (feature): first-try pass gives `round(40×1.5)=60`; second identical pass gives 0 *(Review Focus 3)*; improved replay gives `floor(40×0.25)=10`; fail gives 0 and status stays/attempted; locked level 409 with no row; final level pass issues certificate once and next section unlocks; streak yesterday→+1, today→same, older→1 (use `Carbon::setTestNow`); old body `{score:100, passed:true}` → 422; foreign optionId → 422. **Commit** `feat(api): server-side level completion, XP, streak, certificates`
 
 ### Task C4: Leader team endpoint and events intake
 
@@ -224,7 +226,7 @@ Mapping (page local type ↔ API): `Round.title↔title`, `Round.message↔promp
 **Interfaces:**
 - `GET /api/leader/team` (role leader) → `[{id, name, progressPercent, lastActiveDays, status}]` matching Android `TeamMember`; `status`: `COMPLETED` if progressPercent = 100, `ACTIVE` if lastActiveDays ≤ 3, else `INACTIVE`; `lastActiveDays` = days since `last_activity_date` (999 if null).
 - `POST /api/events` (auth; throttle `60,1`) `{events:[{eventName, levelId?, payload?, deviceInfo?, occurredAt?}]}` max 100; `eventName` ∈ `app_opened | level_started | question_answered | share_achievement | certificate_downloaded`; unknown names rejected 422. `level_completed/level_failed` are written only by the server (C3). → 202 `{accepted: n}`.
-- [ ] Tests: trainee → 403 on leader/team; aggregates/status exact; events validation and insertion. **Commit** `feat(api): leader team and analytics events intake`
+- [x] Tests: trainee → 403 on leader/team; aggregates/status exact; events validation and insertion. **Commit** `feat(api): leader team and analytics events intake`
 
 ---
 
@@ -243,7 +245,7 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
 - LoginScreen: bind the two fields, disable button while loading, show error. RegisterScreen: fields الاسم الكامل، البريد/الهاتف (contains `@` → email else phone)، **كلمة المرور (new field)**، رقم عضوية DXN، **رقم عضوية القائد (اختياري)** (rename label from "كود القائد").
 - App start: if a session exists → main screen; else onboarding/login.
 - Replace `DEFAULT_USER_ID` usages with the session `userId` (pass it into `ContentRepository.loadContent(userId)` and `UserRepository.loadUserProfile(userId)`).
-- [ ] Build passes; manual: register new trainee with the seeded leader's DXN number (create a leader in admin first), wrong leader number shows the server message, login/logout, app restart keeps session. **Commit** `feat(android): real auth with token storage`
+- [x] Build passes; manual: register new trainee with the seeded leader's DXN number (create a leader in admin first), wrong leader number shows the server message, login/logout, app restart keeps session. **Commit** `feat(android): real auth with token storage`
 
 ### Task D2: Content, progress and completion from the server
 
@@ -256,7 +258,7 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
 - Each game screen collects answers: Quiz/MatchPairs/ChatBattle → `(roundId, selectedOptionId)` per round; OrderSequence → `(roundId, orderedIds)`; Lesson → empty list. They call a ViewModel/repository `submit` and navigate to `CompletionScreen` with the **server** `score`, `xpAwarded`, `passed`, certificate fields. The screens keep local hearts/feedback UI exactly as now.
 - Offline/failed: `CompletionScreen` shows "لم تُحفظ النتيجة — تحقق من الاتصال" with "إعادة المحاولة" (resubmits the same answers); no local XP/unlock *(Review Focus 5)*. Locked → show the message.
 - `MockData` remains only as display fallback for content when the tree cannot load (banner "وضع غير متصل — المحتوى للعرض فقط").
-- [ ] Build; manual on emulator against local API: pass level 1 → level 2 unlocks after refresh, XP increases by the server amount; repeat same level → XP +0; stop the API → finish a level → offline message, no unlock; restart API → "إعادة المحاولة" succeeds. **Commit** `feat(android): server-authoritative progress and completion`
+- [x] Build; manual on emulator against local API: pass level 1 → level 2 unlocks after refresh, XP increases by the server amount; repeat same level → XP +0; stop the API → finish a level → offline message, no unlock; restart API → "إعادة المحاولة" succeeds. **Commit** `feat(android): server-authoritative progress and completion`
 
 ### Task D3: Profile, team, events
 
@@ -266,7 +268,7 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
 - Profile: values from `/api/users/{id}/profile`; certificates list from sections-progress (`certificateIssued`); logout button → `AuthViewModel.logout()`.
 - `EventSender.send(name: String, levelId: String? = null, payload: Map<String, Any?> = emptyMap())` — fire-and-forget batch POST `api/events`; send `app_opened` on start, `level_started` when a game screen opens. Failures ignored (no offline queue — spec non-goal).
 - Remove remaining `MockData.currentUser` / `MockData.teamMembers` usages outside the offline content fallback.
-- [ ] Build; manual: leader sees team with the trainee from D1; trainee does not see team; events rows appear in `analytics_events`. **Commit** `feat(android): profile, leader team and events from API`
+- [x] Build; manual: leader sees team with the trainee from D1; trainee does not see team; events rows appear in `analytics_events`. **Commit** `feat(android): profile, leader team and events from API`
 
 ---
 
@@ -288,13 +290,13 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
   - "Average Time" from `timeMs` sums per level session if present, else "—".
 - `GET analytics/export?...` → CSV of failedQuestions + funnel (UTF-8 BOM).
 - `GET certificates` → `[{sectionId, title, issuedCount, isActive}]` (isActive = section published).
-- [ ] Tests with seeded events produce exact numbers for each block; empty DB returns zeros/empty arrays (no division by zero). **Commit** `feat(api): dashboard and analytics endpoints`
+- [x] Tests with seeded events produce exact numbers for each block; empty DB returns zeros/empty arrays (no division by zero). **Commit** `feat(api): dashboard and analytics endpoints`
 
 ### Task E2: Overview & Analytics pages
 
 **Files:** `dxn-admin-web/src/pages/Overview.tsx`, `dxn-admin-web/src/pages/Analytics.tsx`, `src/lib/types.ts`.
-- [ ] Replace every `@/data/mockData` import with `GET dashboard/overview` / `GET analytics`; keep existing charts/layout; date range selector (آخر 7 أيام / 30 يوماً / 90 يوماً) mapping to `from/to`; analytics filters section and leader (from `content/tree` and `users?role=leader`); "تصدير" downloads `analytics/export` via blob. Loading/error/empty states. After this, delete `src/data/mockData.ts` if nothing imports it (`grep -r mockData src`).
-- [ ] `npm run build`; manual: numbers change after completing levels on the emulator. **Commit** `feat(admin-web): overview and analytics on live API`
+- [x] Replace every `@/data/mockData` import with `GET dashboard/overview` / `GET analytics`; keep existing charts/layout; date range selector (آخر 7 أيام / 30 يوماً / 90 يوماً) mapping to `from/to`; analytics filters section and leader (from `content/tree` and `users?role=leader`); "تصدير" downloads `analytics/export` via blob. Loading/error/empty states. After this, delete `src/data/mockData.ts` if nothing imports it (`grep -r mockData src`).
+- [x] `npm run build`; manual: numbers change after completing levels on the emulator. **Commit** `feat(admin-web): overview and analytics on live API`
 
 ### Task E3: Settings API and page
 
@@ -304,7 +306,7 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
 - Wire: `session_minutes` → Sanctum token expiry for **dashboard** tokens (`expires_at` on createToken); `quiz_rate_limit_per_minute` → the completion route limiter (`RateLimiter::for('completion', …)` reading the setting); `xp_*` already used by C3; `maintenance_mode` → mobile routes return 503 `{message:"التطبيق تحت الصيانة"}` (admin routes unaffected). Notification/leagues/heart refill keys are stored only (features are spec non-goals) — label them in the UI with a small "(قريباً)".
 - "إدارة المدراء" card: list admins (`GET users?role=admin`), "إضافة مدير" → POST users with role admin.
 - "حفظ الإعدادات" → PUT; success text "تم حفظ الإعدادات".
-- [ ] Tests: defaults returned; invalid value 422; unknown key 422; maintenance blocks `/api/sections/tree` but not `/api/admin/*`; completion limiter honors the setting. Build + manual. **Commit** `feat: settings API and page`
+- [x] Tests: defaults returned; invalid value 422; unknown key 422; maintenance blocks `/api/sections/tree` but not `/api/admin/*`; completion limiter honors the setting. Build + manual. **Commit** `feat: settings API and page`
 
 ---
 
@@ -314,21 +316,21 @@ Build: `cd DXNTrainingApp && set JAVA_HOME=D:\webserver\appp\jdk17 && gradlew :a
 
 **Files:** `dxn-api/routes/web.php` (SPA fallback), `dxn-admin-web/vite.config.ts` (`base: '/admin/'`), `dxn-admin-web/src/App.tsx` (`<BrowserRouter basename="/admin">`), `deploy/Dockerfile`, `deploy/nginx.conf` or Apache vhost, `deploy/entrypoint.sh`, `deploy/README.md` (Arabic), root `.dockerignore`.
 
-- [ ] **Step 1: Confirm the host.** Open https://app.dockhosting.dev/ docs (or ask the owner) and record in `deploy/README.md`: does it run a Dockerfile, which PHP version, managed MySQL or own container, persistent volume for `storage/`, env var UI, cron/queue availability. **If the host does not accept Docker, stop and report** — do not guess another target.
-- [ ] **Step 2: Admin served by Laravel.** Build React with `VITE_API_URL=""` (same origin) into `dxn-api/public/admin/` (script `npm run build -- --outDir ../dxn-api/public/admin --emptyOutDir`). `routes/web.php`: `Route::get('/admin/{any?}', fn () => response()->file(public_path('admin/index.html')))->where('any', '.*');`. Add `dxn-api/public/admin/` to `.gitignore` (built in the image, not committed).
-- [ ] **Step 3: Dockerfile** (multi-stage): stage 1 `node:22-alpine` builds `dxn-admin-web`; stage 2 `composer:2` installs `--no-dev --optimize-autoloader`; final `php:8.3-apache` (or the host's required base) with extensions `pdo_mysql`, `mbstring`, `intl`, `opcache`, `gd`, `zip`; document root `dxn-api/public`; `a2enmod rewrite`; copy `public/admin` from stage 1. `entrypoint.sh`: `php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan storage:link || true` then start Apache. **Never** run `db:seed` automatically; document a one-time `php artisan db:seed --class=AdminSeeder` and `--class=ContentSeeder`.
-- [ ] **Step 4: Production env template** `deploy/.env.production.example`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://<domain>`, `DB_*`, `FRONTEND_URL=https://<domain>`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` (set once, then remove), `SESSION_DRIVER=database`, `LOG_CHANNEL=stderr`. CORS: same origin, so `FRONTEND_URL` = app URL.
-- [ ] **Step 5: Android release URL:** release `BASE_URL` = `"https://<domain>/"` via `buildConfigField` in the `release` build type; cleartext stays debug-only.
-- [ ] **Step 6: Verify locally:** `docker build -f deploy/Dockerfile .` if Docker is available; otherwise verify `npm run build` into `public/admin`, `php artisan serve`, open `http://127.0.0.1:8000/admin/` → login works same-origin; `php artisan test` all green. Record which was possible.
-- [ ] **Step 7: Commit** `build: production build and dockhosting deploy kit`. The actual deploy (creating the app on dockhosting, setting secrets, DNS) is done by the owner following `deploy/README.md` — do not log in to the host or enter credentials.
+- [x] **Step 1: Confirm the host.** Open https://app.dockhosting.dev/ docs (or ask the owner) and record in `deploy/README.md`: does it run a Dockerfile, which PHP version, managed MySQL or own container, persistent volume for `storage/`, env var UI, cron/queue availability. **If the host does not accept Docker, stop and report** — do not guess another target.
+- [x] **Step 2: Admin served by Laravel.** Build React with `VITE_API_URL=""` (same origin) into `dxn-api/public/admin/` (script `npm run build -- --outDir ../dxn-api/public/admin --emptyOutDir`). `routes/web.php`: `Route::get('/admin/{any?}', fn () => response()->file(public_path('admin/index.html')))->where('any', '.*');`. Add `dxn-api/public/admin/` to `.gitignore` (built in the image, not committed).
+- [x] **Step 3: Dockerfile** (multi-stage): stage 1 `node:22-alpine` builds `dxn-admin-web`; stage 2 `composer:2` installs `--no-dev --optimize-autoloader`; final `php:8.3-apache` (or the host's required base) with extensions `pdo_mysql`, `mbstring`, `intl`, `opcache`, `gd`, `zip`; document root `dxn-api/public`; `a2enmod rewrite`; copy `public/admin` from stage 1. `entrypoint.sh`: `php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan storage:link || true` then start Apache. **Never** run `db:seed` automatically; document a one-time `php artisan db:seed --class=AdminSeeder` and `--class=ContentSeeder`.
+- [x] **Step 4: Production env template** `deploy/.env.production.example`: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://<domain>`, `DB_*`, `FRONTEND_URL=https://<domain>`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` (set once, then remove), `SESSION_DRIVER=database`, `LOG_CHANNEL=stderr`. CORS: same origin, so `FRONTEND_URL` = app URL.
+- [x] **Step 5: Android release URL:** release `BASE_URL` = `"https://<domain>/"` via `buildConfigField` in the `release` build type; cleartext stays debug-only.
+- [ ] **Step 6: Verify locally:** `docker build -f deploy/Dockerfile .` if Docker is available; otherwise verify `npm run build` into `public/admin`, `php artisan serve`, open `http://127.0.0.1:8000/admin/` → login works same-origin; `php artisan test` all green. Record which was possible. — **PARTIAL:** `docker build` **NOT RUN** (Docker غير مثبت)؛ التحقق البديل PASS وموثّق في `deploy/README.md` §5 (`npm run build` إلى `public/admin`، `GET /admin/` = 200، المسارات العميقة، `php artisan test`). لم يُجرَّ تسجيل دخول فعلي من المتصفح ضد MySQL على المضيف؛ مطلوب من المالك بعد النشر.
+- [x] **Step 7: Commit** `build: production build and dockhosting deploy kit` (`32dc6ee`). النشر الفعلي (إنشاء التطبيق على المضيف، الأسرار، DNS) **`NOT RUN`** ومسؤولية المالك وفق `deploy/README.md`؛ لم يُسجَّل دخول إلى المضيف.
 
 ### Task F2: Final verification and docs
 
-- [ ] `php artisan migrate:fresh --seed` on local MySQL; full `php artisan test`; `npm run build`; `gradlew :app:assembleDebug`.
-- [ ] Arabic round-trip on MySQL: create section `اختبار الترميز — ١٢٣ ✓` in the admin, read it back with `mysql -u root dxn_training -e "SELECT title FROM sections ORDER BY id DESC LIMIT 1"`, then delete it.
-- [ ] End-to-end script (manual, record results in `docs/superpowers/plans/2026-11-21-plan2-verification.md`): admin login → create leader → Android register trainee with leader number → complete level 1 (XP from server) → leader sees trainee in app → admin Users shows XP/last activity → Overview/Analytics reflect it → certificate after final quiz of section 1 → section 2 unlocked.
-- [ ] Update `dxn-api/README.md` and `dxn-admin-web/README.md` (Arabic: requirements, run, test, env vars, default admin from `.env`), `DXNTrainingApp/README.md` (BASE_URL for emulator/release).
-- [ ] **Commit** `docs: run and verification docs for the full system`
+- [x] `php artisan migrate:fresh --seed` on local MySQL; full `php artisan test`; `npm run build`; `gradlew :app:assembleDebug`.
+- [x] Arabic round-trip on MySQL: create section `اختبار الترميز — ١٢٣ ✓` in the admin, read it back with `mysql -u root dxn_training -e "SELECT title FROM sections ORDER BY id DESC LIMIT 1"`, then delete it.
+- [x] End-to-end script (manual, record results in `docs/superpowers/plans/2026-11-21-plan2-verification.md`): admin login → create leader → Android register trainee with leader number → complete level 1 (XP from server) → leader sees trainee in app → admin Users shows XP/last activity → Overview/Analytics reflect it → certificate after final quiz of section 1 → section 2 unlocked.
+- [x] Update `dxn-api/README.md` and `dxn-admin-web/README.md` (Arabic: requirements, run, test, env vars, default admin from `.env`), `DXNTrainingApp/README.md` (BASE_URL for emulator/release).
+- [x] **Commit** `docs: run and verification docs for the full system`
 
 ---
 

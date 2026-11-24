@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-11-21-dxn-laravel-backend-design.md` (ملزمة). **Plan 2:** `docs/superpowers/plans/2026-11-21-plan2-complete-system.md` — مهامه غير المكتملة تُنفَّذ من هنا؛ حين تقول هذه الخطة "كما في Plan 2 Task X" فالنص هناك ملزم حرفياً مع الفروقات المذكورة هنا. **المراجعة:** `docs/superpowers/reviews/2026-11-22-plan2-progress-review.md` (رموز C-/I-/M- تشير إليها).
 
+> **حالة التنفيذ (تحديث 2026-11-24):** أُنجزت T0–T12 محلياً؛ الأدلة في `docs/superpowers/plans/2026-11-21-plan2-verification.md`. بناء صورة Docker والنشر الفعلي على DockHosting **`NOT RUN`** ومسؤولية المالك (انظر `deploy/README.md`)؛ لا push ولا merge.
+
 ## Current state
 | Commit | المحتوى |
 |---|---|
@@ -42,8 +44,8 @@
 ---
 
 ## T0 — قرار D2 WIP (قبل أي شيء)
-- [ ] `git diff -- DXNTrainingApp` واقرأه. ثم في `DXNTrainingApp`: `set JAVA_HOME=D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7` و`.\gradlew.bat :app:assembleDebug`.
-- [ ] إن نجح البناء: `git stash push -m "D2-wip" -- DXNTrainingApp` (يُستعاد في T7). إن فشل: نفس الـ stash، وسجّل الخطأ في رسالة T7. **لا commit هنا.**
+- [x] `git diff -- DXNTrainingApp` واقرأه. ثم في `DXNTrainingApp`: `set JAVA_HOME=D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7` و`.\gradlew.bat :app:assembleDebug`.
+- [x] إن نجح البناء: `git stash push -m "D2-wip" -- DXNTrainingApp` (يُستعاد في T7). إن فشل: نفس الـ stash، وسجّل الخطأ في رسالة T7. **لا commit هنا.**
 
 ## T1 — Test backfill (Critical C-1) — اختبارات فقط
 **Files (Create):**
@@ -67,39 +69,39 @@
 - SettingsTest: `test_defaults_returned`، `test_invalid_value_422`، **`test_unknown_key_422`**، **`test_maintenance_blocks_mobile_not_admin`**، **`test_completion_limiter_honors_setting`** *(Review Focus 5 — متوقع فشلها)*.
 - DashboardTest: `test_overview_shape` (مفاتيح الكتل)، `test_overview_empty_db_no_division_by_zero`.
 
-- [ ] **Step 1:** اكتب الملفات. **Step 2:** `cd dxn-api && php artisan test` — سجّل قائمة الاختبارات الفاشلة.
-- [ ] **Step 3:** الاختبارات الفاشلة المتوقعة (المعلَّمة أعلاه) تُعلَّم `$this->markTestIncomplete('fixed in T2/T3')` **فقط** إن كان إصلاحها في T2/T3؛ أي فشل غير متوقع يُصلَح في T2 ويُسجَّل سببه.
-- [ ] **Step 4:** Commit `test(api): backfill feature/unit tests for plan 2 endpoints`
+- [x] **Step 1:** اكتب الملفات. **Step 2:** `cd dxn-api && php artisan test` — سجّل قائمة الاختبارات الفاشلة.
+- [x] **Step 3:** الاختبارات الفاشلة المتوقعة (المعلَّمة أعلاه) تُعلَّم `$this->markTestIncomplete('fixed in T2/T3')` **فقط** إن كان إصلاحها في T2/T3؛ أي فشل غير متوقع يُصلَح في T2 ويُسجَّل سببه.
+- [x] **Step 4:** Commit `test(api): backfill feature/unit tests for plan 2 endpoints`
 
 ## T2 — إصلاحات المراجعة في الـ API
 **Files (Modify):** `app/Http/Controllers/Mobile/CompletionController.php`، `app/Services/ScoringService.php`، `app/Http/Controllers/Mobile/LeaderTeamController.php`، `app/Http/Controllers/Admin/UserController.php`، `app/Http/Controllers/Admin/TeamController.php`، `app/Http/Controllers/Mobile/EventController.php`، `app/Services/ProgressService.php`، `app/Models/User.php`، `app/Http/Requests/RegisterRequest.php` و/أو `AuthController.php`. **Create:** `app/Http/Requests/CompletionRequest.php`.
 
-- [ ] **I-1 XP:** في الـ transaction: `$firstAttempt = ! $row; $wasCompleted = $row?->status === 'completed'; $prevBest = (int)($row?->best_score ?? 0);` ثم:
+- [x] **I-1 XP:** في الـ transaction: `$firstAttempt = ! $row; $wasCompleted = $row?->status === 'completed'; $prevBest = (int)($row?->best_score ?? 0);` ثم:
   - `passed && ! $wasCompleted` → `$firstAttempt ? round(xp×mult) : xp_reward`
   - `passed && $wasCompleted && $score > $prevBest` → `floor(xp×ratio)`
   - غير ذلك 0.
-- [ ] **I-2 تحقق الإجابات:** `CompletionRequest` (FormRequest) يُحمَّل بالمستوى من الـ route؛ القواعد: `answers` array (مطلوب لغير lesson)؛ `answers.*.roundId` required string؛ لـ quiz/match_pairs/chat_battle `answers.*.optionId` required؛ لـ order_sequence `answers.*.orderedOptionIds` required array. في `after()`: كل roundId ∈ جولات المستوى، لا تكرار، عدد الإجابات = عدد الجولات، كل optionId ∈ خيارات جولته، و`orderedOptionIds` تبديل كامل لخيارات الجولة → وإلا خطأ على `answers` أو `answers.{i}.*`. يبقى فحص القفل (409) قبل التحقق كما الآن (المستوى المقفل يعيد 409 حتى لو الجسم خاطئ). `ScoringService` يفترض مدخلات صالحة.
-- [ ] **I-3 أحداث الخادم:** داخل الـ transaction بعد حفظ التقدّم: `AnalyticsEvent::create(['user_id'=>…, 'event_name'=> $passed ? 'level_completed' : 'level_failed', 'level_id'=>…, 'payload'=>['score'=>$score,'attempt'=>$row->attempts], 'created_at'=>now()])`.
-- [ ] **M-3:** انقل فحص `isUnlocked` إلى داخل الـ transaction بعد `lockForUpdate` (أبقِ الرد 409).
-- [ ] **I-4 CSV:** استبدل البناء اليدوي بـ `fputcsv` على `fopen('php://temp','r+')`، بادئة BOM، وتهريب الخلايا الخطرة بدالة خاصة `private function csvSafe(?string $v): string`. الأعمدة كما في Plan 2 B1: الاسم، البريد، الهاتف، رقم العضوية، الدور، القائد، XP، آخر نشاط، الحالة.
-- [ ] **I-5:** `lastActiveDays = $m->last_activity_date ? (int) $m->last_activity_date->startOfDay()->diffInDays(now()->startOfDay()) : 999`.
-- [ ] **I-6:** في `TeamController::index` أضف `'leaderName' => $leader->name` وأبقِ `leader` (كائن). حدّث Plan 2 B3 ضمنياً: React يستخدم `leaderName`.
-- [ ] **M-2:** في `sectionStatuses`: COMPLETED فقط عند وجود شهادة؛ وإلا UNLOCKED/LOCKED.
-- [ ] **M-1:** احسب `levelStatuses($user)` مرة واحدة قبل حلقة الأقسام، واجلب الشهادات مرة واحدة (`Certificate::where('user_id',…)->pluck('code','section_id')`).
-- [ ] **M-4:** `EventController`: `created_at = now()`؛ خزّن `occurredAt` داخل `payload['occurredAt']`.
-- [ ] **M-5/C1:** في `User::booted` saving: `if (is_string($u->dxn_id) && trim($u->dxn_id) === '') $u->dxn_id = null;`؛ `RegisterRequest`: `dxnId` → `required|string|max:64` + `prepareForValidation` يعمل `trim`؛ الرسائل العربية: dxnId المكرر "رقم العضوية مسجّل مسبقاً"، القائد "لم يتم العثور على قائد بهذا الرقم"، و`messages()` للحقول الإلزامية.
-- [ ] أزل `markTestIncomplete` من اختبارات I-1/I-2/I-3/I-4/I-5. `php artisan test` → كلها PASS (عدا اختبارات Settings الخاصة بـ T3).
-- [ ] Commit `fix(api): completion XP/validation/events, CSV escaping, team activity, progress perf`
+- [x] **I-2 تحقق الإجابات:** `CompletionRequest` (FormRequest) يُحمَّل بالمستوى من الـ route؛ القواعد: `answers` array (مطلوب لغير lesson)؛ `answers.*.roundId` required string؛ لـ quiz/match_pairs/chat_battle `answers.*.optionId` required؛ لـ order_sequence `answers.*.orderedOptionIds` required array. في `after()`: كل roundId ∈ جولات المستوى، لا تكرار، عدد الإجابات = عدد الجولات، كل optionId ∈ خيارات جولته، و`orderedOptionIds` تبديل كامل لخيارات الجولة → وإلا خطأ على `answers` أو `answers.{i}.*`. يبقى فحص القفل (409) قبل التحقق كما الآن (المستوى المقفل يعيد 409 حتى لو الجسم خاطئ). `ScoringService` يفترض مدخلات صالحة.
+- [x] **I-3 أحداث الخادم:** داخل الـ transaction بعد حفظ التقدّم: `AnalyticsEvent::create(['user_id'=>…, 'event_name'=> $passed ? 'level_completed' : 'level_failed', 'level_id'=>…, 'payload'=>['score'=>$score,'attempt'=>$row->attempts], 'created_at'=>now()])`.
+- [x] **M-3:** انقل فحص `isUnlocked` إلى داخل الـ transaction بعد `lockForUpdate` (أبقِ الرد 409).
+- [x] **I-4 CSV:** استبدل البناء اليدوي بـ `fputcsv` على `fopen('php://temp','r+')`، بادئة BOM، وتهريب الخلايا الخطرة بدالة خاصة `private function csvSafe(?string $v): string`. الأعمدة كما في Plan 2 B1: الاسم، البريد، الهاتف، رقم العضوية، الدور، القائد، XP، آخر نشاط، الحالة.
+- [x] **I-5:** `lastActiveDays = $m->last_activity_date ? (int) $m->last_activity_date->startOfDay()->diffInDays(now()->startOfDay()) : 999`.
+- [x] **I-6:** في `TeamController::index` أضف `'leaderName' => $leader->name` وأبقِ `leader` (كائن). حدّث Plan 2 B3 ضمنياً: React يستخدم `leaderName`.
+- [x] **M-2:** في `sectionStatuses`: COMPLETED فقط عند وجود شهادة؛ وإلا UNLOCKED/LOCKED.
+- [x] **M-1:** احسب `levelStatuses($user)` مرة واحدة قبل حلقة الأقسام، واجلب الشهادات مرة واحدة (`Certificate::where('user_id',…)->pluck('code','section_id')`).
+- [x] **M-4:** `EventController`: `created_at = now()`؛ خزّن `occurredAt` داخل `payload['occurredAt']`.
+- [x] **M-5/C1:** في `User::booted` saving: `if (is_string($u->dxn_id) && trim($u->dxn_id) === '') $u->dxn_id = null;`؛ `RegisterRequest`: `dxnId` → `required|string|max:64` + `prepareForValidation` يعمل `trim`؛ الرسائل العربية: dxnId المكرر "رقم العضوية مسجّل مسبقاً"، القائد "لم يتم العثور على قائد بهذا الرقم"، و`messages()` للحقول الإلزامية.
+- [x] أزل `markTestIncomplete` من اختبارات I-1/I-2/I-3/I-4/I-5. `php artisan test` → كلها PASS (عدا اختبارات Settings الخاصة بـ T3).
+- [x] Commit `fix(api): completion XP/validation/events, CSV escaping, team activity, progress perf`
 
 ## T3 — Settings: رفض المفاتيح المجهولة وربط السلوك (I-7, I-8)
 **Files:** `app/Http/Controllers/Admin/SettingsController.php`، `app/Http/Controllers/AuthController.php`، `app/Providers/AppServiceProvider.php`، `routes/api.php`، **Create** `app/Http/Middleware/BlockWhenMaintenance.php`، `bootstrap/app.php` (alias `maintenance`).
-- [ ] `update`: إن وُجدت مفاتيح خارج `RULES` → 422 `{message:'مفتاح غير معروف', errors:{<key>:['مفتاح غير معروف']}}`.
-- [ ] نقل `DEFAULTS` إلى `Setting::DEFAULTS` (أو ثابت مشترك) واستعمال `Setting::get` بالقيمة الافتراضية منه في كل مكان (CompletionController يقرأ xp_* بالفعل).
-- [ ] `session_minutes`: في `AuthController::login` لتوكن `dashboard` فقط: `createToken('dashboard', ['*'], now()->addMinutes((int) Setting::get('session_minutes', 60)))`. توكن `mobile` بلا انتهاء.
-- [ ] `quiz_rate_limit_per_minute`: في `AppServiceProvider::boot`: `RateLimiter::for('completion', fn (Request $r) => Limit::perMinute((int) Setting::get('quiz_rate_limit_per_minute', 10))->by($r->user()?->id ?: $r->ip()))`؛ في routes استبدل `throttle:30,1` بـ `throttle:completion`. (ملاحظة: AGENTS.md يذكر `30,1` — حدّثه في F2.)
-- [ ] `maintenance_mode`: middleware يعيد 503 `{message:'التطبيق تحت الصيانة'}` إذا `Setting::get('maintenance_mode', false)`؛ يُطبَّق على مجموعة الـ routes الموبايل (`sections/tree`, `users/*`, `levels/*/complete`, `leader/team`, `events`) و`auth/register` — **لا** على `auth/login|logout|me` ولا `/api/admin/*`.
-- [ ] أزل `markTestIncomplete` من اختبارات Settings؛ `php artisan test` كله PASS.
-- [ ] Commit `feat(api): settings validation and behavioral wiring`
+- [x] `update`: إن وُجدت مفاتيح خارج `RULES` → 422 `{message:'مفتاح غير معروف', errors:{<key>:['مفتاح غير معروف']}}`.
+- [x] نقل `DEFAULTS` إلى `Setting::DEFAULTS` (أو ثابت مشترك) واستعمال `Setting::get` بالقيمة الافتراضية منه في كل مكان (CompletionController يقرأ xp_* بالفعل).
+- [x] `session_minutes`: في `AuthController::login` لتوكن `dashboard` فقط: `createToken('dashboard', ['*'], now()->addMinutes((int) Setting::get('session_minutes', 60)))`. توكن `mobile` بلا انتهاء.
+- [x] `quiz_rate_limit_per_minute`: في `AppServiceProvider::boot`: `RateLimiter::for('completion', fn (Request $r) => Limit::perMinute((int) Setting::get('quiz_rate_limit_per_minute', 10))->by($r->user()?->id ?: $r->ip()))`؛ في routes استبدل `throttle:30,1` بـ `throttle:completion`. (ملاحظة: AGENTS.md يذكر `30,1` — حدّثه في F2.)
+- [x] `maintenance_mode`: middleware يعيد 503 `{message:'التطبيق تحت الصيانة'}` إذا `Setting::get('maintenance_mode', false)`؛ يُطبَّق على مجموعة الـ routes الموبايل (`sections/tree`, `users/*`, `levels/*/complete`, `leader/team`, `events`) و`auth/register` — **لا** على `auth/login|logout|me` ولا `/api/admin/*`.
+- [x] أزل `markTestIncomplete` من اختبارات Settings؛ `php artisan test` كله PASS.
+- [x] Commit `feat(api): settings validation and behavioral wiring`
 
 ### ⏸ نقطة توقف المالك 1
 سلّم: عدد الاختبارات، قائمة commits T1–T3، أي اختبار بقي incomplete ولماذا.
@@ -121,12 +123,12 @@
 كما في Plan 2 Task B3 حرفياً، مع: الفرق تعرض `leaderName` (T2/I-6)؛ أنواع `AdminUser`, `Paginated<T>`, `TeamSummary` في `src/lib/types.ts` مطابقة لـ `AdminUserResource` و`TeamController` الحاليين (اقرأهما). Commit `feat(admin-web): users and teams on live API`.
 
 ## T7 — D1 (إكمال) + D2
-- [ ] `git stash pop` لـ "D2-wip" (من T0)؛ حل التعارضات إن وُجدت.
-- [ ] D1 المتبقي كما في Plan 2 D1: ربط `AuthViewModel`, `LoginScreen`, `RegisterScreen` (حقل كلمة المرور، تسمية "رقم عضوية القائد (اختياري)")، وجهة البداية حسب الجلسة، إزالة `DEFAULT_USER_ID` من `ContentRepository.kt` واستعمال `userId` من `SessionStore`.
-- [ ] نقل `BASE_URL` من `defaultConfig` إلى `buildTypes { debug { "http://10.0.2.2:8000/" } release { "https://CHANGE-ME/" } }` + تعليق `shortcut: release URL placeholder, set in F1`.
-- [ ] D2 كما في Plan 2 D2 حرفياً (CompletionResult، جمع الإجابات من الشاشات الأربع، حذف منطق الفتح المحلي، شاشة غير متصل). شكل الإجابات يجب أن يطابق تحقق T2 (كل الجولات، `optionId` أو `orderedOptionIds`).
-- [ ] تحقق: `gradlew :app:assembleDebug` + الفحوص اليدوية في Plan 2 D1 وD2 على المحاكي مقابل `php artisan serve --host=0.0.0.0 --port=8000`.
-- [ ] Commit واحد لكل جزء: `feat(android): real auth with token storage` ثم `feat(android): server-authoritative progress and completion`.
+- [x] `git stash pop` لـ "D2-wip" (من T0)؛ حل التعارضات إن وُجدت.
+- [x] D1 المتبقي كما في Plan 2 D1: ربط `AuthViewModel`, `LoginScreen`, `RegisterScreen` (حقل كلمة المرور، تسمية "رقم عضوية القائد (اختياري)")، وجهة البداية حسب الجلسة، إزالة `DEFAULT_USER_ID` من `ContentRepository.kt` واستعمال `userId` من `SessionStore`.
+- [x] نقل `BASE_URL` من `defaultConfig` إلى `buildTypes { debug { "http://10.0.2.2:8000/" } release { "https://CHANGE-ME/" } }` + تعليق `shortcut: release URL placeholder, set in F1`.
+- [x] D2 كما في Plan 2 D2 حرفياً (CompletionResult، جمع الإجابات من الشاشات الأربع، حذف منطق الفتح المحلي، شاشة غير متصل). شكل الإجابات يجب أن يطابق تحقق T2 (كل الجولات، `optionId` أو `orderedOptionIds`).
+- [x] تحقق: `gradlew :app:assembleDebug` + الفحوص اليدوية في Plan 2 D1 وD2 على المحاكي مقابل `php artisan serve --host=0.0.0.0 --port=8000`.
+- [x] Commit واحد لكل جزء: `feat(android): real auth with token storage` ثم `feat(android): server-authoritative progress and completion`.
 
 ### ⏸ نقطة توقف المالك 2
 سلّم: نتيجة البناء، الفحوص اليدوية المنجزة/غير المنجزة، commits.
