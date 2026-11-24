@@ -84,3 +84,15 @@ docker build -f deploy/Dockerfile .
 - ÈÚÏ Ãæá ÏÎæá: ÛíøÑ ßáãÉ ãÑæÑ ÇáãÏíÑ ãä áæÍÉ ÇáÅÏÇÑÉ Ëã ÇÍĞİ `ADMIN_PASSWORD` ãä Variables (ÑÇÌÚ ÇáÎØæÉ 6 ÃÚáÇå).
 - ÑÄæÓ ÇáÃãÇä (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, HSTS İí ÇáÅäÊÇÌ¡ CSP ááæÍÉ) ÊõÖÇİ ÊáŞÇÆíÇğ ÚÈÑ `App\Http\Middleware\SecurityHeaders`.
 
+## Smoke tests (Ø·Â¨Ø·Â¹Ø·Â¯ Ø·Â§Ø¸â€Ø¸â€ Ø·Â´Ø·Â±)
+
+```powershell
+$BASE = "https://<domain>"
+curl -s -o NUL -w "%{http_code}" "$BASE/up"
+curl -s -H 'Accept: application/json' "$BASE/api/app/config"
+curl -s -o NUL -w "%{http_code}" -H 'Accept: application/json' -X POST "$BASE/api/auth/login" -H 'Content-Type: application/json' -d '{"login":"x","password":"y"}'
+curl -sI "$BASE/admin/" | Select-String 'content-security-policy|x-content-type-options'
+```
+
+Ø¸â€¦Ø·Ú¾Ø¸Ë†Ø¸â€šØ·Â¹: /up Ã¢â€ â€™ 200Ø·â€º /api/app/config Ã¢â€ â€™ 200 Ø¸Ë†Ø·Â§Ø¸â€Ø·Â§Ø·Â³Ø¸â€¦ Ø¢Â«Ø·Â­Ø¸Æ’Ø·Â§Ø¸Ù¹Ø·Â© Ø·Ú¾Ø¸â€¦Ø¸Ù¹Ø¸â€˜Ø·Â²Ø¢Â»Ø·â€º login Ø·Â®Ø·Â§Ø·Â·Ø·Â¦ Ã¢â€ â€™ 401Ø·â€º Ø·Â±Ø·Â¤Ø¸Ë†Ø·Â³ R2 Ø¸â€¦Ø¸Ë†Ø·Â¬Ø¸Ë†Ø·Â¯Ø·Â©.
+```
