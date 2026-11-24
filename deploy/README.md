@@ -70,7 +70,7 @@ docker build -f deploy/Dockerfile .
 | `php artisan route:cache` ثم `route:clear` | PASS؛ مسار `admin/{any?}` قابل للتخزين المؤقت |
 | `php artisan serve --host=127.0.0.1 --port=8000` + `GET /admin/` | PASS (200، HTML يحتوي `id="root"` ومسارات `/admin/assets/`) |
 | Routes عميقة `/admin/login` و`/admin/anything/deep` | PASS (200 + نفس HTML) عبر router محلي يحاكي إعادة توجيه Apache؛ ملاحظة: `php artisan serve` نفسه يعاني من خاصة PATH_INFO عند وجود مجلد `public/admin` فيعيد 404 لهذه المسارات، ولا تظهر المشكلة على Apache في الصورة |
-| `php artisan test` | PASS — 114 اختباراً / 551 تأكيداً |
+| `php artisan test` | PASS — 129 اختباراً / 620 تأكيداً (تحقق 2026-11-24 بعد Laravel Boost) |
 | `:app:assembleDebug` مع JDK 17 | PASS — `BUILD SUCCESSFUL in 42s` |
 | بناء الصورة الفعلي | **NOT RUN** (Docker غير مثبت) |
 | النشر الفعلي / DNS / الأسرار على المضيف | **NOT RUN** — من مسؤولية المالك |

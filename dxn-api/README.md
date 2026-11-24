@@ -31,7 +31,7 @@ php artisan serve --host=0.0.0.0 --port=8000
 php artisan test        # أو: composer test (يمسح config أولاً)
 ```
 
-> نتيجة التحقق الأخير (2026-11-23): **114 اختباراً / 551 تأكيداً، كلها ناجحة**. الاختبارات تعمل على SQLite عبر `phpunit.xml`، لذلك لا تكشف مشاكل ترميز MySQL؛ فحص Arabic round-trip يدوي موثّق في `docs/superpowers/plans/2026-11-21-plan2-verification.md`. كل نقطة API جديدة تحتاج اختبار Feature.
+> نتيجة التحقق الأخير (2026-11-24): **129 اختباراً / 620 تأكيداً، كلها ناجحة**. الاختبارات تعمل على SQLite عبر `phpunit.xml`، لذلك لا تكشف مشاكل ترميز MySQL؛ فحص Arabic round-trip يدوي موثّق في `docs/superpowers/plans/2026-11-21-plan2-verification.md`. كل نقطة API جديدة تحتاج اختبار Feature.
 
 عند استدعاء API يدوياً أرسل دائماً `Accept: application/json`؛ بدونه قد يعطي مسار غير مصادَّق 500 برسالة `Route [login] not defined`. مثال:
 
