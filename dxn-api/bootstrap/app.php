@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\BlockWhenMaintenance;
+use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,9 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
+        $middleware->append(SecurityHeaders::class);
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
-            'maintenance' => \App\Http\Middleware\BlockWhenMaintenance::class,
+            'role' => EnsureRole::class,
+            'maintenance' => BlockWhenMaintenance::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
