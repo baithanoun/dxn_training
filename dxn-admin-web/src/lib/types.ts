@@ -138,10 +138,12 @@ export interface AdminCertificate {
   issuedAt: string | null
 }
 
-// Shape expected from GET admin/users/{id}; sectionsProgress is currently [] in the API.
+// Shape returned by GET admin/users/{id} for published sections.
 export interface SectionProgress {
   sectionId: string
-  sectionTitle?: string | null
+  sectionTitle: string
+  completedLevels: number
+  totalLevels: number
   progressPercent: number
 }
 

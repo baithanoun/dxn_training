@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Section;
 use App\Models\User;
+use App\Models\UserLevelProgress;
 use Carbon\Carbon;
+use Database\Seeders\ContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -178,6 +181,44 @@ class UsersTest extends TestCase
 
         app('auth')->forgetGuards();
         $this->getJson('/api/auth/me', ['Authorization' => "Bearer $token"])->assertStatus(401);
+    }
+
+    public function test_user_detail_returns_per_section_progress(): void
+    {
+        $this->seed(ContentSeeder::class);
+        $admin = $this->admin();
+        $member = User::factory()->create(['role' => 'trainee']);
+
+        $section = Section::where('status', 'published')->orderBy('order_index')->firstOrFail();
+        $levels = $section->skills()
+            ->where('status', 'published')
+            ->orderBy('order_index')
+            ->with(['levels' => fn ($q) => $q->where('status', 'published')->orderBy('order_index')])
+            ->get()
+            ->flatMap(fn ($skill) => $skill->levels);
+
+        $this->assertGreaterThan(0, $levels->count());
+
+        UserLevelProgress::create([
+            'user_id' => $member->id,
+            'level_id' => $levels->first()->id,
+            'status' => 'completed',
+            'score' => 100,
+            'best_score' => 100,
+            'attempts' => 1,
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')
+            ->getJson("/api/admin/users/{$member->id}")
+            ->assertOk()
+            ->assertJsonCount(Section::where('status', 'published')->count(), 'sectionsProgress');
+
+        $row = collect($response->json('sectionsProgress'))->firstWhere('sectionId', (string) $section->id);
+        $this->assertNotNull($row);
+        $this->assertSame($section->title, $row['sectionTitle']);
+        $this->assertSame(1, $row['completedLevels']);
+        $this->assertSame($levels->count(), $row['totalLevels']);
+        $this->assertSame((int) round(1 / $levels->count() * 100), $row['progressPercent']);
     }
 
     public function test_admin_cannot_demote_self(): void

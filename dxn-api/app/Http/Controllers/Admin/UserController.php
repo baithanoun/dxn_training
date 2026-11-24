@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\AdminUserResource;
 use App\Models\User;
+use App\Services\ProgressService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -16,9 +17,9 @@ class UserController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-                $hash = \App\Models\User::hashDxnId($search);
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+                $hash = User::hashDxnId($search);
                 $q->orWhere('dxn_id_hash', $hash);
             });
         }
@@ -37,7 +38,7 @@ class UserController extends Controller
             } elseif ($status === 'inactive') {
                 $query->where(function ($q) {
                     $q->whereNull('last_activity_date')
-                      ->orWhere('last_activity_date', '<', now()->subDays(3)->toDateString());
+                        ->orWhere('last_activity_date', '<', now()->subDays(3)->toDateString());
                 })->where('is_active', true);
             } elseif ($status === 'disabled') {
                 $query->where('is_active', false);
@@ -64,7 +65,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(string $id)
+    public function show(string $id, ProgressService $progress)
     {
         $user = User::with('sponsor', 'certificates.section')->findOrFail($id);
 
@@ -76,7 +77,7 @@ class UserController extends Controller
             'code' => $c->code,
             'issuedAt' => $c->issued_at?->toDateString(),
         ])->values();
-        $data['sectionsProgress'] = [];
+        $data['sectionsProgress'] = $progress->sectionProgress($user);
 
         return response()->json($data);
     }
@@ -127,8 +128,8 @@ class UserController extends Controller
 
         $data = $request->validate([
             'fullName' => 'sometimes|string|max:255',
-            'email' => 'sometimes|nullable|email|max:255|unique:users,email,' . $id,
-            'phone' => 'sometimes|nullable|string|max:32|unique:users,phone,' . $id,
+            'email' => 'sometimes|nullable|email|max:255|unique:users,email,'.$id,
+            'phone' => 'sometimes|nullable|string|max:32|unique:users,phone,'.$id,
             'password' => 'sometimes|string|min:8',
             'dxnId' => 'sometimes|nullable|string|max:64',
             'role' => 'sometimes|in:admin,leader,trainee',
@@ -144,14 +145,30 @@ class UserController extends Controller
             return response()->json(['message' => 'Cannot deactivate self', 'errors' => ['isActive' => ['Cannot deactivate yourself']]], 422);
         }
 
-        if (array_key_exists('fullName', $data)) $user->name = $data['fullName'];
-        if (array_key_exists('gender', $data)) $user->gender = $data['gender'];
-        if (array_key_exists('email', $data)) $user->email = $data['email'];
-        if (array_key_exists('phone', $data)) $user->phone = $data['phone'];
-        if (array_key_exists('password', $data)) $user->password = $data['password'];
-        if (array_key_exists('dxnId', $data)) $user->dxn_id = $data['dxnId'];
-        if (array_key_exists('role', $data)) $user->role = $data['role'];
-        if (array_key_exists('leaderId', $data)) $user->sponsor_id = $data['leaderId'];
+        if (array_key_exists('fullName', $data)) {
+            $user->name = $data['fullName'];
+        }
+        if (array_key_exists('gender', $data)) {
+            $user->gender = $data['gender'];
+        }
+        if (array_key_exists('email', $data)) {
+            $user->email = $data['email'];
+        }
+        if (array_key_exists('phone', $data)) {
+            $user->phone = $data['phone'];
+        }
+        if (array_key_exists('password', $data)) {
+            $user->password = $data['password'];
+        }
+        if (array_key_exists('dxnId', $data)) {
+            $user->dxn_id = $data['dxnId'];
+        }
+        if (array_key_exists('role', $data)) {
+            $user->role = $data['role'];
+        }
+        if (array_key_exists('leaderId', $data)) {
+            $user->sponsor_id = $data['leaderId'];
+        }
         if (array_key_exists('isActive', $data)) {
             $user->is_active = $data['isActive'];
             if (! $data['isActive']) {
@@ -177,9 +194,9 @@ class UserController extends Controller
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-                $hash = \App\Models\User::hashDxnId($search);
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+                $hash = User::hashDxnId($search);
                 $q->orWhere('dxn_id_hash', $hash);
             });
         }
@@ -229,6 +246,6 @@ class UserController extends Controller
     {
         $value = $v ?? '';
 
-        return $value !== '' && str_contains('=+-@', $value[0]) ? "'" . $value : $value;
+        return $value !== '' && str_contains('=+-@', $value[0]) ? "'".$value : $value;
     }
 }

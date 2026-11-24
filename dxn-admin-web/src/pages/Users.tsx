@@ -681,7 +681,6 @@ function UserPanel({
           <CardTitle className="text-base">تقدم الحقائب التدريبية</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* shortcut: AdminUserResource returns sectionsProgress: [] today; this empty state covers it and the same markup renders bars once the API populates the field. */}
           {detail.sectionsProgress.length === 0 ? (
             <p className="text-sm text-muted-foreground">لا توجد بيانات تقدم لهذا المستخدم بعد.</p>
           ) : (
@@ -689,7 +688,9 @@ function UserPanel({
               <div key={p.sectionId}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="truncate max-w-[260px]">{p.sectionTitle ?? p.sectionId}</span>
-                  <span className="font-medium">{p.progressPercent}%</span>
+                  <span className="font-medium">
+                    {p.progressPercent}% <span className="text-xs text-muted-foreground">({p.completedLevels}/{p.totalLevels})</span>
+                  </span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                   <div

@@ -7,11 +7,12 @@ use App\Models\Level;
 use App\Models\Section;
 use App\Models\User;
 use App\Models\UserLevelProgress;
+use Illuminate\Support\Collection;
 
 class ProgressService
 {
     /** Published, non-trashed levels of a section in skill then level order. */
-    public function orderedLevels(Section $section): \Illuminate\Support\Collection
+    public function orderedLevels(Section $section): Collection
     {
         return $section->skills()
             ->where('status', 'published')
@@ -26,6 +27,7 @@ class ProgressService
     {
         $levels = $this->orderedLevels($section);
         $flagged = $levels->firstWhere('is_final_quiz', true);
+
         return $flagged ?? $levels->last();
     }
 
@@ -41,6 +43,7 @@ class ProgressService
             foreach ($levels as $level) {
                 if (! $sectionUnlocked) {
                     $result[$level->id] = 'LOCKED';
+
                     continue;
                 }
                 $row = $progress->get($level->id);
@@ -60,6 +63,7 @@ class ProgressService
                 }
             }
         }
+
         return $result;
     }
 
@@ -81,11 +85,13 @@ class ProgressService
                     'certificateId' => $cert->code,
                     'completedAt' => $cert->issued_at?->toDateString(),
                 ];
+
                 continue;
             }
             $requiredId = $section->required_section_id;
             if ($requiredId && ! $certificates->has($requiredId)) {
                 $result[$section->id] = ['status' => 'LOCKED', 'certificateIssued' => false, 'certificateId' => null, 'completedAt' => null];
+
                 continue;
             }
             $levels = $this->orderedLevels($section);
@@ -98,26 +104,64 @@ class ProgressService
                 'completedAt' => null,
             ];
         }
+
         return $result;
     }
 
     public function isUnlocked(User $user, Level $level): bool
     {
         $statuses = $this->levelStatuses($user);
+
         return ($statuses[$level->id] ?? 'LOCKED') !== 'LOCKED';
     }
 
     public function completionPercent(User $user): int
     {
         $published = Level::where('status', 'published')->count();
-        if ($published === 0) return 0;
+        if ($published === 0) {
+            return 0;
+        }
         $completed = UserLevelProgress::where('user_id', $user->id)->where('status', 'completed')->count();
+
         return (int) round($completed / $published * 100);
+    }
+
+    /**
+     * Published-section completion for the admin user detail.
+     *
+     * @return array<int, array{sectionId: string, sectionTitle: string, completedLevels: int, totalLevels: int, progressPercent: int}>
+     */
+    public function sectionProgress(User $user): array
+    {
+        $completed = UserLevelProgress::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->pluck('level_id')
+            ->flip();
+
+        $result = [];
+        foreach (Section::where('status', 'published')->orderBy('order_index')->get() as $section) {
+            $levels = $this->orderedLevels($section);
+            $total = $levels->count();
+            $done = $levels->filter(fn (Level $level) => $completed->has($level->id))->count();
+
+            $result[] = [
+                'sectionId' => (string) $section->id,
+                'sectionTitle' => $section->title,
+                'completedLevels' => $done,
+                'totalLevels' => $total,
+                'progressPercent' => $total === 0 ? 0 : (int) round($done / $total * 100),
+            ];
+        }
+
+        return $result;
     }
 
     private function sectionUnlocked(User $user, Section $section): bool
     {
-        if (! $section->required_section_id) return true;
+        if (! $section->required_section_id) {
+            return true;
+        }
+
         return Certificate::where('user_id', $user->id)->where('section_id', $section->required_section_id)->exists();
     }
 }
