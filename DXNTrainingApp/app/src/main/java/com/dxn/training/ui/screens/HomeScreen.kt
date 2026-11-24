@@ -29,6 +29,7 @@ import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.HomeViewModel
 
 @Composable
@@ -46,7 +47,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Background)
+                .background(BrandIvory)
                 .verticalScroll(rememberScrollState())
                 .padding(padding)
         ) {
@@ -60,12 +61,30 @@ fun HomeScreen(
             }
         }
 
+        // الشجرة المحلية للعرض فقط؛ التقدّم لا يُحسب محلياً.
+        if (uiState.offlineFallback && !uiState.isLoading) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = XpContainer),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Warning)
+            ) {
+                Text(
+                    text = "وضع غير متصل — المحتوى للعرض فقط",
+                    color = WarningText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
         DailyProgressCard(uiState)
 
         Text(
             text = "مسار التدريب",
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
@@ -76,7 +95,7 @@ fun HomeScreen(
                     .height(200.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = DXNRed)
+                CircularProgressIndicator(color = BrandPlum)
             }
         }
 
@@ -90,20 +109,21 @@ fun HomeScreen(
         }
 
         uiState.sections.forEachIndexed { index, section ->
+            val requiredTitle = uiState.sections
+                .find { it.id == section.requiredSectionId }?.title ?: "القسم السابق"
+            val lockedSectionText = g(
+                "يجب أن تُكمل $requiredTitle وتحصل على شهادته لفتح هذا القسم",
+                "يجب أن تُكملي $requiredTitle وتحصلي على شهادته لفتح هذا القسم"
+            )
             SectionCard(
                 section = section,
                 index = index,
                 sectionProgress = uiState.sectionProgress[section.id],
                 onContinue = { shouldOpen ->
                     if (!shouldOpen) {
-                        val required = section.requiredSectionId
-                        val requiredTitle = uiState.sections.find { it.id == required }?.title ?: "القسم السابق"
-                        lockedSectionMessage = "يجب إكمال $requiredTitle والحصول على شهادته لفتح هذا القسم"
+                        lockedSectionMessage = lockedSectionText
                         return@SectionCard
                     }
-
-                    // فتح أول مستوى في القسم إذا لم يُفتح بعد
-                    viewModel.unlockFirstLevelOfSection(section.id)
 
                     val firstLevel = section.skills
                         .flatMap { it.levels }
@@ -141,10 +161,10 @@ private fun DailyProgressCard(uiState: HomeViewModel.HomeUiState) {
         Text(
             text = "تقدمك اليومي",
             style = MaterialTheme.typography.bodyLarge,
-            color = DXNBlue
+            color = BrandPlum700
         )
         Spacer(modifier = Modifier.height(12.dp))
-        DxProgressBar(progress = uiState.dailyProgress, color = DXNGreen)
+        DxProgressBar(progress = uiState.dailyProgress, color = Leaf)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -172,8 +192,8 @@ private fun SectionCard(
     val isCertificateIssued = sectionProgress?.certificateIssued == true
 
     val (statusColor, statusText) = when (status) {
-        SectionStatus.COMPLETED -> DXNGreen to "مكتمل"
-        SectionStatus.UNLOCKED -> DXNGold to "متاح"
+        SectionStatus.COMPLETED -> Leaf to "مكتمل"
+        SectionStatus.UNLOCKED -> Xp to "متاح"
         SectionStatus.LOCKED -> Locked to "مقفل"
     }
 
@@ -184,7 +204,7 @@ private fun SectionCard(
             .clickable(enabled = true) { onContinue(!isLocked) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isLocked) CardSurface else statusColor.copy(alpha = 0.08f)
+            containerColor = if (isLocked) Surface else statusColor.copy(alpha = 0.08f)
         ),
         border = if (isCompleted) null else androidx.compose.foundation.BorderStroke(1.dp, statusColor.copy(alpha = 0.3f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
@@ -207,13 +227,13 @@ private fun SectionCard(
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = "مقفل",
-                                tint = CardSurface,
+                                tint = Surface,
                                 modifier = Modifier.size(20.dp)
                             )
                         } else if (isCompleted) {
-                            Text("✓", color = CardSurface, style = MaterialTheme.typography.titleLarge)
+                            Text("✓", color = Surface, style = MaterialTheme.typography.titleLarge)
                         } else {
-                            Text("${index + 1}", color = CardSurface, style = MaterialTheme.typography.titleMedium)
+                            Text("${index + 1}", color = Surface, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -236,11 +256,11 @@ private fun SectionCard(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = statusColor.copy(alpha = 0.12f)
+                    color = if (isCompleted) LeafContainer else statusColor.copy(alpha = 0.12f)
                 ) {
                     Text(
                         text = statusText,
-                        color = statusColor,
+                        color = if (isCompleted) LeafText else statusColor,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
@@ -261,7 +281,7 @@ private fun SectionCard(
                 Text(
                     text = "🎓 ${section.certificateTitle}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = DXNGold,
+                    color = XpText,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -280,8 +300,8 @@ private fun SkillNode(
     val status = userProgress?.status ?: LevelStatus.LOCKED
 
     val (iconColor, textColor) = when (status) {
-        LevelStatus.COMPLETED -> DXNGreen to TextPrimary
-        LevelStatus.UNLOCKED -> DXNGreen to TextPrimary
+        LevelStatus.COMPLETED -> Leaf to TextPrimary
+        LevelStatus.UNLOCKED -> Leaf to TextPrimary
         LevelStatus.LOCKED -> Locked to Locked
     }
 
@@ -295,7 +315,7 @@ private fun SkillNode(
                 }
             },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface),
+        colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
@@ -320,7 +340,7 @@ private fun SkillNode(
                 }
                 Text(
                     text = icon,
-                    color = CardSurface,
+                    color = Surface,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

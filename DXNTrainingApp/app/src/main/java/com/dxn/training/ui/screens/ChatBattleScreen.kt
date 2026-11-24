@@ -1,5 +1,6 @@
 package com.dxn.training.ui.screens
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,47 +14,51 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
+import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun ChatBattleScreen(
     levelId: String,
-    onComplete: (Int, Int) -> Unit,
+    onComplete: (List<AnswerDto>) -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
-    val round = level?.rounds?.firstOrNull()
-    var trust by remember { mutableIntStateOf(round?.initialTrust ?: 50) }
-    var hearts by remember { mutableIntStateOf(3) }
-    var answered by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf<RoundOption?>(null) }
-    val messages = remember { mutableStateListOf<Pair<String, Boolean>>() }
-    LaunchedEffect(round) {
-        if (round != null && messages.isEmpty()) {
-            messages.add(round.prompt to false)
-        }
-    }
-
+    val rounds = level?.rounds ?: emptyList()
+    var roundIndex by remember(levelId) { mutableIntStateOf(0) }
+    val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
 
+    var trust by remember(round.id) { mutableIntStateOf(round.initialTrust) }
+    var hearts by remember(levelId) { mutableIntStateOf(3) }
+    var answered by remember(round.id) { mutableStateOf(false) }
+    var selectedOption by remember(round.id) { mutableStateOf<RoundOption?>(null) }
+    val messages = remember(round.id) { mutableStateListOf(round.prompt to false) }
+    val answers = remember(levelId) { mutableListOf<AnswerDto>() }
+    val roundStartedAt = remember(round.id) { SystemClock.elapsedRealtime() }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         // Header
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = CardSurface)
+            colors = CardDefaults.cardColors(containerColor = Surface)
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Row(
@@ -63,7 +68,7 @@ fun ChatBattleScreen(
                 ) {
                     AvatarPlaceholder(size = 40)
                     Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text("أحمد — صديق مهتم", style = MaterialTheme.typography.bodyLarge, color = DXNBlue)
+                        Text("أحمد — صديق مهتم", style = MaterialTheme.typography.bodyLarge, color = BrandPlum700)
                         Text("متردد", style = MaterialTheme.typography.bodyMedium, color = TextMuted)
                     }
                     CloseButton(onClick = onBack)
@@ -88,25 +93,14 @@ fun ChatBattleScreen(
                 ChatBubble(text = text, isUser = isUser)
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            // Ensure prompt is shown when level changes
-            LaunchedEffect(levelId) {
-                if (messages.isEmpty() || messages.firstOrNull()?.first != round.prompt) {
-                    messages.clear()
-                    messages.add(round.prompt to false)
-                    trust = round.initialTrust
-                    hearts = 3
-                    answered = false
-                    selectedOption = null
-                }
-            }
         }
 
         // Options
         if (!answered) {
             Text(
-                text = "اختر ردك التالي:",
+                text = g("اختر ردك التالي:", "اختاري ردكِ التالي:"),
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue,
+                color = BrandPlum700,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -118,13 +112,13 @@ fun ChatBattleScreen(
                         .clickable { selectedOption = option },
                     shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (selectedOption?.id == option.id) DXNRed else CardSurface
+                        containerColor = if (selectedOption?.id == option.id) BrandPlum else Surface
                     )
                 ) {
                     Text(
                         text = option.text,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (selectedOption?.id == option.id) CardSurface else TextPrimary,
+                        color = if (selectedOption?.id == option.id) Surface else TextPrimary,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -136,7 +130,7 @@ fun ChatBattleScreen(
             Text(
                 text = selectedOption?.feedback ?: "",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selectedOption?.isCorrect == true) DXNGreen else DXNRedDeep,
+                color = if (selectedOption?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
@@ -144,20 +138,33 @@ fun ChatBattleScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         DxButton(
-            text = if (answered) "متابعة" else "إرسال",
+            text = if (answered && roundIndex < rounds.lastIndex) "التالي"
+                   else if (answered) "متابعة" else "إرسال",
             onClick = {
                 if (answered) {
-                    val passed = trust >= level.passThreshold && hearts > 0
-                    val score = if (passed) 100 else 0
-                    val xp = if (passed) level.xpReward else 0
-                    contentRepository.updateLevelProgress(levelId, score, passed)
-                    onComplete(score, xp)
+                    val chosen = selectedOption ?: return@DxButton
+                    answers.add(AnswerDto(round.id, chosen.id))
+                    if (roundIndex < rounds.lastIndex) {
+                        roundIndex++
+                    } else {
+                        onComplete(answers.toList())
+                    }
                 } else {
                     selectedOption?.let { option ->
                         trust = (trust + option.trustImpact).coerceIn(0, 100)
                         if (!option.isCorrect && !option.isNeutral) hearts--
                         messages.add(option.text to true)
                         answered = true
+                        EventSender.send(
+                            name = "question_answered",
+                            levelId = levelId,
+                            payload = mapOf(
+                                "roundId" to round.id,
+                                "optionId" to option.id,
+                                "correct" to option.isCorrect,
+                                "timeMs" to (SystemClock.elapsedRealtime() - roundStartedAt)
+                            )
+                        )
                     }
                 }
             },
@@ -184,12 +191,12 @@ private fun ChatBubble(text: String, isUser: Boolean) {
                         bottomEnd = if (isUser) 16.dp else 4.dp
                     )
                 )
-                .background(if (isUser) DXNRed else CardSurface)
+                .background(if (isUser) BrandPlum else Surface)
                 .padding(12.dp)
         ) {
             Text(
                 text = text,
-                color = if (isUser) CardSurface else TextPrimary,
+                color = if (isUser) Surface else TextPrimary,
                 style = MaterialTheme.typography.bodyLarge
             )
         }

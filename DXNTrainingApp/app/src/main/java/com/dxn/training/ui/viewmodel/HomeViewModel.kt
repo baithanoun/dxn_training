@@ -2,9 +2,11 @@ package com.dxn.training.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.model.Section
 import com.dxn.training.data.model.SectionProgress
 import com.dxn.training.data.model.UserProgress
+import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import kotlinx.coroutines.CancellationException
@@ -12,8 +14,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val contentRepository: ContentRepository = ContentRepository(),
-    private val userRepository: UserRepository = UserRepository()
+    private val contentRepository: ContentRepository = ContentRepository.getInstance(),
+    private val userRepository: UserRepository = UserRepository(),
+    private val sessionStore: SessionStore? = ApiClient.getSessionStore()
 ) : ViewModel() {
 
     data class HomeUiState(
@@ -25,7 +28,8 @@ class HomeViewModel(
         val progress: Map<String, UserProgress> = emptyMap(),
         val sectionProgress: Map<String, SectionProgress> = emptyMap(),
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val offlineFallback: Boolean = false
     )
 
     private val _isLoading = MutableStateFlow(false)
@@ -36,6 +40,7 @@ class HomeViewModel(
         contentRepository.progress,
         contentRepository.sectionProgress,
         contentRepository.sections,
+        contentRepository.loadedFromNetwork,
         _isLoading,
         _error
     ) { values ->
@@ -47,8 +52,9 @@ class HomeViewModel(
         val sectionProgress = values[2] as Map<String, SectionProgress>
         @Suppress("UNCHECKED_CAST")
         val sections = values[3] as List<com.dxn.training.data.model.Section>
-        val isLoading = values[4] as Boolean
-        val error = values[5] as String?
+        val loadedFromNetwork = values[4] as Boolean
+        val isLoading = values[5] as Boolean
+        val error = values[6] as String?
         HomeUiState(
             userName = user.fullName.substringBefore(" "),
             totalXp = user.totalXp,
@@ -58,7 +64,8 @@ class HomeViewModel(
             progress = progress,
             sectionProgress = sectionProgress,
             isLoading = isLoading,
-            error = error
+            error = error,
+            offlineFallback = !loadedFromNetwork
         )
     }.stateIn(
         scope = viewModelScope,
@@ -66,16 +73,28 @@ class HomeViewModel(
         initialValue = HomeUiState()
     )
 
+    private var loadedUserId: String? = null
+
     init {
-        loadContent()
+        // إعادة التحميل عند ظهور جلسة (مثلاً بعد تسجيل الدخول من شاشة البداية).
+        viewModelScope.launch {
+            sessionStore?.session
+                ?.map { it?.userId }
+                ?.distinctUntilChanged()
+                ?.collect { userId ->
+                    if (userId != null) loadContent(userId)
+                }
+        }
     }
 
-    private fun loadContent() {
+    private fun loadContent(userId: String) {
         viewModelScope.launch {
+            loadedUserId = userId
             _isLoading.value = true
             _error.value = null
             try {
-                val success = contentRepository.loadContent("u1")
+                val success = contentRepository.loadContent(userId)
+                userRepository.loadUserProfile(userId)
                 if (!success) {
                     _error.value = "تعذر تحميل المحتوى من الخادم. يُعرض المحتوى المحلي كاحتياط."
                 }
@@ -90,20 +109,10 @@ class HomeViewModel(
     }
 
     fun refresh() {
-        loadContent()
+        loadedUserId?.let { loadContent(it) }
     }
 
     fun clearError() {
         _error.value = null
-    }
-
-    fun unlockNextLevel(levelId: String) {
-        viewModelScope.launch {
-            contentRepository.updateLevelProgress(levelId, 0, true)
-        }
-    }
-
-    fun unlockFirstLevelOfSection(sectionId: String): Boolean {
-        return contentRepository.unlockFirstLevelOfSection(sectionId)
     }
 }

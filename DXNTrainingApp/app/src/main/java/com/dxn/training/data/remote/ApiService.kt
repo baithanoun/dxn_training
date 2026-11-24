@@ -1,5 +1,7 @@
 package com.dxn.training.data.remote
 
+import com.dxn.training.data.model.MemberStatus
+import com.dxn.training.data.model.TeamMember
 import com.dxn.training.data.model.UserProgress
 import com.dxn.training.data.model.SectionProgress
 import retrofit2.Response
@@ -7,34 +9,127 @@ import retrofit2.http.*
 
 // ===================  الطلبات والاستجابات  ===================
 
+data class AnswerDto(
+    val roundId: String,
+    val optionId: String? = null,
+    val orderedOptionIds: List<String>? = null
+)
+
 data class LevelCompletionRequest(
-    val userId: String,
-    val score: Int,
-    val passed: Boolean
+    val answers: List<AnswerDto>
 )
 
 data class LevelCompletionResponse(
     val success: Boolean,
+    val score: Int = 0,
+    val passed: Boolean = false,
     val xpAwarded: Int = 0,
+    val totalXp: Int = 0,
+    val currentStreak: Int = 0,
     val certificateIssued: Boolean = false,
-    val certificateTitle: String? = null
+    val certificateTitle: String? = null,
+    val certificateId: String? = null
+)
+
+data class LoginRequest(
+    val login: String,
+    val password: String
+)
+
+data class DeleteAccountRequest(
+    val password: String
+)
+
+data class RegisterRequest(
+    val fullName: String,
+    val email: String? = null,
+    val phone: String? = null,
+    val password: String,
+    val dxnId: String,
+    val gender: String,
+    val leaderDxnId: String? = null,
+    val acceptTerms: Boolean = false
+)
+
+data class AuthResponse(
+    val token: String,
+    val user: UserProfileResponse
+)
+
+// ===================  الفريق والأحداث  ===================
+
+data class LeaderTeamMemberResponse(
+    val id: String,
+    val name: String,
+    val progressPercent: Int = 0,
+    val lastActiveDays: Int = 0,
+    val status: String = "INACTIVE"
+) {
+    fun toDomain(): TeamMember = TeamMember(
+        id = id,
+        name = name,
+        progressPercent = progressPercent,
+        lastActiveDays = lastActiveDays,
+        status = try {
+            MemberStatus.valueOf(status.uppercase())
+        } catch (e: IllegalArgumentException) {
+            MemberStatus.INACTIVE
+        }
+    )
+}
+
+data class AnalyticsEventRequest(
+    val eventName: String,
+    val levelId: String? = null,
+    val payload: Map<String, Any?>? = null
+)
+
+data class AnalyticsEventsBatchRequest(
+    val events: List<AnalyticsEventRequest>
+)
+
+data class AnalyticsEventsAcceptedResponse(
+    val accepted: Int = 0
 )
 
 data class UserProfileResponse(
     val id: String,
     val fullName: String,
-    val email: String,
+    val email: String? = null,
+    val phone: String? = null,
     val dxnId: String,
     val role: String,
-    val totalXp: Int,
-    val currentStreak: Int,
-    val hearts: Int,
-    val gems: Int
+    val gender: String? = null,
+    val totalXp: Int = 0,
+    val currentStreak: Int = 0,
+    val hearts: Int = 3,
+    val gems: Int = 0
 )
 
 // ===================  API Interface  ===================
 
 interface ApiService {
+
+    // ===================  المصادقة  ===================
+
+    @POST("api/auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<AuthResponse>
+
+    @POST("api/auth/register")
+    suspend fun register(@Body request: RegisterRequest): Response<AuthResponse>
+
+    @POST("api/auth/logout")
+    suspend fun logout(): Response<Unit>
+
+    @HTTP(method = "DELETE", path = "api/account")
+    suspend fun deleteAccount(@Body request: DeleteAccountRequest): Response<Unit>
+
+    // ===================  إعدادات التطبيق العامة  ===================
+
+    @GET("api/app/config")
+    suspend fun getAppConfig(): Response<AppConfigResponse>
+
+    // ===================  المحتوى  ===================
 
     /**
      * جلب شجرة المحتوى الكاملة (الأقسام والمهارات والمستويات).
@@ -74,4 +169,18 @@ interface ApiService {
     suspend fun getUserProfile(
         @Path("userId") userId: String
     ): Response<UserProfileResponse>
+
+    /**
+     * أعضاء فريق القائد (للقادة فقط).
+     */
+    @GET("api/leader/team")
+    suspend fun getLeaderTeam(): Response<List<LeaderTeamMemberResponse>>
+
+    /**
+     * إرسال دفعة أحداث من العميل. الأسماء المسموحة فقط هي التي تُرسَل.
+     */
+    @POST("api/events")
+    suspend fun sendEvents(
+        @Body request: AnalyticsEventsBatchRequest
+    ): Response<AnalyticsEventsAcceptedResponse>
 }

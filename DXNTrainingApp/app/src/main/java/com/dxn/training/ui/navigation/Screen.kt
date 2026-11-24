@@ -23,8 +23,8 @@ sealed class Screen(val route: String) {
     data object OrderSequence : Screen("order/{levelId}") {
         fun createRoute(levelId: String) = "order/$levelId"
     }
-    data object Completion : Screen("completion/{levelId}/{score}/{xp}") {
-        fun createRoute(levelId: String, score: Int, xp: Int) = "completion/$levelId/$score/$xp"
+    data object Completion : Screen("completion/{levelId}") {
+        fun createRoute(levelId: String) = "completion/$levelId"
     }
     data object AdminOverview : Screen("admin/overview")
 }

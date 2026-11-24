@@ -1,41 +1,61 @@
 package com.dxn.training.data.repository
 
 import android.util.Log
+import com.dxn.training.data.local.SessionStore
 import com.dxn.training.data.model.*
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
+import com.dxn.training.data.remote.AnswerDto
 import com.dxn.training.data.remote.LevelCompletionRequest
+import com.dxn.training.data.remote.LevelCompletionResponse
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.*
+import org.json.JSONObject
 
 private const val TAG = "ContentRepository"
-private const val DEFAULT_USER_ID = "u1"
 
-class ContentRepository(
-    private val api: ApiService? = ApiClient.create(),
-    private val syncScope: kotlinx.coroutines.CoroutineScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+sealed class CompletionResult {
+    data class Ok(val response: LevelCompletionResponse) : CompletionResult()
+    data class Locked(val message: String) : CompletionResult()
+    object Offline : CompletionResult()
+    data class Failed(val message: String) : CompletionResult()
+}
+
+class ContentRepository private constructor(
+    private val api: ApiService,
+    private val sessionStore: SessionStore?,
+    private val userRepository: UserRepository
 ) {
     companion object {
         @Volatile
         private var instance: ContentRepository? = null
 
-        fun getInstance(api: ApiService? = null): ContentRepository {
+        fun getInstance(
+            api: ApiService? = null,
+            sessionStore: SessionStore? = ApiClient.getSessionStore(),
+            userRepository: UserRepository? = null
+        ): ContentRepository {
             return instance ?: synchronized(this) {
-                instance ?: ContentRepository(api ?: ApiClient.create()).also { instance = it }
+                instance ?: ContentRepository(
+                    api = api ?: ApiClient.api,
+                    sessionStore = sessionStore ?: ApiClient.getSessionStore(),
+                    userRepository = userRepository ?: UserRepository()
+                ).also { instance = it }
             }
         }
     }
 
     // ===================  الحالة الداخلية  ===================
 
+    // المحتوى المحلي للعرض فقط عند تعذّر تحميل الشجرة من السيرفر.
     private val _sections = MutableStateFlow(MockData.sections)
     val sections: StateFlow<List<Section>> = _sections.asStateFlow()
 
-    private val _progress = MutableStateFlow(MockData.userProgress.toMap())
+    // التقدّم وحالات الأقسام مصدرهما السيرفر فقط؛ لا حساب محلي للفتح أو الشهادات.
+    private val _progress = MutableStateFlow(emptyMap<String, UserProgress>())
     val progress: StateFlow<Map<String, UserProgress>> = _progress.asStateFlow()
 
-    private val _sectionProgress = MutableStateFlow(MockData.sectionProgress.toMap())
+    private val _sectionProgress = MutableStateFlow(emptyMap<String, SectionProgress>())
     val sectionProgress: StateFlow<Map<String, SectionProgress>> = _sectionProgress.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -46,6 +66,9 @@ class ContentRepository(
 
     private val _loadedFromNetwork = MutableStateFlow(false)
     val loadedFromNetwork: StateFlow<Boolean> = _loadedFromNetwork.asStateFlow()
+
+    private val _currentUserId = MutableStateFlow("")
+    val currentUserId: StateFlow<String> = _currentUserId.asStateFlow()
 
     // ===================  قراءة المحتوى  ===================
 
@@ -64,21 +87,24 @@ class ContentRepository(
     }
 
     fun getProgress(levelId: String): UserProgress {
-        return _progress.value[levelId] ?: UserProgress(DEFAULT_USER_ID, levelId, LevelStatus.LOCKED)
+        return _progress.value[levelId]
+            ?: UserProgress(_currentUserId.value, levelId, LevelStatus.LOCKED)
     }
 
     fun getSectionProgress(sectionId: String): SectionProgress {
         return _sectionProgress.value[sectionId]
-            ?: SectionProgress(DEFAULT_USER_ID, sectionId, SectionStatus.LOCKED)
+            ?: SectionProgress(_currentUserId.value, sectionId, SectionStatus.LOCKED)
     }
 
     // ===================  تحميل البيانات من السيرفر  ===================
 
     /**
-     * تحميل كل البيانات من السيرفر مع العودة إلى البيانات المحلية عند الفشل.
+     * تحميل شجرة المحتوى وتقدّم المستخدم من السيرفر. عند فشل الشجرة تبقى البيانات
+     * المحلية للعرض فقط، وتُعرض لافتة "وضع غير متصل" في الواجهة.
      * @return true إذا نجح تحميل الأقسام على الأقل.
      */
-    suspend fun loadContent(userId: String = DEFAULT_USER_ID): Boolean {
+    suspend fun loadContent(userId: String): Boolean {
+        _currentUserId.value = userId
         _isLoading.value = true
         _lastError.value = null
         _loadedFromNetwork.value = false
@@ -86,69 +112,44 @@ class ContentRepository(
         var sectionsLoadedFromNetwork = false
 
         try {
-            api?.let { service ->
-                // 1) الأقسام
-                val sectionsResponse = service.getSectionsTree()
-                if (sectionsResponse.isSuccessful) {
-                    val body = sectionsResponse.body()
-                    if (body != null && body.isNotEmpty()) {
-                        _sections.update { body.map { it.toDomain() } }
-                        sectionsLoadedFromNetwork = true
-                    } else {
-                        Log.w(TAG, "getSectionsTree returned empty body; keeping local sections")
-                    }
+            // 1) الأقسام
+            val sectionsResponse = api.getSectionsTree()
+            if (sectionsResponse.isSuccessful) {
+                val body = sectionsResponse.body()
+                if (body != null && body.isNotEmpty()) {
+                    _sections.value = body.map { it.toDomain() }
+                    sectionsLoadedFromNetwork = true
                 } else {
-                    logError("getSectionsTree", sectionsResponse.code())
+                    Log.w(TAG, "getSectionsTree returned empty body; keeping local sections")
                 }
+            } else {
+                logError("getSectionsTree", sectionsResponse.code())
+            }
 
-                // 2) تقدم المستويات — دمج مع البيانات المحلية بدلاً من الاستبدال
-                val progressResponse = service.getUserProgress(userId)
-                if (progressResponse.isSuccessful) {
-                    val body = progressResponse.body()
-                    if (body != null && body.isNotEmpty()) {
-                        val serverProgress = body.mapValues { (levelId, response) ->
-                            response.toDomain(levelId, userId)
-                        }
-                        _progress.update { local ->
-                            val merged = local.toMutableMap()
-                            serverProgress.forEach { (levelId, serverValue) ->
-                                val localValue = local[levelId]
-                                // الاحتفاظ بالتقدم المحلي إذا كان أعلى (تلافي race)
-                                if (localValue == null || localValue.attempts <= serverValue.attempts) {
-                                    merged[levelId] = serverValue
-                                }
-                            }
-                            merged
-                        }
+            // 2) تقدم المستويات — استبدال كامل بحالة السيرفر
+            val progressResponse = api.getUserProgress(userId)
+            if (progressResponse.isSuccessful) {
+                val body = progressResponse.body()
+                if (body != null) {
+                    _progress.value = body.mapValues { (levelId, response) ->
+                        response.toDomain(levelId, userId)
                     }
-                } else {
-                    logError("getUserProgress", progressResponse.code())
                 }
+            } else {
+                logError("getUserProgress", progressResponse.code())
+            }
 
-                // 3) تقدم الأقسام والشهادات — دمج مع البيانات المحلية
-                val sectionProgressResponse = service.getSectionProgress(userId)
-                if (sectionProgressResponse.isSuccessful) {
-                    val body = sectionProgressResponse.body()
-                    if (body != null && body.isNotEmpty()) {
-                        val serverProgress = body.mapValues { (sectionId, response) ->
-                            response.toDomain(sectionId, userId)
-                        }
-                        _sectionProgress.update { local ->
-                            val merged = local.toMutableMap()
-                            serverProgress.forEach { (sectionId, serverValue) ->
-                                val localValue = local[sectionId]
-                                // الاحتفاظ بالتقدم المحلي إذا كان highest status
-                                if (localValue == null ||
-                                    localValue.status.ordinal <= serverValue.status.ordinal) {
-                                    merged[sectionId] = serverValue
-                                }
-                            }
-                            merged
-                        }
+            // 3) تقدم الأقسام والشهادات — استبدال كامل بحالة السيرفر
+            val sectionProgressResponse = api.getSectionProgress(userId)
+            if (sectionProgressResponse.isSuccessful) {
+                val body = sectionProgressResponse.body()
+                if (body != null) {
+                    _sectionProgress.value = body.mapValues { (sectionId, response) ->
+                        response.toDomain(sectionId, userId)
                     }
-                } else {
-                    logError("getSectionProgress", sectionProgressResponse.code())
                 }
+            } else {
+                logError("getSectionProgress", sectionProgressResponse.code())
             }
         } catch (e: CancellationException) {
             throw e
@@ -163,200 +164,47 @@ class ContentRepository(
         return sectionsLoadedFromNetwork
     }
 
-    suspend fun refreshAll(userId: String = DEFAULT_USER_ID): Boolean = loadContent(userId)
-
-    // ===================  منطق القفل والشهادات  ===================
-
-    /**
-     * القسم مفتوح إذا:
-     * - لا يتطلب قسماً سابقاً، أو
-     * - القسم السابق مكتمل (COMPLETED) وتم إصدار شهادته.
-     */
-    private fun canSectionBeUnlocked(sectionId: String): Boolean {
-        val section = _sections.value.find { it.id == sectionId } ?: return false
-        val requiredId = section.requiredSectionId ?: return true
-        val requiredProgress = getSectionProgress(requiredId)
-        return requiredProgress.status == SectionStatus.COMPLETED && requiredProgress.certificateIssued
-    }
-
-    private fun computeSectionStatus(sectionId: String): SectionStatus {
-        if (!canSectionBeUnlocked(sectionId)) return SectionStatus.LOCKED
-
-        val section = _sections.value.find { it.id == sectionId } ?: return SectionStatus.LOCKED
-        val allLevels = section.skills.flatMap { it.levels }
-        if (allLevels.isEmpty()) return SectionStatus.LOCKED
-
-        val progressMap = _progress.value
-        val allCompleted = allLevels.all { progressMap[it.id]?.status == LevelStatus.COMPLETED }
-        val hasUnlocked = allLevels.any { progressMap[it.id]?.status != LevelStatus.LOCKED }
-
-        return when {
-            allCompleted -> SectionStatus.COMPLETED
-            hasUnlocked -> SectionStatus.UNLOCKED
-            else -> SectionStatus.LOCKED
-        }
-    }
-
-    /**
-     * إصدار شهادة القسم فقط بعد اجتياز اختبار إتمام القسم (final quiz).
-     * آخر مستوى في آخر مهارة في القسم هو اختبار الإتمام.
-     */
-    private fun hasPassedFinalQuiz(sectionId: String): Boolean {
-        val section = _sections.value.find { it.id == sectionId } ?: return false
-        val finalLevel = section.skills.lastOrNull()?.levels?.lastOrNull() ?: return false
-        val finalProgress = _progress.value[finalLevel.id]
-        return finalProgress?.status == LevelStatus.COMPLETED && finalProgress.passedFinalQuiz
-    }
-
-    private fun isFinalLevelOfSection(levelId: String): Boolean {
-        val section = findSectionForLevel(levelId) ?: return false
-        val finalLevel = section.skills.lastOrNull()?.levels?.lastOrNull()
-        return finalLevel?.id == levelId
-    }
-
-    private fun issueCertificateIfNeeded(sectionId: String) {
-        val section = _sections.value.find { it.id == sectionId } ?: return
-        if (section.certificateTitle.isBlank()) return
-
-        val current = getSectionProgress(sectionId)
-        if (current.status == SectionStatus.COMPLETED && !current.certificateIssued && hasPassedFinalQuiz(sectionId)) {
-            _sectionProgress.update { it.toMutableMap().apply {
-                put(
-                    sectionId,
-                    current.copy(
-                        certificateIssued = true,
-                        certificateId = "cert-${sectionId}",
-                        completedAt = "2026-11-17"
-                    )
-                )
-            } }
-        }
-    }
-
-    private fun recomputeAllSections() {
-        _sections.value.forEach { section ->
-            val newStatus = computeSectionStatus(section.id)
-            val current = getSectionProgress(section.id)
-
-            // لا نسمح بتحويل قسم مكتمل إلى غير مكتمل
-            val effectiveStatus = if (current.status == SectionStatus.COMPLETED) SectionStatus.COMPLETED else newStatus
-
-            if (current.status != effectiveStatus) {
-                _sectionProgress.update { it.toMutableMap().apply {
-                    put(section.id, current.copy(status = effectiveStatus))
-                } }
-            }
-
-            if (effectiveStatus == SectionStatus.COMPLETED) {
-                issueCertificateIfNeeded(section.id)
-            }
-        }
-    }
-
-    // ===================  تحديث التقدم  ===================
-
-    fun updateLevelProgress(levelId: String, score: Int, passed: Boolean) {
-        val current = getProgress(levelId)
-        val currentSection = findSectionForLevel(levelId)
-
-        // لا يمكن إكمال مستوى في قسم مقفل
-        if (currentSection != null && computeSectionStatus(currentSection.id) == SectionStatus.LOCKED) {
-            return
-        }
-
-        val isFinalQuiz = isFinalLevelOfSection(levelId)
-        val newStatus = if (passed) LevelStatus.COMPLETED else current.status
-        val updated = current.copy(
-            status = if (current.status == LevelStatus.LOCKED && passed) LevelStatus.UNLOCKED else newStatus,
-            score = score,
-            attempts = current.attempts + 1,
-            bestScore = maxOf(current.bestScore, score),
-            passedFinalQuiz = if (isFinalQuiz && passed) true else current.passedFinalQuiz
-        )
-        _progress.update { it.toMutableMap().apply { put(levelId, updated) } }
-
-        if (passed) {
-            // فتح المستوى التالي داخل نفس المهارة
-            val skill = findSkillForLevel(levelId)
-            val levelsInSkill = skill?.levels ?: emptyList()
-            val currentIndex = levelsInSkill.indexOfFirst { it.id == levelId }
-            val nextInSkill = levelsInSkill.getOrNull(currentIndex + 1)
-            if (nextInSkill != null) {
-                val nextProgress = getProgress(nextInSkill.id)
-                if (nextProgress.status == LevelStatus.LOCKED) {
-                    _progress.update { it.toMutableMap().apply {
-                        put(nextInSkill.id, nextProgress.copy(status = LevelStatus.UNLOCKED))
-                    } }
-                }
-            }
-
-            // فتح المهارة التالية في نفس القسم إن وجدت
-            val section = currentSection
-            if (section != null) {
-                val skillIndex = section.skills.indexOfFirst { it.id == skill?.id }
-                val nextSkill = section.skills.getOrNull(skillIndex + 1)
-                val firstLevelOfNextSkill = nextSkill?.levels?.firstOrNull()
-                if (firstLevelOfNextSkill != null) {
-                    val nextProgress = getProgress(firstLevelOfNextSkill.id)
-                    if (nextProgress.status == LevelStatus.LOCKED) {
-                        _progress.update { it.toMutableMap().apply {
-                            put(firstLevelOfNextSkill.id, nextProgress.copy(status = LevelStatus.UNLOCKED))
-                        } }
-                    }
-                }
-            }
-
-            // إعادة حساب حالات الأقسام وإصدار الشهادات
-            recomputeAllSections()
-
-            // مزامنة مع السيرفر (best-effort، لا نمنع UI)
-            syncScope.launch {
-                submitLevelCompletion(levelId, score, passed)
-            }
-        }
-    }
-
-    /**
-     * يُستخدم للسماح للمستخدم بفتح مستوى مقفل عندما يكون القسم متاحاً
-     * (مثلاً عند الضغط على "ابدأ" لأول مرة).
-     */
-    fun unlockFirstLevelOfSection(sectionId: String): Boolean {
-        if (computeSectionStatus(sectionId) == SectionStatus.LOCKED) return false
-        val section = _sections.value.find { it.id == sectionId } ?: return false
-        val firstLevel = section.skills.firstOrNull()?.levels?.firstOrNull() ?: return false
-        val progress = getProgress(firstLevel.id)
-        if (progress.status == LevelStatus.LOCKED) {
-            _progress.update { it.toMutableMap().apply {
-                put(firstLevel.id, progress.copy(status = LevelStatus.UNLOCKED))
-            } }
-        }
-        return true
-    }
+    suspend fun refreshAll(userId: String): Boolean = loadContent(userId)
 
     // ===================  مزامنة السيرفر  ===================
 
     /**
-     * مزامنة تقديم إكمال مستوى إلى السيرفر. تُستدعى صراحةً من ViewModel.
+     * إرسال إجابات المستوى إلى السيرفر. النتيجة والXP والشهادة كلها من الاستجابة؛
+     * لا يُحدَّث أي تقدّم محلي قبل نجاح الطلب.
      */
     suspend fun submitLevelCompletion(
         levelId: String,
-        score: Int,
-        passed: Boolean,
-        userId: String = DEFAULT_USER_ID
-    ): Boolean {
-        val service = api ?: return false
+        answers: List<AnswerDto>
+    ): CompletionResult {
+        val userId = sessionStore?.session?.first()?.userId ?: return CompletionResult.Offline
+        _currentUserId.value = userId
         return try {
-            val response = service.completeLevel(
-                levelId,
-                LevelCompletionRequest(userId, score, passed)
-            )
-            if (!response.isSuccessful) {
-                logError("completeLevel", response.code())
+            val response = api.completeLevel(levelId, LevelCompletionRequest(answers))
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.success) {
+                    userRepository.applyCompletionResult(body)
+                    refreshAll(userId)
+                    CompletionResult.Ok(body)
+                } else {
+                    CompletionResult.Failed("تعذر حفظ النتيجة")
+                }
+            } else {
+                val raw = response.errorBody()?.string()
+                when (response.code()) {
+                    409 -> CompletionResult.Locked(errorMessage(raw) ?: "المستوى مقفل")
+                    422 -> CompletionResult.Failed(errorMessage(raw) ?: "بيانات غير صالحة")
+                    else -> {
+                        logError("completeLevel", response.code())
+                        CompletionResult.Failed("خطأ في الخادم (${response.code()})")
+                    }
+                }
             }
-            response.isSuccessful
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Network error while completing level", e)
-            false
+            CompletionResult.Offline
         }
     }
 
@@ -365,5 +213,14 @@ class ContentRepository(
     private fun logError(endpoint: String, code: Int) {
         Log.w(TAG, "$endpoint failed with HTTP $code")
         _lastError.value = "خطأ في الخادم ($code). يُعرض المحتوى المحلي."
+    }
+
+    private fun errorMessage(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+        return try {
+            JSONObject(raw).optString("message").takeIf { it.isNotBlank() } ?: raw
+        } catch (e: Exception) {
+            raw
+        }
     }
 }

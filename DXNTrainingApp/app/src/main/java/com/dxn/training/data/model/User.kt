@@ -7,6 +7,7 @@ data class User(
     val phone: String,
     val dxnId: String,
     val role: UserRole,
+    val gender: String? = null,
     val sponsorId: String? = null,
     val totalXp: Int = 0,
     val currentStreak: Int = 0,

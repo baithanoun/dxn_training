@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>معاينة هوية حكاية تميّز</title>
+  <style>
+    :root {
+      color-scheme: light;
+
+      --plum-50: #F3ECEF;
+      --plum-100: #E7DAE0;
+      --plum-200: #CFB4C1;
+      --plum-300: #B48A9E;
+      --plum-400: #935773;
+      --plum-500: #69163D;
+      --plum-600: #5C1336;
+      --plum-700: #50112E;
+      --plum-800: #430E27;
+      --plum-900: #360C20;
+
+      --rose-50: #FAF3F6;
+      --rose-100: #F5E6ED;
+      --rose-200: #EBCDDB;
+      --rose-300: #E0B2C6;
+      --rose-400: #D28FAD;
+      --rose-500: #C0648D;
+      --rose-600: #A6567A;
+      --rose-700: #8C4866;
+      --rose-800: #733953;
+      --rose-900: #592B40;
+
+      --ivory: #F8F8F4;
+      --surface: #FFFFFF;
+      --text: #2A1420;
+      --muted: #6E5A64;
+      --border: #E7DAE0;
+      --success: #2F7D5B;
+      --error: #C0392B;
+      --error-bg: #FDECEA;
+      --error-border: #F5C2BC;
+      --warning: #B7791F;
+      --warning-text: #8A5A14;
+      --info: #2B6CB0;
+      --xp: #B7791F;
+      --xp-text: #8A5A14;
+      --xp-container: #FBF1E2;
+      --heart: #D64545;
+      --streak: #C0648D;
+      --locked: #A8959E;
+      --locked-text: #7A6870;
+      --leaf: #5E8C61;
+      --leaf-text: #466B49;
+      --leaf-container: #EEF4EE;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--ivory);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      line-height: 1.6;
+    }
+
+    img { max-width: 100%; }
+    code { font-family: inherit; font-variant-numeric: tabular-nums; }
+
+    .page {
+      width: min(100%, 1120px);
+      margin-inline: auto;
+      padding: clamp(16px, 3vw, 32px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) 1fr;
+      gap: clamp(16px, 4vw, 40px);
+      align-items: center;
+      padding: clamp(18px, 3vw, 28px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .logo-frame {
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      background: var(--ivory);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .logo-frame img { display: block; width: 100%; max-width: 230px; height: auto; }
+
+    .hero__eyebrow { margin: 0; color: var(--rose-600); font-size: .875rem; font-weight: 700; }
+    .hero h1 { margin: .25rem 0; color: var(--plum-500); font-size: clamp(1.7rem, 4vw, 2.6rem); line-height: 1.2; }
+    .hero__lede { margin: 0; max-width: 62ch; color: var(--muted); }
+
+    .section { margin-top: clamp(28px, 5vw, 44px); }
+
+    .section__title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 16px;
+      color: var(--plum-500);
+      font-size: 1.25rem;
+    }
+
+    .section__title::before {
+      content: "";
+      inline-size: 6px;
+      block-size: 1.25em;
+      background: var(--rose-500);
+      border-radius: 3px;
+    }
+
+    .scale-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+
+    .scale-card {
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .scale-card h3 { margin: 0 0 12px; color: var(--plum-500); }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 8px; }
+
+    .swatch {
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .swatch__chip {
+      block-size: 52px;
+      background: var(--swatch);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .swatch__meta { display: grid; gap: 2px; padding: 6px 8px; font-size: 12px; line-height: 1.3; }
+    .swatch__step { color: var(--text); font-weight: 700; }
+    .swatch__hex { color: var(--muted); direction: ltr; text-align: start; }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: start;
+      vertical-align: middle;
+    }
+
+    thead th { background: var(--plum-50); color: var(--plum-500); font-size: 13px; white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .hex { direction: ltr; text-align: start; white-space: nowrap; }
+
+    .token-chip {
+      display: inline-block;
+      inline-size: 36px;
+      block-size: 20px;
+      background: var(--swatch);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      vertical-align: middle;
+    }
+
+    .table-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+    .measured td:first-child { border-inline-start: 4px solid var(--leaf); font-weight: 700; }
+
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+
+    .demo-tile {
+      min-height: 160px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .demo-tile--dark { background: var(--plum-500); border-color: var(--plum-500); }
+    .demo-tile__label { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+    .demo-tile--dark .demo-tile__label { color: var(--rose-300); }
+
+    .brandmark { display: flex; align-items: center; gap: 12px; }
+    .brandmark__logo { display: block; flex: none; background: var(--ivory); border-radius: 10px; object-fit: contain; }
+    .brandmark__wordmark { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+    .brandmark__name { color: var(--plum-500); font-weight: 700; line-height: 1.15; }
+    .brandmark__dxn { color: var(--rose-600); font-weight: 600; line-height: 1.2; white-space: nowrap; }
+    .demo-tile--dark .brandmark__name { color: var(--surface); }
+    .demo-tile--dark .brandmark__dxn { color: var(--rose-300); }
+
+    .brandmark--sm .brandmark__logo { inline-size: 40px; block-size: 40px; }
+    .brandmark--sm .brandmark__name { font-size: 1.125rem; }
+    .brandmark--sm .brandmark__dxn { font-size: .6875rem; letter-spacing: .18em; }
+    .brandmark--lg .brandmark__logo { inline-size: 96px; block-size: 96px; }
+    .brandmark--lg .brandmark__name { font-size: 1.875rem; }
+    .brandmark--lg .brandmark__dxn { font-size: 1.125rem; letter-spacing: .22em; }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .btn {
+      appearance: none;
+      padding: 10px 20px;
+      border: 2px solid;
+      border-radius: 10px;
+      font: inherit;
+      font-weight: 700;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .btn:focus-visible { outline: 3px solid var(--plum-500); outline-offset: 2px; }
+    .btn--primary { background: var(--plum-500); border-color: var(--plum-500); color: var(--surface); }
+    .btn--secondary { background: var(--rose-600); border-color: var(--rose-600); color: var(--surface); }
+    .btn--outline { background: var(--surface); border-color: var(--plum-500); color: var(--plum-500); }
+    .btn--disabled { background: var(--surface); border-color: var(--locked); color: var(--locked-text); cursor: not-allowed; }
+
+    .component-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+
+    .panel {
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .panel h3 { margin: 0 0 12px; color: var(--plum-500); font-size: 1rem; }
+
+    .sample-card { padding: 14px; background: var(--ivory); border: 1px solid var(--border); border-radius: 12px; }
+    .sample-card__head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; justify-content: space-between; }
+    .sample-card p { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+
+    .badge--done {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--leaf-container);
+      border: 1px solid var(--leaf);
+      border-radius: 999px;
+      color: var(--leaf-text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .error-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: 12px;
+      color: var(--error);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .error-banner__icon {
+      display: grid;
+      flex: none;
+      place-items: center;
+      inline-size: 22px;
+      block-size: 22px;
+      border: 2px solid var(--error);
+      border-radius: 50%;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .progress-row + .progress-row { margin-top: 16px; }
+    .progress-row__label { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+    .progress-row__value { direction: ltr; font-weight: 700; }
+    .progress-track { block-size: 10px; overflow: hidden; background: var(--plum-50); border: 1px solid var(--border); border-radius: 999px; }
+    .progress-fill { block-size: 100%; background: var(--swatch); }
+
+    .metric-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .hearts { display: inline-flex; gap: 4px; color: var(--heart); font-size: 1.5rem; line-height: 1; }
+    .metric-label { color: var(--muted); font-size: 13px; }
+
+    .xp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--xp-container);
+      border: 1px solid var(--xp);
+      border-radius: 999px;
+      color: var(--xp-text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .xp-badge__icon { color: var(--xp); }
+
+    .locked-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--locked);
+      border-radius: 10px;
+      color: var(--locked-text);
+      font-size: 13px;
+    }
+
+    .lock-icon { flex: none; color: var(--locked); }
+
+    .onboarding {
+      max-width: 760px;
+      padding: clamp(18px, 4vw, 32px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .onboarding__head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .onboarding__leaf { flex: none; color: var(--leaf); }
+    .onboarding h3 { margin: 0; color: var(--plum-500); font-size: 1.5rem; line-height: 1.2; }
+    .onboarding__tagline { margin: 2px 0 0; color: var(--rose-600); font-weight: 600; }
+    .onboarding__bio { margin: 0; line-height: 1.9; }
+
+    .onboarding__welcome {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      background: var(--plum-50);
+      border: 1px solid var(--plum-100);
+      border-radius: 10px;
+      color: var(--plum-500);
+      font-weight: 600;
+    }
+
+    .footer { margin-top: clamp(28px, 5vw, 44px); padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 720px) {
+      .hero { grid-template-columns: 1fr; }
+      .logo-frame img { max-width: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="logo-frame">
+        <img src="hikaya-tamayoz-logo.jpg" alt="شعار حكاية تميّز" width="770" height="744">
+      </div>
+      <div>
+        <p class="hero__eyebrow">معاينة الهوية · لوحة الألوان</p>
+        <h1>حكاية تميّز</h1>
+        <p class="hero__lede">الشعار المصدر، التدرّجان plum وrose، التوكنز الدلالية، ومكوّنات الواجهة على خلفية عاجية. الخط الحالي system-ui مؤقتاً.</p>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="scales-title">
+      <h2 class="section__title" id="scales-title">التدرّجات اللونية</h2>
+      <div class="scale-grid">
+        <article class="scale-card">
+          <h3>plum</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-50)"></div><div class="swatch__meta"><span class="swatch__step">50</span><span class="swatch__hex">#F3ECEF</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-100)"></div><div class="swatch__meta"><span class="swatch__step">100</span><span class="swatch__hex">#E7DAE0</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-200)"></div><div class="swatch__meta"><span class="swatch__step">200</span><span class="swatch__hex">#CFB4C1</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-300)"></div><div class="swatch__meta"><span class="swatch__step">300</span><span class="swatch__hex">#B48A9E</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-400)"></div><div class="swatch__meta"><span class="swatch__step">400</span><span class="swatch__hex">#935773</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-500)"></div><div class="swatch__meta"><span class="swatch__step">500</span><span class="swatch__hex">#69163D</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-600)"></div><div class="swatch__meta"><span class="swatch__step">600</span><span class="swatch__hex">#5C1336</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-700)"></div><div class="swatch__meta"><span class="swatch__step">700</span><span class="swatch__hex">#50112E</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-800)"></div><div class="swatch__meta"><span class="swatch__step">800</span><span class="swatch__hex">#430E27</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--plum-900)"></div><div class="swatch__meta"><span class="swatch__step">900</span><span class="swatch__hex">#360C20</span></div></div>
+          </div>
+        </article>
+
+        <article class="scale-card">
+          <h3>rose</h3>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-50)"></div><div class="swatch__meta"><span class="swatch__step">50</span><span class="swatch__hex">#FAF3F6</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-100)"></div><div class="swatch__meta"><span class="swatch__step">100</span><span class="swatch__hex">#F5E6ED</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-200)"></div><div class="swatch__meta"><span class="swatch__step">200</span><span class="swatch__hex">#EBCDDB</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-300)"></div><div class="swatch__meta"><span class="swatch__step">300</span><span class="swatch__hex">#E0B2C6</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-400)"></div><div class="swatch__meta"><span class="swatch__step">400</span><span class="swatch__hex">#D28FAD</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-500)"></div><div class="swatch__meta"><span class="swatch__step">500</span><span class="swatch__hex">#C0648D</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-600)"></div><div class="swatch__meta"><span class="swatch__step">600</span><span class="swatch__hex">#A6567A</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-700)"></div><div class="swatch__meta"><span class="swatch__step">700</span><span class="swatch__hex">#8C4866</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-800)"></div><div class="swatch__meta"><span class="swatch__step">800</span><span class="swatch__hex">#733953</span></div></div>
+            <div class="swatch"><div class="swatch__chip" style="--swatch: var(--rose-900)"></div><div class="swatch__meta"><span class="swatch__step">900</span><span class="swatch__hex">#592B40</span></div></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="semantic-title">
+      <h2 class="section__title" id="semantic-title">التوكنز الدلالية والتلعيب</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">التوكن</th>
+              <th scope="col">عيّنة</th>
+              <th scope="col">HEX</th>
+              <th scope="col">الاستخدام</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row"><code>ivory</code></th><td><span class="token-chip" style="--swatch: var(--ivory)"></span></td><td class="hex">#F8F8F4</td><td>خلفية الصفحات</td></tr>
+            <tr><th scope="row"><code>surface</code></th><td><span class="token-chip" style="--swatch: var(--surface)"></span></td><td class="hex">#FFFFFF</td><td>البطاقات</td></tr>
+            <tr><th scope="row"><code>text</code></th><td><span class="token-chip" style="--swatch: var(--text)"></span></td><td class="hex">#2A1420</td><td>النص الأساسي</td></tr>
+            <tr><th scope="row"><code>muted</code></th><td><span class="token-chip" style="--swatch: var(--muted)"></span></td><td class="hex">#6E5A64</td><td>النص الثانوي</td></tr>
+            <tr><th scope="row"><code>border</code></th><td><span class="token-chip" style="--swatch: var(--border)"></span></td><td class="hex">#E7DAE0</td><td>الحدود والمدخلات (plum-100)</td></tr>
+            <tr><th scope="row"><code>success</code></th><td><span class="token-chip" style="--swatch: var(--success)"></span></td><td class="hex">#2F7D5B</td><td>رسائل النظام الناجحة</td></tr>
+            <tr><th scope="row"><code>error</code></th><td><span class="token-chip" style="--swatch: var(--error)"></span></td><td class="hex">#C0392B</td><td>نص أيقونة الخطأ</td></tr>
+            <tr><th scope="row"><code>error-bg</code></th><td><span class="token-chip" style="--swatch: var(--error-bg)"></span></td><td class="hex">#FDECEA</td><td>خلفية بانر الخطأ</td></tr>
+            <tr><th scope="row"><code>error-border</code></th><td><span class="token-chip" style="--swatch: var(--error-border)"></span></td><td class="hex">#F5C2BC</td><td>حدود بانر الخطأ</td></tr>
+            <tr><th scope="row"><code>warning</code></th><td><span class="token-chip" style="--swatch: var(--warning)"></span></td><td class="hex">#B7791F</td><td>أيقونة التحذير فقط</td></tr>
+            <tr><th scope="row"><code>warning-text</code></th><td><span class="token-chip" style="--swatch: var(--warning-text)"></span></td><td class="hex">#8A5A14</td><td>نص التحذير</td></tr>
+            <tr><th scope="row"><code>info</code></th><td><span class="token-chip" style="--swatch: var(--info)"></span></td><td class="hex">#2B6CB0</td><td>المعلومات</td></tr>
+            <tr><th scope="row"><code>xp</code></th><td><span class="token-chip" style="--swatch: var(--xp)"></span></td><td class="hex">#B7791F</td><td>أيقونة XP</td></tr>
+            <tr><th scope="row"><code>xp-text</code></th><td><span class="token-chip" style="--swatch: var(--xp-text)"></span></td><td class="hex">#8A5A14</td><td>نص XP</td></tr>
+            <tr><th scope="row"><code>xp-container</code></th><td><span class="token-chip" style="--swatch: var(--xp-container)"></span></td><td class="hex">#FBF1E2</td><td>خلفية شارة XP</td></tr>
+            <tr><th scope="row"><code>heart</code></th><td><span class="token-chip" style="--swatch: var(--heart)"></span></td><td class="hex">#D64545</td><td>القلوب (أيقونات)</td></tr>
+            <tr><th scope="row"><code>streak</code></th><td><span class="token-chip" style="--swatch: var(--streak)"></span></td><td class="hex">#C0648D</td><td>شعلة Streak (rose-500)</td></tr>
+            <tr><th scope="row"><code>locked</code></th><td><span class="token-chip" style="--swatch: var(--locked)"></span></td><td class="hex">#A8959E</td><td>زخرف العنصر المقفل</td></tr>
+            <tr><th scope="row"><code>locked-text</code></th><td><span class="token-chip" style="--swatch: var(--locked-text)"></span></td><td class="hex">#7A6870</td><td>نص العنصر المقفل</td></tr>
+            <tr><th scope="row"><code>leaf</code></th><td><span class="token-chip" style="--swatch: var(--leaf)"></span></td><td class="hex">#5E8C61</td><td>أيقونات النمو والإنجاز</td></tr>
+            <tr><th scope="row"><code>leaf-text</code></th><td><span class="token-chip" style="--swatch: var(--leaf-text)"></span></td><td class="hex">#466B49</td><td>نص الإنجاز</td></tr>
+            <tr><th scope="row"><code>leaf-container</code></th><td><span class="token-chip" style="--swatch: var(--leaf-container)"></span></td><td class="hex">#EEF4EE</td><td>خلفية شارة «منجز»</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="brandmark-title">
+      <h2 class="section__title" id="brandmark-title">BrandMark</h2>
+      <div class="demo-grid">
+        <article class="demo-tile">
+          <p class="demo-tile__label">sm · فاتح</p>
+          <div class="brandmark brandmark--sm">
+            <img class="brandmark__logo" src="hikaya-tamayoz-logo.jpg" alt="شعار حكاية تميّز" width="40" height="40">
+            <span class="brandmark__wordmark">
+              <span class="brandmark__name">حكاية تميّز</span>
+              <span class="brandmark__dxn" dir="ltr">DXN</span>
+            </span>
+          </div>
+        </article>
+
+        <article class="demo-tile">
+          <p class="demo-tile__label">lg · فاتح</p>
+          <div class="brandmark brandmark--lg">
+            <img class="brandmark__logo" src="hikaya-tamayoz-logo.jpg" alt="شعار حكاية تميّز" width="96" height="96">
+            <span class="brandmark__wordmark">
+              <span class="brandmark__name">حكاية تميّز</span>
+              <span class="brandmark__dxn" dir="ltr">DXN</span>
+            </span>
+          </div>
+        </article>
+
+        <article class="demo-tile demo-tile--dark">
+          <p class="demo-tile__label">sm · داكن</p>
+          <div class="brandmark brandmark--sm">
+            <img class="brandmark__logo" src="hikaya-tamayoz-logo.jpg" alt="شعار حكاية تميّز" width="40" height="40">
+            <span class="brandmark__wordmark">
+              <span class="brandmark__name">حكاية تميّز</span>
+              <span class="brandmark__dxn" dir="ltr">DXN</span>
+            </span>
+          </div>
+        </article>
+
+        <article class="demo-tile demo-tile--dark">
+          <p class="demo-tile__label">lg · داكن</p>
+          <div class="brandmark brandmark--lg">
+            <img class="brandmark__logo" src="hikaya-tamayoz-logo.jpg" alt="شعار حكاية تميّز" width="96" height="96">
+            <span class="brandmark__wordmark">
+              <span class="brandmark__name">حكاية تميّز</span>
+              <span class="brandmark__dxn" dir="ltr">DXN</span>
+            </span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="buttons-title">
+      <h2 class="section__title" id="buttons-title">الأزرار</h2>
+      <div class="button-row">
+        <button class="btn btn--primary" type="button">أساسي</button>
+        <button class="btn btn--secondary" type="button">ثانوي</button>
+        <button class="btn btn--outline" type="button">حدودي</button>
+        <button class="btn btn--disabled" type="button" disabled>معطّل</button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="components-title">
+      <h2 class="section__title" id="components-title">مكوّنات الواجهة</h2>
+      <div class="component-grid">
+        <article class="panel">
+          <h3>بطاقة وشارة الإنجاز</h3>
+          <div class="sample-card">
+            <div class="sample-card__head">
+              <strong>الدرس الرابع: العادات الصحية</strong>
+              <span class="badge--done"><span aria-hidden="true">✓</span> منجز</span>
+            </div>
+            <p>أكملت هذا الدرس بنجاح وحصلت على الخبرة المقرّرة.</p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h3>بانر الخطأ</h3>
+          <div class="error-banner" role="alert">
+            <span class="error-banner__icon" aria-hidden="true">!</span>
+            <span>تعذّر حفظ التقدّم. تحقّق من الاتصال وحاول مرة أخرى.</span>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h3>شريط التقدّم</h3>
+          <div class="progress-row">
+            <div class="progress-row__label"><span>تقدّم الدرس</span><span class="progress-row__value">40%</span></div>
+            <div class="progress-track" role="progressbar" aria-label="تقدّم الدرس" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+              <div class="progress-fill" style="--swatch: var(--plum-500); inline-size: 40%"></div>
+            </div>
+          </div>
+          <div class="progress-row">
+            <div class="progress-row__label"><span>المسار مكتمل</span><span class="progress-row__value">100%</span></div>
+            <div class="progress-track" role="progressbar" aria-label="المسار مكتمل" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+              <div class="progress-fill" style="--swatch: var(--leaf); inline-size: 100%"></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h3>مؤشرات اللعب</h3>
+          <div class="metric-row">
+            <span class="hearts" role="img" aria-label="3 من 3 قلوب"><span aria-hidden="true">♥</span><span aria-hidden="true">♥</span><span aria-hidden="true">♥</span></span>
+            <span class="metric-label">3 قلوب</span>
+          </div>
+          <div class="metric-row">
+            <span class="xp-badge"><span class="xp-badge__icon" aria-hidden="true">★</span><span dir="ltr">+25 XP</span></span>
+          </div>
+          <div class="locked-item">
+            <svg class="lock-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="5" y="11" width="14" height="10" rx="2"></rect>
+              <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+            </svg>
+            <span>مستوى مقفل</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="onboarding-title">
+      <h2 class="section__title" id="onboarding-title">نموذج Onboarding</h2>
+      <article class="onboarding">
+        <div class="onboarding__head">
+          <svg class="onboarding__leaf" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 4C11 4 4 9 4 16c0 2 1 4 3 5 1-5 5-9 11-11-4 3-7 7-8 12 7 1 12-4 12-11 0-3-1-5-2-7Z"></path>
+          </svg>
+          <div>
+            <h3>حكاية تميّز</h3>
+            <p class="onboarding__tagline">لأن كل طموح يستحق أن يُروى!</p>
+          </div>
+        </div>
+        <p class="onboarding__bio">في حكاية تميّز، نجمع بين ثقافة الحياة الصحية مع DXN وقوة العمل الجماعي الذكي عبر الإنترنت. نوفّر بيئة تدريبية داعمة ترافق كل متدرب ومتدربة من البداية حتى الاحتراف، لبناء مشروع خاص بمرونة تامة، ولتصبح كل حكاية قادمة حكاية تميّز.</p>
+        <p class="onboarding__welcome">أهلاً بك في عائلتك الثانية.. رحلتك نحو التميّز تبدأ الآن!</p>
+      </article>
+    </section>
+
+    <section class="section" aria-labelledby="contrast-title">
+      <h2 class="section__title" id="contrast-title">تباين WCAG</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">الزوج (النص على الخلفية)</th>
+              <th scope="col">HEX (مقدمة / خلفية)</th>
+              <th scope="col">النسبة</th>
+              <th scope="col">الحكم</th>
+              <th scope="col">المصدر</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="measured"><th scope="row">leaf-text على leaf-container</th><td class="hex">#466B49 / #EEF4EE</td><td class="hex">5.44:1</td><td>✓ نص عادي (≥ 4.5)</td><td>مُقاس في P0</td></tr>
+            <tr class="measured"><th scope="row">xp-text على xp-container</th><td class="hex">#8A5A14 / #FBF1E2</td><td class="hex">5.29:1</td><td>✓ نص عادي (≥ 4.5)</td><td>مُقاس في P0</td></tr>
+            <tr><th scope="row">plum-500 على white</th><td class="hex">#69163D / #FFFFFF</td><td class="hex">11.78:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">plum-500 على ivory</th><td class="hex">#69163D / #F8F8F4</td><td class="hex">11.06:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">white على plum-500</th><td class="hex">#FFFFFF / #69163D</td><td class="hex">11.78:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">plum-500 على plum-50</th><td class="hex">#69163D / #F3ECEF</td><td class="hex">10.13:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">plum-500 على rose-50</th><td class="hex">#69163D / #FAF3F6</td><td class="hex">10.78:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-500 على white</th><td class="hex">#C0648D / #FFFFFF</td><td class="hex">3.85:1</td><td>أيقونات / نص كبير فقط</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-500 على ivory</th><td class="hex">#C0648D / #F8F8F4</td><td class="hex">3.62:1</td><td>أيقونات / نص كبير فقط</td><td>الخطة</td></tr>
+            <tr><th scope="row">white على rose-500</th><td class="hex">#FFFFFF / #C0648D</td><td class="hex">3.85:1</td><td>ممنوع لنص عادي</td><td>الخطة</td></tr>
+            <tr><th scope="row">white على rose-600</th><td class="hex">#FFFFFF / #A6567A</td><td class="hex">4.96:1</td><td>✓ الزر الثانوي</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-600 على white</th><td class="hex">#A6567A / #FFFFFF</td><td class="hex">4.96:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-600 على ivory</th><td class="hex">#A6567A / #F8F8F4</td><td class="hex">4.66:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">white على rose-700</th><td class="hex">#FFFFFF / #8C4866</td><td class="hex">6.49:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-700 على ivory</th><td class="hex">#8C4866 / #F8F8F4</td><td class="hex">6.10:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-300 على plum-500</th><td class="hex">#E0B2C6 / #69163D</td><td class="hex">6.37:1</td><td>✓ سطر DXN الداكن</td><td>الخطة</td></tr>
+            <tr><th scope="row">rose-500 على plum-500</th><td class="hex">#C0648D / #69163D</td><td class="hex">3.06:1</td><td>أيقونات فقط</td><td>الخطة</td></tr>
+            <tr><th scope="row">text على white</th><td class="hex">#2A1420 / #FFFFFF</td><td class="hex">17.22:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">text على ivory</th><td class="hex">#2A1420 / #F8F8F4</td><td class="hex">16.18:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">muted على white</th><td class="hex">#6E5A64 / #FFFFFF</td><td class="hex">6.35:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">muted على ivory</th><td class="hex">#6E5A64 / #F8F8F4</td><td class="hex">5.96:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">success على white</th><td class="hex">#2F7D5B / #FFFFFF</td><td class="hex">4.99:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">success على ivory</th><td class="hex">#2F7D5B / #F8F8F4</td><td class="hex">4.69:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">error على white</th><td class="hex">#C0392B / #FFFFFF</td><td class="hex">5.44:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">error على ivory</th><td class="hex">#C0392B / #F8F8F4</td><td class="hex">5.11:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">info على white</th><td class="hex">#2B6CB0 / #FFFFFF</td><td class="hex">5.42:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">warning / xp على white</th><td class="hex">#B7791F / #FFFFFF</td><td class="hex">3.64:1</td><td>أيقونات فقط</td><td>الخطة</td></tr>
+            <tr><th scope="row">warning-text / xp-text على white</th><td class="hex">#8A5A14 / #FFFFFF</td><td class="hex">5.91:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">heart على white</th><td class="hex">#D64545 / #FFFFFF</td><td class="hex">4.38:1</td><td>أيقونات</td><td>الخطة</td></tr>
+            <tr><th scope="row">leaf على white</th><td class="hex">#5E8C61 / #FFFFFF</td><td class="hex">3.89:1</td><td>أيقونات</td><td>الخطة</td></tr>
+            <tr><th scope="row">leaf-text على white</th><td class="hex">#466B49 / #FFFFFF</td><td class="hex">6.07:1</td><td>✓</td><td>الخطة</td></tr>
+            <tr><th scope="row">locked على white</th><td class="hex">#A8959E / #FFFFFF</td><td class="hex">2.82:1</td><td>زخرفي فقط</td><td>الخطة</td></tr>
+            <tr><th scope="row">locked-text على white</th><td class="hex">#7A6870 / #FFFFFF</td><td class="hex">5.20:1</td><td>✓</td><td>الخطة</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">النسب مقرّبة لأقرب رقمين بعد العلامة العشرية، ومحسوبة بمعادلة WCAG 2.1 للسطوع النسبي. الصفوف المُقاسة في P0 استخدمت قيم التوكنز نفسها في هذه الصفحة.</p>
+    </section>
+
+    <footer class="footer">معاينة ثابتة لهوية «حكاية تميّز» — بلا مكتبات خارجية ولا خطوط محمّلة.</footer>
+  </main>
+</body>
+</html>

@@ -13,33 +13,49 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dxn.training.ui.components.BrandMark
+import com.dxn.training.ui.components.BrandMarkSize
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
+import com.dxn.training.ui.viewmodel.AuthUiState
+import com.dxn.training.ui.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
-    var email by remember { mutableStateOf("") }
+fun LoginScreen(
+    authViewModel: AuthViewModel,
+    onLogin: () -> Unit,
+    onRegister: () -> Unit
+) {
+    var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val state by authViewModel.state.collectAsState()
+
+    LaunchedEffect(state) {
+        if (state is AuthUiState.LoggedIn) onLogin()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CardSurface)
+            .background(Surface)
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(80.dp))
+        Spacer(modifier = Modifier.height(48.dp))
+        BrandMark(size = BrandMarkSize.Large)
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "تسجيل الدخول",
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue
+            color = BrandPlum700
         )
 
         Spacer(modifier = Modifier.height(40.dp))
 
         AuthTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = login,
+            onValueChange = { login = it },
             label = "البريد / رقم الهاتف",
             keyboardType = KeyboardType.Email
         )
@@ -52,19 +68,33 @@ fun LoginScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
             keyboardType = KeyboardType.Password
         )
 
+        (state as? AuthUiState.Error)?.let { error ->
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = error.message,
+                color = Error,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
-        DxButton(text = "دخول", onClick = onLogin)
+        DxButton(
+            text = if (state is AuthUiState.Loading) "جاري الدخول..." else "دخول",
+            onClick = { authViewModel.login(login, password) },
+            enabled = state !is AuthUiState.Loading
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
         TextButton(onClick = onRegister) {
             Text(
-                text = "ليس لديك حساب؟ سجّل",
-                color = DXNRed,
+                text = g("ليس لديك حساب؟ سجّل", "ليس لديكِ حساب؟ سجّلي"),
+                color = BrandPlum,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
         Text(
-            text = "أو سجل عبر Google / Apple",
+            text = g("أو سجّل عبر Google / Apple", "أو سجّلي عبر Google / Apple"),
             color = TextMuted,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
@@ -94,9 +124,9 @@ private fun AuthTextField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Background,
-                unfocusedContainerColor = Background,
-                focusedBorderColor = DXNRed,
+                focusedContainerColor = BrandIvory,
+                unfocusedContainerColor = BrandIvory,
+                focusedBorderColor = BrandPlum,
                 unfocusedBorderColor = Disabled
             ),
             visualTransformation = visualTransformation,

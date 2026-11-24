@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.DXNTrainingApp" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#F8FAF9</item>
+        <item name="android:statusBarColor">@color/brand_ivory</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/brand_ivory</item>
     </style>
 </resources>

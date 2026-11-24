@@ -1,31 +1,69 @@
+import java.io.FileInputStream
+import java.util.Properties
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
 
+// Release signing is read from DXNTrainingApp/keystore.properties (gitignored).
+// The owner creates the keystore; never commit it or its passwords.
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val hasKeystore = keystorePropertiesFile.exists()
+if (hasKeystore) {
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
+}
+
+// Set the real HTTPS origin via DXN_RELEASE_BASE_URL (env) or -PDXN_RELEASE_BASE_URL=...
+// or a `dxn.releaseBaseUrl` entry in local.properties. The placeholder is rejected for release builds.
+val releaseBaseUrl = (
+    System.getenv("DXN_RELEASE_BASE_URL")
+        ?: (project.findProperty("DXN_RELEASE_BASE_URL") as String?)
+        ?: "https://<domain>/"
+    ).trim().let { if (it.endsWith("/")) it else "$it/" }
+
 android {
     namespace = "com.dxn.training"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dxn.training"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 36
+        versionCode = 2
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
 
-        // عنوان السيرفر الأساسي — يُغيَّر بعد نشر الموقع
-        buildConfigField("String", "BASE_URL", "\"https://dxn-training-api.example.com/\"")
+    }
+
+    signingConfigs {
+        if (hasKeystore) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            // debug: emulator (10.0.2.2 = host machine)
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8000/\"")
+        }
         release {
-            isMinifyEnabled = false
+            buildConfigField("String", "BASE_URL", "\"$releaseBaseUrl\"")
+            // Release builds require a real keystore (see README). No debug fallback.
+            signingConfig = if (hasKeystore) signingConfigs.getByName("release") else null
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -73,6 +111,8 @@ dependencies {
 
     // Networking
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.11.0")
@@ -83,4 +123,20 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// Fail fast on release builds that still use the placeholder origin.
+gradle.taskGraph.whenReady {
+    val releaseTasks = allTasks.filter { it.name.contains("Release", ignoreCase = true) }
+    val isRelease = releaseTasks.isNotEmpty()
+    if (isRelease && releaseBaseUrl.contains("<domain>")) {
+        throw GradleException(
+            "DXN_RELEASE_BASE_URL is still the placeholder. Set it to the real https://... origin before building a release."
+        )
+    }
+    if (isRelease && !hasKeystore) {
+        throw GradleException(
+            "Release signing keystore missing: copy keystore.properties.example to keystore.properties (outside git) and fill it — see README. Publishing without a real keystore is not allowed."
+        )
+    }
 }

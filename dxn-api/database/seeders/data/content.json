@@ -1,0 +1,585 @@
+[
+  {
+    "title": "أساسيات النجاح مع DXN",
+    "orderIndex": 1,
+    "bagId": 1,
+    "description": "الشركة وشعارها ومعنى الألوان، فكرة استثمار الاستهلاك، التسجيل، ثلاثية النجاح، والمنتجات الأساسية.",
+    "certificateTitle": "شهادة أساسيات DXN",
+    "requiredSectionOrderIndex": null,
+    "skills": [
+      {
+        "title": "الشركة وهويتها",
+        "orderIndex": 1,
+        "levels": [
+          {
+            "title": "شعار DXN ومعنى الألوان",
+            "orderIndex": 1,
+            "xpReward": 40,
+            "passThreshold": 80,
+            "type": "quiz",
+            "cards": [
+              {
+                "title": "شعار DXN ومعنى الألوان",
+                "body": "الأحمر يمثل النار والشمس — الإصرار والطموح. الأخضر يمثل الأشجار والجانوديرما — النمو والتوسع. الأزرق الداكن يمثل الماء والأساس.",
+                "tip": "تأسست DXN عام 1993 على يد الدكتور ليم سيو سين."
+              },
+              {
+                "title": "فلسفة DXN",
+                "body": "DXN تقوم على مبدأ استثمار الاستهلاك: حوّل ما تنفقه شهرياً إلى فرصة استثمارية.",
+                "tip": "الجودة والاستدامة هما أساس المنتجات."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "متى تأسست شركة DXN ومن مؤسسها؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "1990 — د. أحمد",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "ليست الإجابة الصحيحة.",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "1993 — د. ليم سيو سين",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "إجابة صحيحة!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "2000 — د. محمد",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "ليست الإجابة الصحيحة.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "التسجيل وثلاثية النجاح",
+        "orderIndex": 2,
+        "levels": [
+          {
+            "title": "استخدام المنتجات والتسجيل",
+            "orderIndex": 1,
+            "xpReward": 40,
+            "passThreshold": 80,
+            "type": "chat_battle",
+            "cards": [
+              {
+                "title": "ثلاثية النجاح",
+                "body": "استخدم المنتجات شخصياً، شارك الفكرة، وابنِ فريقك. هذه هي السلسلة الذهبية.",
+                "tip": "المصداقية تأتي من التجربة الشخصية."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "ما عناصر ثلاثية النجاح في DXN؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "استخدام، مشاركة، بناء فريق",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 30,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "شراء، بيع، ربح فقط",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح، النجاح يحتاج بناء علاقات.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "المنتجات الأساسية",
+        "orderIndex": 3,
+        "levels": [
+          {
+            "title": "الريشي والسبايرولينا والمورنزي",
+            "orderIndex": 1,
+            "xpReward": 60,
+            "passThreshold": 80,
+            "type": "match_pairs",
+            "cards": [
+              {
+                "title": "فطر الريشي",
+                "body": "الريشي (جانوديرما) يدعم الخلايا ويساعد على طرد السموم.",
+                "tip": "يُعرف باسم فطر الخلود في الطب التقليدي."
+              },
+              {
+                "title": "السبايرولينا والمورنزي",
+                "body": "السبايرولينا غذاء كامل غني بالبروتين. عصير المورنزي غني بمضادات الأكسدة.",
+                "tip": "الطريقة الصحيحة للاستخدام تضاعف الفائدة."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "اربط المنتج بالفائدة:",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "الريشي — طرد السموم",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "المورنزي — بروتين نباتي",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "خطأ، المورنزي غني بمضادات الأكسدة.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "استثمار الاستهلاك",
+    "orderIndex": 2,
+    "bagId": 2,
+    "description": "كيف تحوّل ما تنفقه شهرياً على المستهلكات إلى مشروع استثماري.",
+    "certificateTitle": "شهادة استثمار الاستهلاك",
+    "requiredSectionOrderIndex": 1,
+    "skills": [
+      {
+        "title": "تحويل المصروفات إلى استثمار",
+        "orderIndex": 1,
+        "levels": [
+          {
+            "title": "الخطوات العملية والأرقام",
+            "orderIndex": 1,
+            "xpReward": 50,
+            "passThreshold": 80,
+            "type": "order_sequence",
+            "cards": [
+              {
+                "title": "استثمار الاستهلاك",
+                "body": "بدلاً من شراء منتجات متعددة من السوق، استبدلها بمنتجات DXN عالية الجودة واحصل على فرصة عمل.",
+                "tip": "احسب توفيرك الشهري وتحويله إلى دخل."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "ما المقصود باستثمار الاستهلاك؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "شراء منتجات DXN بدلاً من المنتجات العادية والاستفادة من العمل",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "شراء أي منتج بسعر أقل",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "نظرية خماسية الصحة",
+    "orderIndex": 3,
+    "bagId": 3,
+    "description": "الوجبة الواحدة، الحمضية والقلوية، الخمائر والإنزيمات، النظرية الخضراء، والتمارين الرياضية.",
+    "certificateTitle": "شهادة نظرية خماسية الصحة",
+    "requiredSectionOrderIndex": 2,
+    "skills": [
+      {
+        "title": "الخماسية الصحية",
+        "orderIndex": 1,
+        "levels": [
+          {
+            "title": "الوجبة الواحدة والتوازن القلوي",
+            "orderIndex": 1,
+            "xpReward": 50,
+            "passThreshold": 80,
+            "type": "chat_battle",
+            "cards": [
+              {
+                "title": "الوجبة الواحدة",
+                "body": "تناول وجبة غنية ومتوازنة بدلاً من وجبات متفرقة غير صحية.",
+                "tip": "المشروبات الصحية تساعد على الشبع والطاقة."
+              },
+              {
+                "title": "التوازن الحمضي القلوي",
+                "body": "الجسم يحتاج توازناً بين الأحماض والقلويات. المنتجات الخضراء تساعد على القلوية.",
+                "tip": "الخمائر والإنزيمات تدعم الهضم."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "ما أحد أركان الخماسية الصحية؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "الوجبة الواحدة",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 30,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "تناول الوجبات السريعة",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "ربط النظرية بالمنتجات",
+        "orderIndex": 2,
+        "levels": [
+          {
+            "title": "أي منتج يناسب كل حاجة؟",
+            "orderIndex": 1,
+            "xpReward": 60,
+            "passThreshold": 80,
+            "type": "match_pairs",
+            "cards": [
+              {
+                "title": "المنتجات والصحة",
+                "body": "الريشي للدعم الخلوي، السبايرولينا للتغذية، المورنزي لمضادات الأكسدة، والتمارين للنشاط.",
+                "tip": "استخدم المنتج المناسب للاستشارة."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "أي منتج يناسب من يبحث عن طاقة يومية متوازنة؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "السبايرولينا",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "صابون DXN",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "الخطة التسويقية والرتب",
+    "orderIndex": 4,
+    "bagId": 4,
+    "description": "التسجيل ورقم التخفيض، نظام النقاط PV/SV، الرتب النجمية، ومحاكي حساب الأرباح.",
+    "certificateTitle": "شهادة الخطة التسويقية والرتب",
+    "requiredSectionOrderIndex": 3,
+    "skills": [
+      {
+        "title": "نظام النقاط PV & SV",
+        "orderIndex": 1,
+        "levels": [
+          {
+            "title": "احتساب النقاط الشخصية والجماعية",
+            "orderIndex": 1,
+            "xpReward": 60,
+            "passThreshold": 80,
+            "type": "order_sequence",
+            "cards": [
+              {
+                "title": "PV و SV",
+                "body": "PV (Point Value) قيمة النقاط الشخصية. SV (Sales Value) قيمة المبيعات. كل منتج له نقاط محددة.",
+                "tip": "100 PV شهرياً شرط التأهل الأساسي."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "كم PV مطلوب شهرياً للتأهل؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "100 PV",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "50 PV",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "سلم الرتب النجمية",
+        "orderIndex": 2,
+        "levels": [
+          {
+            "title": "من موزع إلى نجم ماسي",
+            "orderIndex": 1,
+            "xpReward": 70,
+            "passThreshold": 80,
+            "type": "chat_battle",
+            "cards": [
+              {
+                "title": "الرتب النجمية",
+                "body": "الرتب: موزع → وكيل نجم → نجم ياقوتي/روبي → نجم ماسي. كل رتبة لها شروط وتأهيل.",
+                "tip": "الترقي يأتي بالتأهل الشخصي وبناء المجموعة."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "ما ترتيب الرتب الصحيح؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "موزع → وكيل نجم → ياقوتي → ماسي",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 30,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "موزع → ماسي → ياقوتي → وكيل نجم",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "الطريق إلى النجم الماسي",
+    "orderIndex": 5,
+    "bagId": 5,
+    "description": "خطة شهر بشهر للوصول للنجم الماسي خلال 5 أشهر، قائمة المعارف، فن الدعوة، والرد على الاعتراضات.",
+    "certificateTitle": "شهادة التخرج — النجم الماسي",
+    "requiredSectionOrderIndex": 4,
+    "skills": [
+      {
+        "title": "خطة العمل الشهرية",
+        "orderIndex": 1,
+        "levels": [
+          {
+            "title": "خطة 5 أشهر",
+            "orderIndex": 1,
+            "xpReward": 60,
+            "passThreshold": 80,
+            "type": "match_pairs",
+            "cards": [
+              {
+                "title": "خطة 5 أشهر",
+                "body": "الشهر 1: التعلم والتسجيل. الشهر 2-3: بناء قائمة المعارف. الشهر 4-5: التكرار والترقي.",
+                "tip": "الاستمرارية والمتابعة هما السر."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "كم شهراً تقريباً للوصول للنجم الماسي بالخطة العملية؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "5 أشهر",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "صحيح!",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "شهر واحد",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -10,
+                    "feedback": "غير صحيح.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "مهارات الميدان",
+        "orderIndex": 2,
+        "levels": [
+          {
+            "title": "قائمة المعارف وفن الدعوة",
+            "orderIndex": 1,
+            "xpReward": 70,
+            "passThreshold": 80,
+            "type": "order_sequence",
+            "cards": [
+              {
+                "title": "قائمة المعارف",
+                "body": "اكتب قائمة بـ 100 شخص على الأقل وصنّفهم: مهتم بالصحة، مهتم بالدخل، محتاج للتغيير.",
+                "tip": "لا تحكم مسبقاً على اهتمامات الناس."
+              },
+              {
+                "title": "فن الدعوة بدون حرق الفكرة",
+                "body": "ابدأ بالفائدة، لا بالتفاصيل. استخدم الفضول لتحديد موعد العرض.",
+                "tip": "لا تشرح كل شيء في المحادثة الأولى."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "كيف تدعو صديقاً للاطلاع على الفكرة دون حرقها؟",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "عندي مشروع صحي ممتاز، هل عندك 20 دقيقة غداً؟",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "رد احترافي.",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "بيع DXN سهل والربح كبير، انضم الآن",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -20,
+                    "feedback": "حرق للفكرة، يخفض الثقة.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "الرد على الاعتراضات",
+        "orderIndex": 3,
+        "levels": [
+          {
+            "title": "اعتراض السعر والمنتجات",
+            "orderIndex": 1,
+            "xpReward": 80,
+            "passThreshold": 80,
+            "type": "quiz",
+            "cards": [
+              {
+                "title": "قاعدة الرد الذهبية",
+                "body": "لا تجادل العميل. الاعتراض هو طلب لمزيد من المعلومات بصيغة دفاعية.",
+                "tip": "استخدم تقنية Feel - Felt - Found."
+              },
+              {
+                "title": "التركيز على القيمة لا السعر",
+                "body": "المنتج العضوي يدوم ويعطي فائدة صحية، ويمكن الحصول عليه مجاناً عبر النقاط.",
+                "tip": "حوّل الاعتراض إلى فائدة."
+              }
+            ],
+            "rounds": [
+              {
+                "prompt": "العميل: المنتج غالي شوي...",
+                "initialTrust": 50,
+                "options": [
+                  {
+                    "text": "(Feel-Felt-Found) أتفهم شعورك...",
+                    "isCorrect": true,
+                    "isNeutral": false,
+                    "trustImpact": 25,
+                    "feedback": "رد احترافي يرفع الثقة.",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "لا مش غالي، أنت غلطان",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -20,
+                    "feedback": "رد هجومي يخفض الثقة.",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "اشتري بسرعة قبل ينتهي العرض",
+                    "isCorrect": false,
+                    "isNeutral": false,
+                    "trustImpact": -15,
+                    "feedback": "ضغط غير مناسب.",
+                    "xpBonus": 0
+                  },
+                  {
+                    "text": "دعني أرسل لك دراسة مقارنة",
+                    "isCorrect": false,
+                    "isNeutral": true,
+                    "trustImpact": 0,
+                    "feedback": "رد محايد، لا يؤثر كثيراً.",
+                    "xpBonus": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

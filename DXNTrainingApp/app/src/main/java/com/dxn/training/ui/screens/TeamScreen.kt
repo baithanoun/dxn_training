@@ -19,36 +19,42 @@ import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.DxProgressBar
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.TeamViewModel
 
 @Composable
 fun TeamScreen(viewModel: TeamViewModel) {
     val members by viewModel.members.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
     var filter by remember { mutableStateOf(MemberStatus.ACTIVE) }
+
+    LaunchedEffect(Unit) { viewModel.load() }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
     ) {
-        ScreenHeader(title = "فريقي", streak = 5)
+        ScreenHeader(title = "فريقي")
 
-        // Summary
+        // Summary — الأرقام من استجابة السيرفر.
+        val average = if (members.isEmpty()) 0 else members.sumOf { it.progressPercent } / members.size
         DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             Text(
                 text = "ملخص الفريق",
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "الأعضاء: ${members.size}  |  معدل الإكمال: 68%",
+                text = "الأعضاء: ${members.size}  |  متوسط الإكمال: $average%",
                 style = MaterialTheme.typography.bodyMedium,
                 color = TextMuted
             )
             Spacer(modifier = Modifier.height(8.dp))
-            DxProgressBar(progress = 0.68f)
+            DxProgressBar(progress = average / 100f)
         }
 
         // Filters
@@ -70,18 +76,39 @@ fun TeamScreen(viewModel: TeamViewModel) {
                 onClick = { filter = MemberStatus.INACTIVE },
                 modifier = Modifier.weight(1f)
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            FilterChip(
+                label = "مكتمل",
+                selected = filter == MemberStatus.COMPLETED,
+                onClick = { filter = MemberStatus.COMPLETED },
+                modifier = Modifier.weight(1f)
+            )
         }
 
         val filtered = members.filter { it.status == filter }
-        filtered.forEach { member ->
-            MemberRow(member = member)
+        when {
+            isLoading -> {
+                CircularProgressIndicator(
+                    color = BrandPlum,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            error != null || filtered.isEmpty() -> {
+                Text(
+                    text = "لا يوجد أعضاء بعد",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextMuted,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
+            else -> filtered.forEach { member -> MemberRow(member = member) }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
         DxButton(
-            text = "إرسال تشجيع",
+            text = g("شجّع فريقك", "شجّعي فريقك"),
             onClick = { },
-            containerColor = DXNGold,
+            containerColor = Xp,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(modifier = Modifier.height(80.dp))
@@ -95,8 +122,8 @@ private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit, mo
         modifier = modifier.height(40.dp),
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) DXNRed else CardSurface,
-            contentColor = if (selected) CardSurface else TextMuted
+            containerColor = if (selected) BrandPlum else Surface,
+            contentColor = if (selected) Surface else TextMuted
         )
     ) {
         Text(label, style = MaterialTheme.typography.bodyMedium)
@@ -110,7 +137,7 @@ private fun MemberRow(member: TeamMember) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface)
+        colors = CardDefaults.cardColors(containerColor = Surface)
     ) {
         Row(
             modifier = Modifier
@@ -125,7 +152,7 @@ private fun MemberRow(member: TeamMember) {
                     .background(Disabled),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = member.name.first().toString(), color = TextMuted)
+                Text(text = member.name.firstOrNull()?.toString().orEmpty(), color = TextMuted)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -135,15 +162,15 @@ private fun MemberRow(member: TeamMember) {
                     color = TextPrimary
                 )
                 Text(
-                    text = "إنجاز ${member.progressPercent}%",
+                    text = "إنجاز ${member.progressPercent}%  |  آخر نشاط قبل ${member.lastActiveDays} يوم",
                     style = MaterialTheme.typography.bodyMedium,
                     color = TextMuted
                 )
             }
             val color = when (member.status) {
-                MemberStatus.ACTIVE -> DXNGreen
-                MemberStatus.INACTIVE -> DXNRedDeep
-                MemberStatus.COMPLETED -> DXNGold
+                MemberStatus.ACTIVE -> Leaf
+                MemberStatus.INACTIVE -> Error
+                MemberStatus.COMPLETED -> Xp
             }
             Box(
                 modifier = Modifier

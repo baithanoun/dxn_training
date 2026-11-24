@@ -4,27 +4,6 @@ import com.dxn.training.data.model.*
 
 object MockData {
 
-    val currentUser = User(
-        id = "u1",
-        fullName = "أحمد محمد",
-        email = "ahmed@dxn.com",
-        phone = "+966 5xx xxx xxx",
-        dxnId = "DXN-123456",
-        role = UserRole.TRAINEE,
-        totalXp = 1240,
-        currentStreak = 5,
-        hearts = 3,
-        gems = 120,
-        badges = listOf(
-            Badge("b1", "المتدرب النشط", "S", "2026-11-01"),
-            Badge("b2", "أول إتقان", "X", "2026-11-05")
-        ),
-        certificates = listOf(
-            Certificate("c1", "أساسيات DXN", "2026-11-10"),
-            Certificate("c2", "مهارات المنتجات", "2026-11-12")
-        )
-    )
-
     val sections = listOf(
         Section(
             id = "s1",
@@ -509,14 +488,6 @@ object MockData {
                 )
             )
         )
-    )
-
-    val teamMembers = listOf(
-        TeamMember("m1", "خالد", 85, 0, MemberStatus.ACTIVE),
-        TeamMember("m2", "سارة", 62, 1, MemberStatus.ACTIVE),
-        TeamMember("m3", "محمد", 30, 5, MemberStatus.INACTIVE),
-        TeamMember("m4", "نور", 0, 12, MemberStatus.INACTIVE),
-        TeamMember("m5", "ليلى", 100, 2, MemberStatus.COMPLETED)
     )
 
     val userProgress = mutableMapOf(

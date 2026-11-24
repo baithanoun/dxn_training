@@ -1,6 +1,7 @@
 package com.dxn.training.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -9,13 +10,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
 import com.dxn.training.ui.components.DxCard
@@ -26,14 +30,23 @@ import com.dxn.training.ui.viewmodel.ProfileViewModel
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    onAdminClick: () -> Unit
+    onAdminClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val user by viewModel.user.collectAsState()
+    val certificates by viewModel.certificates.collectAsState()
+
+    // Refresh certificates each time the screen comes back to the foreground
+    // (e.g. after completing a section and receiving a certificate).
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
             .verticalScroll(rememberScrollState())
     ) {
         ScreenHeader(title = "ملفي")
@@ -46,9 +59,9 @@ fun ProfileScreen(
                 AvatarPlaceholder(size = 90)
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = user.fullName,
+                    text = user.fullName.ifBlank { "..." },
                     style = MaterialTheme.typography.headlineMedium,
-                    color = DXNBlue
+                    color = BrandPlum700
                 )
                 Text(
                     text = user.dxnId,
@@ -67,19 +80,56 @@ fun ProfileScreen(
         ) {
             StatBox(value = user.currentStreak.toString(), label = "Streak", icon = "★")
             StatBox(value = user.totalXp.toString(), label = "XP", icon = "●")
-            StatBox(value = user.certificates.size.toString(), label = "شهادة", icon = "▮")
+            StatBox(value = certificates.size.toString(), label = "شهادة", icon = "▮")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        val menuItems = listOf("حقيبة المتدرب", "الأوسمة", "الشهادات", "الإعدادات", "تسجيل الخروج")
+        // الشهادات من تقدّم الأقسام على السيرفر.
+        DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(
+                text = "الشهادات",
+                style = MaterialTheme.typography.bodyLarge,
+                color = BrandPlum700
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            if (certificates.isEmpty()) {
+                Text(
+                    text = "لا توجد شهادات بعد",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextMuted
+                )
+            } else {
+                certificates.forEach { certificate ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "🎓 ${certificate.title}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextPrimary
+                        )
+                        if (certificate.issuedAt.isNotBlank()) {
+                            Text(
+                                text = certificate.issuedAt.take(10),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = TextMuted
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        val menuItems = listOf("حقيبة المتدرب", "الأوسمة", "الإعدادات")
         menuItems.forEach { item ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = CardSurface)
+                colors = CardDefaults.cardColors(containerColor = Surface)
             ) {
                 Row(
                     modifier = Modifier
@@ -102,6 +152,111 @@ fun ProfileScreen(
             }
         }
 
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clickable { onLogout() },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Surface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "تسجيل الخروج",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Error
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = Error
+                )
+            }
+        }
+
+        var showDeleteDialog by remember { mutableStateOf(false) }
+        var deletePassword by remember { mutableStateOf("") }
+        var deleteError by remember { mutableStateOf<String?>(null) }
+        var isDeleting by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { if (!isDeleting) showDeleteDialog = false },
+                title = { Text("حذف الحساب") },
+                text = {
+                    Column {
+                        Text("أدخل كلمة المرور لتأكيد حذف الحساب. لا يمكن التراجع.")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = deletePassword,
+                            onValueChange = { deletePassword = it },
+                            label = { Text("كلمة المرور") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            singleLine = true
+                        )
+                        deleteError?.let { Text(it, color = Error, style = MaterialTheme.typography.bodySmall) }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = !isDeleting && deletePassword.isNotBlank(),
+                        onClick = {
+                            isDeleting = true
+                            deleteError = null
+                            scope.launch {
+                                val ok = viewModel.deleteAccount(deletePassword)
+                                isDeleting = false
+                                if (ok) {
+                                    showDeleteDialog = false
+                                    onLogout()
+                                } else {
+                                    deleteError = "تعذر حذف الحساب. تحقق من كلمة المرور."
+                                }
+                            }
+                        }
+                    ) { Text("حذف", color = Error) }
+                },
+                dismissButton = {
+                    TextButton(enabled = !isDeleting, onClick = { showDeleteDialog = false }) { Text("إلغاء") }
+                }
+            )
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clickable { showDeleteDialog = true },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Surface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "حذف الحساب",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Error
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = Error
+                )
+            }
+        }
+
         if (user.role == UserRole.ADMIN || user.role == UserRole.LEADER) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -109,7 +264,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DXNBlue)
+                colors = ButtonDefaults.buttonColors(containerColor = BrandPlum900)
             ) {
                 Text("لوحة الإدارة")
             }
@@ -124,7 +279,7 @@ private fun StatBox(value: String, label: String, icon: String) {
     Card(
         modifier = Modifier.size(100.dp, 90.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Background)
+        colors = CardDefaults.cardColors(containerColor = BrandIvory)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -133,13 +288,13 @@ private fun StatBox(value: String, label: String, icon: String) {
         ) {
             Text(
                 text = icon,
-                color = DXNGold,
+                color = Xp,
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DXNBlue
+                color = BrandPlum700
             )
             Text(
                 text = label,

@@ -1,5 +1,6 @@
 package com.dxn.training.ui.screens
 
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,35 +12,43 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.model.RoundOption
+import com.dxn.training.data.remote.AnswerDto
+import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
 import com.dxn.training.ui.theme.*
+import com.dxn.training.ui.text.g
 
 @Composable
 fun MatchPairsScreen(
     levelId: String,
-    onComplete: (Int, Int) -> Unit,
+    onComplete: (List<AnswerDto>) -> Unit,
     onBack: () -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val level = remember(levelId) { contentRepository.getLevel(levelId) }
-    val round = level?.rounds?.firstOrNull()
-    val options = round?.options ?: emptyList()
-    var selected by remember { mutableStateOf<RoundOption?>(null) }
-    var answered by remember { mutableStateOf(false) }
-    var hearts by remember { mutableIntStateOf(3) }
-
+    val rounds = level?.rounds ?: emptyList()
+    var roundIndex by remember(levelId) { mutableIntStateOf(0) }
+    val round = rounds.getOrNull(roundIndex)
     if (level == null || round == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("المستوى غير متاح", color = DXNRedDeep, style = MaterialTheme.typography.bodyLarge)
+            Text("المستوى غير متاح", color = Error, style = MaterialTheme.typography.bodyLarge)
         }
         return
     }
+    val options = round.options
+    var selected by remember(round.id) { mutableStateOf<RoundOption?>(null) }
+    var answered by remember(round.id) { mutableStateOf(false) }
+    var hearts by remember(levelId) { mutableIntStateOf(3) }
+    val answers = remember(levelId) { mutableListOf<AnswerDto>() }
+    val roundStartedAt = remember(round.id) { SystemClock.elapsedRealtime() }
+
+    LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BrandIvory)
     ) {
         ScreenHeader(title = level.title, onClose = onBack, streak = 5)
 
@@ -58,7 +67,7 @@ fun MatchPairsScreen(
         Text(
             text = round.prompt,
             style = MaterialTheme.typography.headlineMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -76,17 +85,17 @@ fun MatchPairsScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = when {
-                        isCorrect -> DXNGreen
-                        isWrong -> DXNRedDeep
-                        isSelected -> DXNRed
-                        else -> CardSurface
+                        isCorrect -> Leaf
+                        isWrong -> Error
+                        isSelected -> BrandPlum
+                        else -> Surface
                     }
                 )
             ) {
                 Text(
                     text = option.text,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = if (isSelected || isCorrect || isWrong) CardSurface else TextPrimary,
+                    color = if (isSelected || isCorrect || isWrong) Surface else TextPrimary,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -96,7 +105,7 @@ fun MatchPairsScreen(
             Text(
                 text = if (selected?.isCorrect == true) "صحيح!" else "اختيار خاطئ",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (selected?.isCorrect == true) DXNGreen else DXNRedDeep,
+                color = if (selected?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
@@ -104,14 +113,28 @@ fun MatchPairsScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
-            text = if (answered) "متابعة" else "تحقق",
+            text = if (answered && roundIndex < rounds.lastIndex) "التالي" else if (answered) "متابعة" else g("تحقق", "تحققي"),
             onClick = {
                 if (answered) {
-                    val score = if (selected?.isCorrect == true) 100 else 0
-                    val xp = if (score >= level.passThreshold) level.xpReward else 0
-                    val passed = score >= level.passThreshold
-                    contentRepository.updateLevelProgress(levelId, score, passed)
-                    onComplete(score, xp)
+                    val chosen = selected ?: return@DxButton
+                    answers.add(AnswerDto(round.id, chosen.id))
+                    EventSender.send(
+                        name = "question_answered",
+                        levelId = levelId,
+                        payload = mapOf(
+                            "roundId" to round.id,
+                            "optionId" to chosen.id,
+                            "correct" to chosen.isCorrect,
+                            "timeMs" to (SystemClock.elapsedRealtime() - roundStartedAt)
+                        )
+                    )
+                    if (roundIndex < rounds.lastIndex) {
+                        roundIndex++
+                        selected = null
+                        answered = false
+                    } else {
+                        onComplete(answers.toList())
+                    }
                 } else {
                     answered = true
                     if (selected?.isCorrect == false) hearts--

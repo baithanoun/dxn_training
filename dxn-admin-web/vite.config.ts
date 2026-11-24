@@ -7,6 +7,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 // https://vite.dev/config/
 export default defineConfig({
+  // React is served from Laravel at /admin/ in production (same origin).
+  base: '/admin/',
   plugins: [react()],
   resolve: {
     alias: {

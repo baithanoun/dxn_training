@@ -23,8 +23,8 @@ fun DxButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    containerColor: Color = DXNRed,
-    contentColor: Color = CardSurface
+    containerColor: Color = BrandPlum,
+    contentColor: Color = Surface
 ) {
     Button(
         onClick = onClick,
@@ -37,7 +37,7 @@ fun DxButton(
             containerColor = containerColor,
             disabledContainerColor = Disabled,
             contentColor = contentColor,
-            disabledContentColor = CardSurface
+            disabledContentColor = Surface
         )
     ) {
         Text(text = text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
@@ -57,7 +57,7 @@ fun DxOutlinedButton(
             .height(52.dp),
         shape = RoundedCornerShape(24.dp),
         colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = DXNRed
+            contentColor = BrandPlum
         )
     ) {
         Text(text = text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
@@ -72,7 +72,7 @@ fun DxCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardSurface),
+        colors = CardDefaults.cardColors(containerColor = Surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -86,7 +86,7 @@ fun DxCard(
 fun DxProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
-    color: Color = DXNGreen,
+    color: Color = Leaf,
     trackColor: Color = Disabled
 ) {
     Box(
@@ -110,9 +110,9 @@ fun DxProgressBar(
 fun DxTrustBar(trust: Int, modifier: Modifier = Modifier) {
     val progress = trust.coerceIn(0, 100) / 100f
     val color = when {
-        progress < 0.4f -> DXNRedDeep
-        progress < 0.7f -> WarningAmber
-        else -> DXNGreen
+        progress < 0.4f -> Error
+        progress < 0.7f -> Warning
+        else -> Leaf
     }
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -143,7 +143,7 @@ fun DxTrustBar(trust: Int, modifier: Modifier = Modifier) {
         Text(
             text = "$trust%",
             style = MaterialTheme.typography.labelMedium,
-            color = DXNBlue,
+            color = BrandPlum700,
             modifier = Modifier.padding(start = 8.dp)
         )
     }
@@ -156,7 +156,7 @@ fun HeartsIndicator(hearts: Int, modifier: Modifier = Modifier) {
             val active = index < hearts
             Text(
                 text = "♥",
-                color = if (active) DXNRedDeep else Disabled,
+                color = if (active) Heart else Disabled,
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 2.dp)
@@ -198,26 +198,26 @@ fun ScreenHeader(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
-            color = DXNBlue
+            color = BrandPlum700
         )
 
         if (streak != null) {
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFFEF3C7))
+                    .background(XpContainer)
                     .padding(horizontal = 10.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "🔥",
-                    color = DXNRedDeep,
+                    color = Streak,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Text(
                     text = "$streak أيام",
-                    color = DXNRedDeep,
+                    color = Streak,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

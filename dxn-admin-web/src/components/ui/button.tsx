@@ -7,12 +7,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-dxn-primary text-white hover:bg-dxn-primary/90",
-        destructive: "bg-dxn-error text-white hover:bg-dxn-error/90",
+        default: "bg-brand-plum-500 text-white hover:bg-brand-plum-500/90",
+        destructive: "bg-semantic-error text-white hover:bg-semantic-error/90",
         outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-dxn-secondary text-white hover:bg-dxn-secondary/90",
+        secondary: "bg-brand-rose-600 text-white hover:bg-brand-rose-600/90",
         ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-dxn-primary underline-offset-4 hover:underline",
+        link: "text-brand-plum-500 underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

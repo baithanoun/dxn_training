@@ -4,6 +4,15 @@ import com.dxn.training.data.model.*
 
 // ===================  نماذج JSON القادمة من السيرفر  ===================
 
+data class AppConfigResponse(
+    val appName: String,
+    val teamName: String,
+    val teamTagline: String?,
+    val teamBio: String?,
+    val teamWelcome: String?,
+    val maintenanceMode: Boolean
+)
+
 /**
  * نموذج القسم القادم من السيرفر.
  */
