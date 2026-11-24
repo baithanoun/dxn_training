@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+
+jobs:
+  api:
+    name: API (Laravel)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dxn-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, pdo_sqlite
+          coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Run tests
+        run: php artisan test
+
+  web:
+    name: Admin web (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dxn-admin-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: dxn-admin-web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        env:
+          VITE_API_URL: http://localhost
+        run: npm run build
+      - name: Lint
+        run: npm run lint
+
+  android:
+    name: Android (debug)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Make gradlew executable
+        run: chmod +x DXNTrainingApp/gradlew
+      - name: Build debug APK
+        working-directory: DXNTrainingApp
+        run: ./gradlew :app:assembleDebug
+
+  docker:
+    name: Docker image (build only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -f deploy/Dockerfile .
