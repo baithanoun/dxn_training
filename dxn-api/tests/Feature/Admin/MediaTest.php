@@ -114,6 +114,16 @@ class MediaTest extends TestCase
         Storage::disk('public')->assertExists('media/shared.jpg');
     }
 
+    public function test_media_upload_disabled_returns_503(): void
+    {
+        config(['media.uploads_enabled' => false]);
+
+        $this->actingAs($this->admin(), 'sanctum')
+            ->postJson('/api/admin/media', ['file' => UploadedFile::fake()->image('a.jpg')])
+            ->assertStatus(503)
+            ->assertJsonPath('message', 'رفع الصور غير مفعّل على هذا الخادم');
+    }
+
     public function test_requires_admin(): void
     {
         Storage::fake('public');
