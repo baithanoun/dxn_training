@@ -221,6 +221,36 @@ class UsersTest extends TestCase
         $this->assertSame((int) round(1 / $levels->count() * 100), $row['progressPercent']);
     }
 
+    public function test_password_change_revokes_tokens(): void
+    {
+        $admin = $this->admin();
+        $member = User::factory()->create(['role' => 'trainee']);
+        $token = $member->createToken('mobile')->plainTextToken;
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/users/{$member->id}", ['password' => 'new-password-123'])
+            ->assertOk();
+
+        app('auth')->forgetGuards();
+        $this->getJson('/api/auth/me', ['Authorization' => "Bearer $token"])->assertStatus(401);
+    }
+
+    public function test_update_rejects_invalid_leader_without_saving_changes(): void
+    {
+        $admin = $this->admin();
+        $trainee = User::factory()->create(['role' => 'trainee']);
+        $other = User::factory()->create(['role' => 'trainee']);
+
+        $this->actingAs($admin, 'sanctum')
+            ->putJson("/api/admin/users/{$trainee->id}", [
+                'fullName' => 'Should not persist',
+                'leaderId' => (string) $other->id,
+            ])
+            ->assertStatus(422)->assertJsonValidationErrors('leaderId');
+
+        $this->assertNotSame('Should not persist', $trainee->fresh()->name);
+    }
+
     public function test_admin_cannot_demote_self(): void
     {
         $admin = $this->admin();

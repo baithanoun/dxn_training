@@ -145,6 +145,15 @@ class UserController extends Controller
             return response()->json(['message' => 'Cannot deactivate self', 'errors' => ['isActive' => ['Cannot deactivate yourself']]], 422);
         }
 
+        if (isset($data['leaderId']) && $data['leaderId']) {
+            $leader = User::find($data['leaderId']);
+            if (! $leader || $leader->role !== 'leader') {
+                return response()->json(['message' => 'Leader must have leader role', 'errors' => ['leaderId' => ['Must be a leader']]], 422);
+            }
+        }
+
+        $passwordChanged = array_key_exists('password', $data);
+
         if (array_key_exists('fullName', $data)) {
             $user->name = $data['fullName'];
         }
@@ -177,10 +186,12 @@ class UserController extends Controller
         }
         $user->save();
 
-        if (isset($data['leaderId']) && $data['leaderId']) {
-            $leader = User::find($data['leaderId']);
-            if (! $leader || $leader->role !== 'leader') {
-                return response()->json(['message' => 'Leader must have leader role', 'errors' => ['leaderId' => ['Must be a leader']]], 422);
+        if ($passwordChanged) {
+            $currentToken = $current->currentAccessToken();
+            if ((string) $current->id === $id && $currentToken && method_exists($currentToken, 'getKey')) {
+                $user->tokens()->whereKeyNot($currentToken->getKey())->delete();
+            } else {
+                $user->tokens()->delete();
             }
         }
 
