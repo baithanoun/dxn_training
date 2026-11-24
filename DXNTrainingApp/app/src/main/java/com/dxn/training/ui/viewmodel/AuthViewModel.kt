@@ -75,7 +75,8 @@ class AuthViewModel(
         password: String,
         dxnId: String,
         leaderDxnId: String,
-        gender: String
+        gender: String,
+        acceptTerms: Boolean = false
     ) {
         viewModelScope.launch {
             _state.value = AuthUiState.Loading
@@ -90,7 +91,8 @@ class AuthViewModel(
                         password = password,
                         dxnId = dxnId.trim(),
                         gender = gender,
-                        leaderDxnId = leaderDxnId.trim().takeIf { it.isNotEmpty() }
+                        leaderDxnId = leaderDxnId.trim().takeIf { it.isNotEmpty() },
+                        acceptTerms = acceptTerms
                     )
                 )
                 handleAuth(response, "تعذر إنشاء الحساب")

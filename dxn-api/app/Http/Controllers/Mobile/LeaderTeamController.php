@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
+use App\Models\Level;
 use App\Models\User;
+use App\Models\UserLevelProgress;
 use Illuminate\Http\Request;
 
 class LeaderTeamController extends Controller
@@ -15,12 +17,12 @@ class LeaderTeamController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        $members = User::where('sponsor_id', $leader->id)->get();
-        $totalPublished = \App\Models\Level::where('status', 'published')->count();
+        $members = User::where('sponsor_id', $leader->id)->where('is_active', true)->get();
+        $totalPublished = Level::where('status', 'published')->count();
 
         $out = [];
         foreach ($members as $m) {
-            $completed = \App\Models\UserLevelProgress::where('user_id', $m->id)->where('status', 'completed')->count();
+            $completed = UserLevelProgress::where('user_id', $m->id)->where('status', 'completed')->count();
             $progressPercent = $totalPublished > 0 ? (int) round($completed / $totalPublished * 100) : 0;
             $lastActiveDays = $m->last_activity_date
                 ? (int) $m->last_activity_date->copy()->startOfDay()->diffInDays(now()->startOfDay())

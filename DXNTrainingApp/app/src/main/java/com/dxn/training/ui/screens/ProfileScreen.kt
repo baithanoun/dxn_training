@@ -10,13 +10,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
@@ -167,6 +169,83 @@ fun ProfileScreen(
             ) {
                 Text(
                     text = "تسجيل الخروج",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Error
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = Error
+                )
+            }
+        }
+
+        var showDeleteDialog by remember { mutableStateOf(false) }
+        var deletePassword by remember { mutableStateOf("") }
+        var deleteError by remember { mutableStateOf<String?>(null) }
+        var isDeleting by remember { mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { if (!isDeleting) showDeleteDialog = false },
+                title = { Text("حذف الحساب") },
+                text = {
+                    Column {
+                        Text("أدخل كلمة المرور لتأكيد حذف الحساب. لا يمكن التراجع.")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = deletePassword,
+                            onValueChange = { deletePassword = it },
+                            label = { Text("كلمة المرور") },
+                            visualTransformation = PasswordVisualTransformation(),
+                            singleLine = true
+                        )
+                        deleteError?.let { Text(it, color = Error, style = MaterialTheme.typography.bodySmall) }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        enabled = !isDeleting && deletePassword.isNotBlank(),
+                        onClick = {
+                            isDeleting = true
+                            deleteError = null
+                            scope.launch {
+                                val ok = viewModel.deleteAccount(deletePassword)
+                                isDeleting = false
+                                if (ok) {
+                                    showDeleteDialog = false
+                                    onLogout()
+                                } else {
+                                    deleteError = "تعذر حذف الحساب. تحقق من كلمة المرور."
+                                }
+                            }
+                        }
+                    ) { Text("حذف", color = Error) }
+                },
+                dismissButton = {
+                    TextButton(enabled = !isDeleting, onClick = { showDeleteDialog = false }) { Text("إلغاء") }
+                }
+            )
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+                .clickable { showDeleteDialog = true },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(containerColor = Surface)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "حذف الحساب",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Error
                 )

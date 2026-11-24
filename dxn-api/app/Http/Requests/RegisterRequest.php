@@ -21,6 +21,7 @@ class RegisterRequest extends FormRequest
             'dxnId' => ['required', 'string', 'max:64'],
             'gender' => ['required', 'string', 'in:male,female'],
             'leaderDxnId' => ['nullable', 'string', 'max:64'],
+            'acceptTerms' => ['required', 'accepted'],
         ];
     }
 

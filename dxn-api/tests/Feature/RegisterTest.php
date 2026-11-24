@@ -18,6 +18,7 @@ class RegisterTest extends TestCase
             'password' => 'password123',
             'dxnId' => 'DXN-1001',
             'gender' => 'male',
+            'acceptTerms' => true,
         ], $overrides);
     }
 

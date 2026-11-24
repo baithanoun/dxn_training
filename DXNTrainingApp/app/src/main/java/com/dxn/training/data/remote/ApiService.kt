@@ -36,6 +36,10 @@ data class LoginRequest(
     val password: String
 )
 
+data class DeleteAccountRequest(
+    val password: String
+)
+
 data class RegisterRequest(
     val fullName: String,
     val email: String? = null,
@@ -43,7 +47,8 @@ data class RegisterRequest(
     val password: String,
     val dxnId: String,
     val gender: String,
-    val leaderDxnId: String? = null
+    val leaderDxnId: String? = null,
+    val acceptTerms: Boolean = false
 )
 
 data class AuthResponse(
@@ -115,6 +120,9 @@ interface ApiService {
 
     @POST("api/auth/logout")
     suspend fun logout(): Response<Unit>
+
+    @HTTP(method = "DELETE", path = "api/account")
+    suspend fun deleteAccount(@Body request: DeleteAccountRequest): Response<Unit>
 
     // ===================  إعدادات التطبيق العامة  ===================
 

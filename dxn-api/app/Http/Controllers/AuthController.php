@@ -47,6 +47,7 @@ class AuthController extends Controller
             'dxn_id' => $dxnId,
             'role' => 'trainee',
             'sponsor_id' => $sponsorId,
+            'terms_accepted_at' => now(),
         ]);
 
         $tokenName = $request->header('X-Client') === 'android' ? 'mobile' : 'dashboard';

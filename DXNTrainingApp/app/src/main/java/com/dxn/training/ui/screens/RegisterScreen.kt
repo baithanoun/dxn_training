@@ -18,6 +18,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
+import com.dxn.training.BuildConfig
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.viewmodel.AuthUiState
@@ -35,6 +39,8 @@ fun RegisterScreen(
     var dxnId by remember { mutableStateOf("") }
     var leaderDxnId by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf<String?>(null) }
+    var acceptTerms by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val state by authViewModel.state.collectAsState()
 
     LaunchedEffect(state) {
@@ -117,14 +123,36 @@ fun RegisterScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(checked = acceptTerms, onCheckedChange = { acceptTerms = it })
+            Column {
+                Text(
+                    text = "أوافق على سياسة الخصوصية والشروط",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextPrimary
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.BASE_URL + "privacy")))
+                    }) { Text("سياسة الخصوصية", style = MaterialTheme.typography.bodySmall) }
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.BASE_URL + "terms")))
+                    }) { Text("الشروط", style = MaterialTheme.typography.bodySmall) }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
         DxButton(
             text = if (state is AuthUiState.Loading) "جاري إنشاء الحساب..." else "إنشاء الحساب",
             onClick = {
                 val selectedGender = gender ?: return@DxButton
-                authViewModel.register(name, contact, password, dxnId, leaderDxnId, selectedGender)
+                authViewModel.register(name, contact, password, dxnId, leaderDxnId, selectedGender, acceptTerms)
             },
-            enabled = gender != null && state !is AuthUiState.Loading
+            enabled = gender != null && acceptTerms && state !is AuthUiState.Loading
         )
         Spacer(modifier = Modifier.height(12.dp))
         TextButton(onClick = onBack) {

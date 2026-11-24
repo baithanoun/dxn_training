@@ -8,6 +8,7 @@ import com.dxn.training.data.model.Certificate
 import com.dxn.training.data.model.User
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
+import com.dxn.training.data.remote.DeleteAccountRequest
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
 import kotlinx.coroutines.CancellationException
@@ -58,6 +59,25 @@ class ProfileViewModel(
         }
     }
 
+    /**
+     * Deletes the current user's account. Returns true on success.
+     */
+    suspend fun deleteAccount(password: String): Boolean {
+        return try {
+            val response = api.deleteAccount(DeleteAccountRequest(password))
+            if (response.isSuccessful) {
+                sessionStore?.clear()
+                true
+            } else {
+                false
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to delete account", e)
+            false
+        }
+    }
     private suspend fun loadProfile(userId: String?) {
         if (userId == null) {
             _certificates.value = emptyList()

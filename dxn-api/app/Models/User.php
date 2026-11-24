@@ -7,23 +7,25 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'gender', 'email', 'phone', 'password', 'dxn_id', 'sponsor_id'])]
+#[Fillable(['name', 'gender', 'email', 'phone', 'password', 'dxn_id', 'sponsor_id', 'terms_accepted_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
-    public function sponsor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function sponsor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sponsor_id');
     }
 
-    public function certificates(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function certificates(): HasMany
     {
         return $this->hasMany(Certificate::class);
     }
@@ -61,6 +63,7 @@ class User extends Authenticatable
             'dxn_id' => 'encrypted',
             'is_active' => 'boolean',
             'last_activity_date' => 'date',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 }

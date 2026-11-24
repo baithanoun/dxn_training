@@ -1,23 +1,24 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\ContentTreeController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ReorderController;
 use App\Http\Controllers\Admin\RoundsController;
 use App\Http\Controllers\Admin\SectionController;
-use App\Http\Controllers\Admin\SkillController;
-use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SkillController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AppConfigController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Mobile\TreeController;
-use App\Http\Controllers\Mobile\ProgressController;
 use App\Http\Controllers\Mobile\CompletionController;
-use App\Http\Controllers\Mobile\LeaderTeamController;
 use App\Http\Controllers\Mobile\EventController;
+use App\Http\Controllers\Mobile\LeaderTeamController;
+use App\Http\Controllers\Mobile\ProgressController;
+use App\Http\Controllers\Mobile\TreeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware(['throttle:5,1', 'maintenance']);
@@ -29,6 +30,7 @@ Route::get('/app/config', [AppConfigController::class, 'index'])->middleware('th
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::delete('/account', [AccountController::class, 'destroy'])->middleware('throttle:3,1');
 
     // Mobile endpoints stay reachable for login/logout/me and all /admin routes during maintenance.
     Route::middleware('maintenance')->group(function () {
