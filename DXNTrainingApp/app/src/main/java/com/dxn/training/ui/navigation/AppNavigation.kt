@@ -31,6 +31,7 @@ import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.AppConfigRepository
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.data.repository.UserRepository
+import com.dxn.training.ui.components.UpdatePrompt
 import com.dxn.training.ui.screens.*
 import com.dxn.training.ui.text.LocalGender
 import com.dxn.training.ui.text.toGender
@@ -155,6 +156,7 @@ fun AppNavigation(navController: NavHostController) {
     val profileGender = profile.gender.takeIf { profile.id == session?.userId }
     val currentGender = (profileGender ?: session?.gender).toGender()
     CompositionLocalProvider(LocalGender provides currentGender) {
+        UpdatePrompt(appConfig)
         NavHost(
             navController = navController,
             startDestination = if (session != null) Screen.Main.route else Screen.Splash.route

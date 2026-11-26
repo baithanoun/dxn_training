@@ -13,6 +13,8 @@ dxn-api/public/admin/
 .idea/
 __pycache__/
 *.apk
+# Published release APK served by the API (scripts/release-android.ps1).
+!dxn-api/public/downloads/*.apk
 *.aab
 
 # Secrets / machine-specific

@@ -10,7 +10,11 @@ data class AppConfigResponse(
     val teamTagline: String?,
     val teamBio: String?,
     val teamWelcome: String?,
-    val maintenanceMode: Boolean
+    val maintenanceMode: Boolean,
+    // Latest published Android build; null when nothing is published yet.
+    val appDownloadUrl: String? = null,
+    val appVersion: String? = null,
+    val appVersionCode: Int? = null
 )
 
 /**

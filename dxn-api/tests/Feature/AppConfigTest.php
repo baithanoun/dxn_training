@@ -22,7 +22,7 @@ class AppConfigTest extends TestCase
         sort($keys);
 
         $this->assertSame([
-            'appDownloadUrl', 'appName', 'appVersion', 'maintenanceMode', 'teamBio', 'teamName', 'teamTagline', 'teamWelcome',
+            'appDownloadUrl', 'appName', 'appVersion', 'appVersionCode', 'maintenanceMode', 'teamBio', 'teamName', 'teamTagline', 'teamWelcome',
         ], $keys);
     }
 
