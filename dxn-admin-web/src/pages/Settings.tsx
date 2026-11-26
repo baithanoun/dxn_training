@@ -22,6 +22,8 @@ const DEFAULTS: AppSettings = {
   team_bio:
     "في حكاية تميّز، نجمع بين ثقافة الحياة الصحية مع DXN وقوة العمل الجماعي الذكي عبر الإنترنت. نوفّر بيئة تدريبية داعمة ترافق كل متدرب ومتدربة من البداية حتى الاحتراف، لبناء مشروع خاص بمرونة تامة، ولتصبح كل حكاية قادمة حكاية تميّز.",
   team_welcome: "أهلاً بك في عائلتك الثانية.. رحلتك نحو التميّز تبدأ الآن!",
+  app_download_url: null,
+  app_version: "1.0.0",
   default_language: "ar",
   maintenance_mode: false,
   xp_lesson_default: 20,
@@ -176,6 +178,37 @@ export default function SettingsPage() {
         <>
           {activeTab === "general" && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg">تحميل التطبيق</CardTitle>
+                  <CardDescription>
+                    الرابط والإصدار المعروضان في صفحة تسجيل الدخول. اترك الرابط فارغاً ليظهر «متاح قريباً».
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-medium">رابط التحميل (https)</label>
+                    <Input
+                      dir="ltr"
+                      type="url"
+                      placeholder="https://..."
+                      value={settings.app_download_url ?? ""}
+                      onChange={(e) => setField("app_download_url", e.target.value.trim() || null)}
+                      maxLength={500}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">رقم الإصدار</label>
+                    <Input
+                      dir="ltr"
+                      placeholder="1.0.0"
+                      value={settings.app_version ?? ""}
+                      onChange={(e) => setField("app_version", e.target.value.trim() || null)}
+                      maxLength={20}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
               <Card className="border-0 shadow-sm lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="text-lg">هوية الفريق</CardTitle>

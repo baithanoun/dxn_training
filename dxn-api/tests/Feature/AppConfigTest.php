@@ -22,8 +22,38 @@ class AppConfigTest extends TestCase
         sort($keys);
 
         $this->assertSame([
-            'appName', 'maintenanceMode', 'teamBio', 'teamName', 'teamTagline', 'teamWelcome',
+            'appDownloadUrl', 'appName', 'appVersion', 'maintenanceMode', 'teamBio', 'teamName', 'teamTagline', 'teamWelcome',
         ], $keys);
+    }
+
+    public function test_download_link_and_version_are_editable_and_public(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->putJson('/api/admin/settings', [
+                'app_download_url' => 'https://example.org/app.apk',
+                'app_version' => '1.2.0',
+            ])->assertOk();
+
+        $config = $this->getJson('/api/app/config')->assertOk()->json();
+        $this->assertSame('https://example.org/app.apk', $config['appDownloadUrl']);
+        $this->assertSame('1.2.0', $config['appVersion']);
+    }
+
+    public function test_download_link_must_be_https(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->putJson('/api/admin/settings', ['app_download_url' => 'javascript:alert(1)'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('app_download_url');
+
+        $this->actingAs(User::factory()->create(['role' => 'admin']), 'sanctum')
+            ->putJson('/api/admin/settings', ['app_download_url' => 'http://example.org/app.apk'])
+            ->assertStatus(422);
+    }
+
+    public function test_download_link_defaults_to_null(): void
+    {
+        $this->assertNull($this->getJson('/api/app/config')->assertOk()->json('appDownloadUrl'));
     }
 
     public function test_config_reflects_updated_settings(): void

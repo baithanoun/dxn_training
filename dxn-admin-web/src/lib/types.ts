@@ -10,6 +10,8 @@ export interface AppSettings {
   team_tagline: string | null
   team_bio: string | null
   team_welcome: string | null
+  app_download_url: string | null
+  app_version: string | null
   default_language: "ar"
   maintenance_mode: boolean
   xp_lesson_default: number

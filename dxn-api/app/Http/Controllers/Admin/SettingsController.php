@@ -14,6 +14,8 @@ class SettingsController extends Controller
         'team_tagline' => 'nullable|string|max:150',
         'team_bio' => 'nullable|string|max:1000',
         'team_welcome' => 'nullable|string|max:200',
+        'app_download_url' => 'nullable|url:https|max:500',
+        'app_version' => ['nullable', 'string', 'max:20', 'regex:/^[0-9A-Za-z.-]+$/'],
         'default_language' => 'in:ar',
         'maintenance_mode' => 'boolean',
         'xp_lesson_default' => 'integer|min:0|max:1000',

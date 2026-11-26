@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   BatteryFull,
@@ -17,11 +17,11 @@ import {
   Wifi,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 const LOGO_URL = `${import.meta.env.BASE_URL}brand/logo.png`;
-// shortcut: download link/version come from build env, move to app settings when the app is on Play
-const APP_DOWNLOAD_URL: string = import.meta.env.VITE_APP_DOWNLOAD_URL || "";
-const APP_VERSION: string = import.meta.env.VITE_APP_VERSION || "1.0.0";
+
+type DownloadInfo = { url: string | null; version: string | null };
 
 const inputClass =
   "w-full rounded-xl border border-brand-plum-100 bg-white py-3 pl-4 pr-11 text-sm text-brand-text outline-none transition placeholder:text-brand-muted focus:border-brand-plum-500 focus:ring-2 focus:ring-brand-plum-500/20";
@@ -128,29 +128,31 @@ function PhoneMockup() {
   );
 }
 
-function DownloadCard() {
+function DownloadCard({ url, version }: DownloadInfo) {
   return (
     <div className="flex w-full max-w-sm items-center gap-4 rounded-2xl border border-white/10 bg-black/35 p-4 shadow-xl backdrop-blur-md">
       <div className="shrink-0 rounded-xl bg-white p-1.5">
         <img src={LOGO_URL} alt="" className="h-[76px] w-[76px]" />
-
       </div>
       <div className="min-w-0 flex-1 text-right">
         <p className="text-sm font-bold text-white">
-          حمّل التطبيق <span dir="ltr" className="text-brand-rose-300">(v{APP_VERSION})</span>
+          حمّل التطبيق
+          {version && (
+            <span dir="ltr" className="text-brand-rose-300"> (v{version})</span>
+          )}
         </p>
         <p className="mt-1 text-xs text-white/70">
-          {APP_DOWNLOAD_URL ? "حمّل أحدث نسخة من التطبيق" : "التطبيق متاح قريباً"}
+          {url ? "حمّل أحدث نسخة من التطبيق" : "التطبيق متاح قريباً"}
         </p>
-        {APP_DOWNLOAD_URL && (
+        {url && (
           <a
-            href={APP_DOWNLOAD_URL}
+            href={url}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white transition hover:bg-black/70 focus:outline-none focus:ring-2 focus:ring-brand-rose-300"
           >
             <Play size={12} aria-hidden="true" />
-            Google Play
+            تحميل التطبيق
           </a>
         )}
       </div>
@@ -165,6 +167,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [download, setDownload] = useState<DownloadInfo>({ url: null, version: null });
+
+  // Public endpoint; on failure the card simply stays in its "coming soon" state.
+  useEffect(() => {
+    api<{ appDownloadUrl: string | null; appVersion: string | null }>("/api/app/config")
+      .then((c) => setDownload({ url: c.appDownloadUrl, version: c.appVersion }))
+      .catch(() => {});
+  }, []);
 
   if (user) return <Navigate to="/" replace />;
 
@@ -268,7 +278,7 @@ export default function Login() {
 
         <div className="relative z-10 flex flex-col items-center gap-6">
           <PhoneMockup />
-          <DownloadCard />
+          <DownloadCard url={download.url} version={download.version} />
         </div>
       </section>
     </div>

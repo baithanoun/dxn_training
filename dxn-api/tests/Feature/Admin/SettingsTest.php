@@ -34,7 +34,7 @@ class SettingsTest extends TestCase
         $this->assertSame(0.25, $settings['xp_replay_ratio']);
         $this->assertSame(60, $settings['session_minutes']);
         $this->assertSame(10, $settings['quiz_rate_limit_per_minute']);
-        $this->assertCount(19, $settings);
+        $this->assertCount(21, $settings);
     }
 
     public function test_defaults_include_team_keys(): void

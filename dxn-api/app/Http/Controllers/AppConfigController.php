@@ -19,6 +19,8 @@ class AppConfigController extends Controller
             'teamBio' => $value('team_bio'),
             'teamWelcome' => $value('team_welcome'),
             'maintenanceMode' => $value('maintenance_mode'),
+            'appDownloadUrl' => $value('app_download_url'),
+            'appVersion' => $value('app_version'),
         ]);
     }
 }
