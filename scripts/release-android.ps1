@@ -37,8 +37,12 @@ $env:DXN_RELEASE_BASE_URL = $BaseUrl
 
 Push-Location $appDir
 try {
-    & .\gradlew.bat :app:assembleRelease --no-daemon
-    if ($LASTEXITCODE -ne 0) { throw "Gradle release build failed." }
+    # Gradle logs to stderr; under "Stop", Windows PowerShell 5.1 would abort on that.
+    $ErrorActionPreference = "Continue"
+    & .\gradlew.bat :app:assembleRelease --no-daemon 2>&1 | ForEach-Object { "$_" }
+    $gradleExit = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
+    if ($gradleExit -ne 0) { throw "Gradle release build failed (exit $gradleExit)." }
 } finally {
     Pop-Location
 }
