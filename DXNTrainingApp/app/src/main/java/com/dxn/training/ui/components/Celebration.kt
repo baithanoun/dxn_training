@@ -44,9 +44,11 @@ internal fun confettiEnabled(animatorDurationScale: Float): Boolean = animatorDu
 @Composable
 fun CorrectAnswerFeedback(visible: Boolean) {
     if (!visible) return
+    val context = LocalContext.current
     val hapticFeedback = LocalHapticFeedback.current
     LaunchedEffect(Unit) {
         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        CorrectAnswerSound.play(context)
     }
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
