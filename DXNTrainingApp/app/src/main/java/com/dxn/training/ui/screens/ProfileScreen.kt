@@ -19,7 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
 import com.dxn.training.ui.components.DxCard
@@ -39,9 +40,12 @@ fun ProfileScreen(
 
     // Refresh certificates each time the screen comes back to the foreground
     // (e.g. after completing a section and receiving a certificate).
-    LifecycleResumeEffect(Unit) {
-        viewModel.refresh()
-        onPauseOrDispose { }
+    // shortcut: manual resume observer because Compose UI is 1.6; switch back to LifecycleResumeEffect after moving the Compose BOM to >= 2024.09
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, e -> if (e == Lifecycle.Event.ON_RESUME) viewModel.refresh() }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     Column(
