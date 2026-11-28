@@ -39,6 +39,10 @@ import com.dxn.training.ui.theme.BrandPlum
 import com.dxn.training.ui.viewmodel.*
 import kotlinx.coroutines.flow.first
 
+/** Clears a deep-linked invite id only when an existing session ends, not while logged out. */
+internal fun shouldClearPendingLeaderDxnId(previousUserId: String?, currentUserId: String?): Boolean =
+    previousUserId != null && currentUserId == null
+
 class AuthViewModelFactory(
     private val api: ApiService,
     private val sessionStore: SessionStore
@@ -130,6 +134,13 @@ fun AppNavigation(
     val session by sessionStore.session.collectAsState(initial = null)
     val profile by userRepository.user.collectAsState()
     var sessionChecked by remember { mutableStateOf(false) }
+    var previousSessionUserId by remember { mutableStateOf(session?.userId) }
+    LaunchedEffect(session?.userId) {
+        if (shouldClearPendingLeaderDxnId(previousSessionUserId, session?.userId)) {
+            onLeaderDxnIdConsumed()
+        }
+        previousSessionUserId = session?.userId
+    }
     LaunchedEffect(Unit) {
         val currentSession = sessionStore.session.first()
         sessionChecked = true
