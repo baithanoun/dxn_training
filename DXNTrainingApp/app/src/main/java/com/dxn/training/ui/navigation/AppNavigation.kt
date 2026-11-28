@@ -363,7 +363,9 @@ fun AppNavigation(navController: NavHostController) {
                     onShowCertificate = { sectionId ->
                         navController.navigate(Screen.Certificate.createRoute(sectionId))
                     },
-                    contentRepository = contentRepository
+                    contentRepository = contentRepository,
+                    appDownloadUrl = appConfig?.appDownloadUrl,
+                    userName = profile.fullName
                 )
             }
 

@@ -24,12 +24,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.certificate.CertificateRenderer
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxOutlinedButton
 import com.dxn.training.ui.components.ScreenHeader
+import com.dxn.training.ui.share.ShareHelper
 import com.dxn.training.ui.text.g
 import com.dxn.training.ui.theme.BrandIvory
 import com.dxn.training.ui.theme.BrandPlum
@@ -39,8 +39,6 @@ import com.dxn.training.ui.viewmodel.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 @Composable
 fun CertificateScreen(
@@ -123,7 +121,7 @@ fun CertificateScreen(
                             // minSdk 24: on API 24-28 there is no MediaStore RELATIVE_PATH
                             // and no storage permission request here. shortcut: keep the PNG
                             // in app-owned files and share it through FileProvider instead.
-                            saveToAppFiles(context, current, safeFileName)
+                            ShareHelper.saveCertificatePng(context, current, safeFileName)
                             Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
                                 saveToGallery(context, current, safeFileName)
                         }
@@ -146,26 +144,13 @@ fun CertificateScreen(
             onClick = {
                 val current = bitmap ?: return@DxButton
                 scope.launch {
-                    val uri = runCatching {
-                        withContext(Dispatchers.IO) {
-                            val file = saveToAppFiles(context, current, safeFileName)
-                            FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                file
-                            )
+                    val shared = runCatching {
+                        val file = withContext(Dispatchers.IO) {
+                            ShareHelper.saveCertificatePng(context, current, safeFileName)
                         }
-                    }.getOrNull()
-                    if (uri == null) {
-                        message = shareFailed
-                        return@launch
-                    }
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "image/png"
-                        putExtra(Intent.EXTRA_STREAM, uri)
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    }
-                    context.startActivity(Intent.createChooser(intent, "مشاركة الشهادة"))
+                        ShareHelper.shareCertificateFile(context, file)
+                    }.isSuccess
+                    if (!shared) message = shareFailed
                 }
             }
         )
@@ -195,17 +180,6 @@ fun CertificateScreen(
 }
 
 /** Writes the shareable PNG into app-owned storage; FileProvider exposes it to other apps. */
-private fun saveToAppFiles(context: Context, bitmap: Bitmap, fileName: String): File {
-    val directory = File(context.filesDir, "certificates").apply { mkdirs() }
-    val file = File(directory, "$fileName.png")
-    FileOutputStream(file).use { out ->
-        if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)) {
-            error("PNG compression failed")
-        }
-    }
-    return file
-}
-
 /** API 29+ only: writes to Pictures/HikayaTamayoz without any storage permission. */
 private fun saveToGallery(context: Context, bitmap: Bitmap, fileName: String): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false

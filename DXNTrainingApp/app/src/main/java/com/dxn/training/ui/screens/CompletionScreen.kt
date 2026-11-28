@@ -8,19 +8,26 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.CompletionResult
 import com.dxn.training.data.repository.ContentRepository
+import com.dxn.training.ui.certificate.CertificateRenderer
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxOutlinedButton
 import com.dxn.training.ui.components.DxProgressBar
+import com.dxn.training.ui.share.ShareHelper
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.CompletionViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CompletionScreen(
@@ -29,12 +36,20 @@ fun CompletionScreen(
     onNextLevel: () -> Unit,
     onReview: () -> Unit,
     onShowCertificate: (String) -> Unit,
-    contentRepository: ContentRepository = ContentRepository.getInstance()
+    contentRepository: ContentRepository = ContentRepository.getInstance(),
+    appDownloadUrl: String? = null,
+    userName: String = ""
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val state by completionViewModel.state.collectAsState()
     val result = state.result?.takeIf { state.levelId == levelId }
     val section = contentRepository.findSectionForLevel(levelId)
-    val passThreshold = contentRepository.getLevel(levelId)?.passThreshold ?: 80
+    val level = contentRepository.getLevel(levelId)
+    val levelName = level?.title.orEmpty()
+    val passThreshold = level?.passThreshold ?: 80
+    val sharePrefix = g("أكملتُ", "أكملتُ")
+    val traineeNameFallback = g("متدرب DXN", "متدربة DXN")
 
     Column(
         modifier = Modifier
@@ -202,7 +217,54 @@ fun CompletionScreen(
         Spacer(modifier = Modifier.height(12.dp))
         DxButton(
             text = "مشاركة الإنجاز",
-            onClick = { EventSender.send("share_achievement", levelId = levelId) },
+            onClick = {
+                val ok = result as? CompletionResult.Ok
+                val shareText = ShareHelper.buildAchievementText(
+                    prefix = sharePrefix,
+                    levelName = levelName,
+                    scorePercent = ok?.response?.score,
+                    appDownloadUrl = appDownloadUrl
+                )
+                if (ok != null && ok.response.certificateIssued) {
+                    scope.launch {
+                        val shared = runCatching {
+                            val file = withContext(Dispatchers.Default) {
+                                val certTitle = ok.response.certificateTitle
+                                    ?: section?.certificateTitle?.takeIf { it.isNotBlank() }
+                                    ?: "شهادة إتمام"
+                                val code = ok.response.certificateId?.takeIf { it.isNotBlank() }
+                                    ?: section?.id
+                                    ?: levelId
+                                val issuedAt = section?.let {
+                                    contentRepository.getSectionProgress(it.id).completedAt
+                                }.orEmpty()
+                                val safeName = code.filter { c -> c.isLetterOrDigit() || c == '-' || c == '_' }
+                                    .take(64)
+                                    .ifBlank { "certificate" }
+                                val bitmap = CertificateRenderer.render(
+                                    context.applicationContext,
+                                    userName.ifBlank { traineeNameFallback },
+                                    certTitle,
+                                    code,
+                                    issuedAt
+                                )
+                                try {
+                                    ShareHelper.saveCertificatePng(context, bitmap, safeName)
+                                } finally {
+                                    bitmap.recycle()
+                                }
+                            }
+                            ShareHelper.shareCertificateFile(context, file, text = shareText)
+                        }.isSuccess
+                        if (shared) {
+                            EventSender.send("share_achievement", levelId = levelId)
+                        }
+                    }
+                } else {
+                    ShareHelper.shareText(context, shareText)
+                    EventSender.send("share_achievement", levelId = levelId)
+                }
+            },
             containerColor = BrandPlum100,
             contentColor = BrandPlum700
         )
