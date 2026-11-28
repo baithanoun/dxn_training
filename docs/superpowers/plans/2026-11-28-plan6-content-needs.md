@@ -1,6 +1,6 @@
 # Plan 6 — C2: قائمة احتياجات المحتوى
 
-المصدر: `dxn-api/database/seeders/data/content.json` و`dxn-api/database/seeders/ContentSeeder.php`.  
+المصدر: `dxn-api/database/seeders/data/content.json` و`dxn-api/database/seeders/ContentSeeder.php`.
 هذه قائمة ثابتة من الـ seeder؛ قاعدة البيانات الحية/الإنتاج لم تُفحص. لا توجد صور مرفقة حالياً لأي من البطاقات الـ16: `ContentSeeder.php:63-70` يمرّر `title/body/tip/order_index` فقط، رغم أن `media_url` مدعوم في المخطط والـ API.
 
 ## بطاقات تحتاج صورة/review

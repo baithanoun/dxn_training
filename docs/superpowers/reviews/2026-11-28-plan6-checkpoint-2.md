@@ -1,8 +1,8 @@
 # Plan 6 — تقرير نقطة التوقف 2
 
-التاريخ: 2026-11-28  
-الفرع: `feat/plan6-trainer-notes`  
-الأساس: `origin/main` @ `aacbb35bb3dc9a671fc40a88a8fccdb9941e463d`  
+التاريخ: 2026-11-28
+الفرع: `feat/plan6-trainer-notes`
+الأساس: `origin/main` @ `aacbb35bb3dc9a671fc40a88a8fccdb9941e463d`
 الحالة: أُنجزت المرحلة B وإصدار 1.0.2 محلياً، مع متابعة المرحلة C بناءً على تعليمات المالك بتأجيل الاستفسارات للنهاية. لا push ولا merge ولا نشر.
 
 ## 1. الـ commits
