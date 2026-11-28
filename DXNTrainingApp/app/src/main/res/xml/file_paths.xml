@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- App-owned PNGs used only for ACTION_SEND; no WRITE_EXTERNAL_STORAGE needed. -->
+    <files-path
+        name="certificates"
+        path="certificates/" />
+</paths>

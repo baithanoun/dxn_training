@@ -33,6 +33,7 @@ import com.dxn.training.ui.viewmodel.ProfileViewModel
 fun ProfileScreen(
     viewModel: ProfileViewModel,
     onAdminClick: () -> Unit,
+    onCertificateClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
     val user by viewModel.user.collectAsState()
@@ -107,19 +108,34 @@ fun ProfileScreen(
             } else {
                 certificates.forEach { certificate ->
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                onCertificateClick(
+                                    certificate.sectionId.ifBlank { certificate.id }
+                                )
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "🎓 ${certificate.title}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = TextPrimary
                         )
-                        if (certificate.issuedAt.isNotBlank()) {
-                            Text(
-                                text = certificate.issuedAt.take(10),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = TextMuted
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (certificate.issuedAt.isNotBlank()) {
+                                Text(
+                                    text = certificate.issuedAt.take(10),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextMuted
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "عرض الشهادة",
+                                tint = TextMuted
                             )
                         }
                     }

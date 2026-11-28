@@ -31,5 +31,7 @@ data class Badge(
 data class Certificate(
     val id: String,
     val title: String,
-    val issuedAt: String
+    val issuedAt: String,
+    // Server section id, needed to open the matching certificate preview screen.
+    val sectionId: String = ""
 )

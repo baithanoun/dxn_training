@@ -235,6 +235,9 @@ fun AppNavigation(navController: NavHostController) {
                         navController.navigate(Screen.Lesson.createRoute(levelId))
                     },
                     onAdminClick = { navController.navigate(Screen.AdminOverview.route) },
+                    onCertificateClick = { sectionId ->
+                        navController.navigate(Screen.Certificate.createRoute(sectionId))
+                    },
                     onLogout = {
                         authViewModel.logout()
                         navController.navigate(Screen.Login.route) {
@@ -357,7 +360,23 @@ fun AppNavigation(navController: NavHostController) {
                         }
                     },
                     onReview = { navController.popBackStack(Screen.Lesson.route, false) },
+                    onShowCertificate = { sectionId ->
+                        navController.navigate(Screen.Certificate.createRoute(sectionId))
+                    },
                     contentRepository = contentRepository
+                )
+            }
+
+            composable(
+                route = Screen.Certificate.route,
+                arguments = listOf(navArgument("sectionId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val sectionId = backStackEntry.arguments?.getString("sectionId") ?: return@composable
+                CertificateScreen(
+                    sectionId = sectionId,
+                    profileViewModel = profileViewModel,
+                    contentRepository = contentRepository,
+                    onBack = { navController.popBackStack() }
                 )
             }
 

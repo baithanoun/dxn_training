@@ -28,6 +28,7 @@ fun CompletionScreen(
     completionViewModel: CompletionViewModel,
     onNextLevel: () -> Unit,
     onReview: () -> Unit,
+    onShowCertificate: (String) -> Unit,
     contentRepository: ContentRepository = ContentRepository.getInstance()
 ) {
     val state by completionViewModel.state.collectAsState()
@@ -109,6 +110,13 @@ fun CompletionScreen(
                                         style = MaterialTheme.typography.bodySmall,
                                         color = TextMuted
                                     )
+                                    section?.let {
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        DxOutlinedButton(
+                                            text = "عرض الشهادة",
+                                            onClick = { onShowCertificate(it.id) }
+                                        )
+                                    }
                                 }
                             }
                         }

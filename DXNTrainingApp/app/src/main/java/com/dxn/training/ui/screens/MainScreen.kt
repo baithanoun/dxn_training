@@ -26,6 +26,7 @@ fun MainScreen(
     profileViewModel: ProfileViewModel,
     onLevelClick: (String) -> Unit,
     onAdminClick: () -> Unit,
+    onCertificateClick: (String) -> Unit,
     onLogout: () -> Unit,
     isLeader: Boolean = false
 ) {
@@ -97,6 +98,7 @@ fun MainScreen(
                 MainTab.PROFILE -> ProfileScreen(
                     viewModel = profileViewModel,
                     onAdminClick = onAdminClick,
+                    onCertificateClick = onCertificateClick,
                     onLogout = onLogout
                 )
                 null -> Unit

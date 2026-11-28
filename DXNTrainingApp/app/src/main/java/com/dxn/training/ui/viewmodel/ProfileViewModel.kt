@@ -97,7 +97,8 @@ class ProfileViewModel(
                             id = progress.certificateId ?: sectionId,
                             title = titles[sectionId]?.takeIf { it.isNotBlank() }
                                 ?: "شهادة إتمام",
-                            issuedAt = progress.completedAt.orEmpty()
+                            issuedAt = progress.completedAt.orEmpty(),
+                            sectionId = sectionId
                         )
                     }
             } else {
