@@ -2,10 +2,8 @@ package com.dxn.training.ui.share
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.core.content.FileProvider
 import java.io.File
-import java.io.FileOutputStream
 
 object ShareHelper {
     fun buildAchievementText(
@@ -30,19 +28,7 @@ object ShareHelper {
         context.startActivity(Intent.createChooser(intent, "مشاركة الإنجاز"))
     }
 
-    /** Writes the shareable PNG into app-owned storage; FileProvider exposes it to other apps. */
-    fun saveCertificatePng(context: Context, bitmap: Bitmap, fileName: String): File {
-        val directory = File(context.filesDir, "certificates").apply { mkdirs() }
-        val file = File(directory, "$fileName.png")
-        FileOutputStream(file).use { out ->
-            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)) {
-                error("PNG compression failed")
-            }
-        }
-        return file
-    }
-
-    fun shareCertificateFile(
+    fun shareCertificatePdf(
         context: Context,
         file: File,
         chooserTitle: String = "مشاركة الشهادة",
@@ -54,7 +40,7 @@ object ShareHelper {
             file
         )
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
+            type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
             if (!text.isNullOrBlank()) putExtra(Intent.EXTRA_TEXT, text)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.CompletionResult
 import com.dxn.training.data.repository.ContentRepository
+import com.dxn.training.ui.certificate.CertificatePdfWriter
 import com.dxn.training.ui.certificate.CertificateRenderer
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxOutlinedButton
@@ -249,12 +250,12 @@ fun CompletionScreen(
                                     issuedAt
                                 )
                                 try {
-                                    ShareHelper.saveCertificatePng(context, bitmap, safeName)
+                                    CertificatePdfWriter.write(context.applicationContext, bitmap, safeName)
                                 } finally {
                                     bitmap.recycle()
                                 }
                             }
-                            ShareHelper.shareCertificateFile(context, file, text = shareText)
+                            ShareHelper.shareCertificatePdf(context, file, text = shareText)
                         }.isSuccess
                         if (shared) {
                             EventSender.send("share_achievement", levelId = levelId)
