@@ -24,6 +24,7 @@ import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
 import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.ScreenHeader
+import com.dxn.training.ui.components.dxTextFieldColors
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.viewmodel.ProfileViewModel
 
@@ -199,7 +200,8 @@ fun ProfileScreen(
                             onValueChange = { deletePassword = it },
                             label = { Text("كلمة المرور") },
                             visualTransformation = PasswordVisualTransformation(),
-                            singleLine = true
+                            singleLine = true,
+                            colors = dxTextFieldColors()
                         )
                         deleteError?.let { Text(it, color = Error, style = MaterialTheme.typography.bodySmall) }
                     }

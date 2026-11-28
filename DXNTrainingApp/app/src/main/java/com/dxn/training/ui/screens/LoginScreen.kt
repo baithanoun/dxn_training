@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.dxn.training.ui.components.BrandMark
 import com.dxn.training.ui.components.BrandMarkSize
 import com.dxn.training.ui.components.DxButton
+import com.dxn.training.ui.components.dxTextFieldColors
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.AuthUiState
@@ -123,12 +124,7 @@ private fun AuthTextField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = BrandIvory,
-                unfocusedContainerColor = BrandIvory,
-                focusedBorderColor = BrandPlum,
-                unfocusedBorderColor = Disabled
-            ),
+            colors = dxTextFieldColors(),
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(
                 keyboardType = keyboardType,

@@ -65,6 +65,19 @@ fun DxOutlinedButton(
 }
 
 @Composable
+fun dxTextFieldColors(): TextFieldColors = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = TextPrimary,
+    unfocusedTextColor = TextPrimary,
+    cursorColor = BrandPlum,
+    focusedPlaceholderColor = TextMuted,
+    unfocusedPlaceholderColor = TextMuted,
+    focusedContainerColor = BrandIvory,
+    unfocusedContainerColor = BrandIvory,
+    focusedBorderColor = BrandPlum,
+    unfocusedBorderColor = Disabled
+)
+
+@Composable
 fun DxCard(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
