@@ -3,7 +3,7 @@
 التاريخ: 2026-11-28  
 الفرع: `feat/plan6-trainer-notes`  
 الأساس: `origin/main` @ `aacbb35bb3dc9a671fc40a88a8fccdb9941e463d`  
-الحالة: إيقاف عند ⏸ نقطة توقف 1 (R1) بانتظار مراجعة المالك. لا push ولا merge ولا إصدار.
+الحالة: أُنجزت أعمال نقطة التوقف 1 (R1) محلياً، مع متابعة المراحل اللاحقة بناءً على تعليمات المالك بتأجيل الاستفسارات للنهاية. لا push ولا merge ولا نشر.
 
 ## 1. الـ commits
 
@@ -14,6 +14,7 @@
 | A3 | `2142d1255f1f3842030cd64268df5e12bff8224b` | `fix(android): profile screen no longer crashes on open` |
 | A4 | `fc0941af000e89be619bfa4a45f2e7e567209e82` | `fix(android): launcher icon shows the team logo` |
 | A5 | `45cc4ffb88e61db7466e97ee835e5a3fe1248e8c` | `fix(android): retry button works after a failed attempt` |
+| R1 | (هذا الـ commit) | `release(android): 1.0.1` |
 
 كل commit يحمل السطر: `Co-Authored-By: Big Pickle <noreply@anthropic.com>`.
 
@@ -33,6 +34,12 @@
 - `git diff --check origin/main..HEAD` → نظيف.
 - مراجعة متكاملة بواسطة `superpawers-reviewer` → **APPROVED**، بلا findings مادية.
 - لم تتغير ملفات الـ API أو الواجهة في المرحلة A، لذا بقيت أدلة الأساس صالحة لهما.
+
+### R1 — إصدار 1.0.1
+- `versionCode = 3` و`versionName = "1.0.1"` في `DXNTrainingApp/app/build.gradle.kts`.
+- نسخ `keystore.properties` و`dxn-release.jks` مؤقتاً من نسخة العمل الأصلية، ثم تشغيل `.\scripts\release-android.ps1 -JavaHome "D:\webserver\appp\jdk17\extracted\jdk-17.0.12+7"` → **BUILD SUCCESSFUL in 2m 5s** (52 مهمة، R8/lintVital ناجحان). حُذف المفتاحان فوراً بعد البناء ولم يُضافا إلى git.
+- الإصدار المحلي: `dxn-api/public/downloads/hikaya-tamayoz-1.0.1.apk` (2.4 MB) و`latest.json` بـ `versionCode: 3` وSHA-256 `0e5fb39a15851ae2113ff8c89f7f97b89ca23c1cb646119c80dd00be4c81a113`. حُذف APK الإصدار 1.0.0 من مجلد النشر كما يفعل السكربت.
+- NOT RUN: Review Focus 5 (ترقية جهاز عليه 1.0.0 إلى 1.0.1 مع بقاء الجلسة) — لا يوجد جهاز/محاكي، ولا نشر إلى الخادم.
 
 ## 3. تفاصيل المهام
 
@@ -74,9 +81,9 @@
 
 ## 5. ما لم يُنفّذ عند نقطة التوقف
 
-- R1 / إصدار 1.0.1: رفع `versionCode = 3` و`versionName = "1.0.1"`، تشغيل `.\scripts\release-android.ps1`، وcommit الإصدار — كلها **NOT RUN** لأنها تتطلب موافقة المالك والمفتاح/keystore، والخطة تمنع push وmerge دون إذن جديد.
+- R1 / إصدار 1.0.1: نُفّذ محلياً كما هو موضح أعلاه؛ الـ push/النشر ممنوعان دون موافقة المالك.
 - Review Focus 5 (ترقية مستخدم 1.0.0 إلى 1.0.1 مع بقاء الدخول) — **NOT RUN**.
-- المرحلة B فما بعدها — لم تبدأ؛ تتطلب قرارات المالك D1–D6 عند نقاطها المحددة.
+- المرحلة B فما بعدها: نُفّذت لاحقاً بناءً على تعليمات المالك؛ انظر تقارير نقاط التوقف 2 و3 والسجل النهائي.
 
 ## 6. مراجعة المالك المطلوبة
 
