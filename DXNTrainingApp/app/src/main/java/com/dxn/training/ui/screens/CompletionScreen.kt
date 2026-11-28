@@ -33,6 +33,7 @@ fun CompletionScreen(
     val state by completionViewModel.state.collectAsState()
     val result = state.result?.takeIf { state.levelId == levelId }
     val section = contentRepository.findSectionForLevel(levelId)
+    val passThreshold = contentRepository.getLevel(levelId)?.passThreshold ?: 80
 
     Column(
         modifier = Modifier
@@ -113,6 +114,29 @@ fun CompletionScreen(
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
+                        val scoreColor = if (response.passed) LeafText else Error
+                        Text(
+                            text = "${response.score} / 100",
+                            style = MaterialTheme.typography.displayMedium,
+                            color = scoreColor
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${response.score}%",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = scoreColor
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = if (response.passed) {
+                                g("اجتزتَ المستوى", "اجتزتِ المستوى")
+                            } else {
+                                "${g("تحتاج", "تحتاجين")} $passThreshold% للنجاح"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = scoreColor
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                         DxProgressBar(
                             progress = response.score / 100f,
                             color = if (response.passed) Leaf else Error
