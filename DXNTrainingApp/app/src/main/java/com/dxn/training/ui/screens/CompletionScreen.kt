@@ -154,8 +154,7 @@ fun CompletionScreen(
             is CompletionResult.Ok -> {
                 DxButton(
                     text = if (result.response.passed) "المستوى التالي" else g("أعد المحاولة", "أعيدي المحاولة"),
-                    onClick = onNextLevel,
-                    enabled = result.response.passed
+                    onClick = if (result.response.passed) onNextLevel else onReview
                 )
             }
             is CompletionResult.Offline, is CompletionResult.Failed -> {
