@@ -31,6 +31,8 @@ import com.dxn.training.ui.viewmodel.AuthViewModel
 @Composable
 fun RegisterScreen(
     authViewModel: AuthViewModel,
+    initialLeaderDxnId: String? = null,
+    onLeaderDxnIdConsumed: () -> Unit = {},
     onRegister: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -46,6 +48,14 @@ fun RegisterScreen(
 
     LaunchedEffect(state) {
         if (state is AuthUiState.LoggedIn) onRegister()
+    }
+
+    LaunchedEffect(initialLeaderDxnId) {
+        val prefill = initialLeaderDxnId?.trim().orEmpty()
+        if (prefill.isNotEmpty()) {
+            leaderDxnId = prefill
+            onLeaderDxnIdConsumed()
+        }
     }
 
     Column(

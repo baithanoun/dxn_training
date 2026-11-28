@@ -97,6 +97,8 @@ fun MainScreen(
                 MainTab.TEAM -> TeamScreen(viewModel = teamViewModel)
                 MainTab.PROFILE -> ProfileScreen(
                     viewModel = profileViewModel,
+                    teamViewModel = teamViewModel,
+                    isLeader = isLeader,
                     onAdminClick = onAdminClick,
                     onCertificateClick = onCertificateClick,
                     onLogout = onLogout

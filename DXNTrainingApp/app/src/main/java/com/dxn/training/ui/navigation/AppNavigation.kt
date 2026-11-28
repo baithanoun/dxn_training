@@ -99,7 +99,11 @@ class CompletionViewModelFactory(
 }
 
 @Composable
-fun AppNavigation(navController: NavHostController) {
+fun AppNavigation(
+    navController: NavHostController,
+    pendingLeaderDxnId: String? = null,
+    onLeaderDxnIdConsumed: () -> Unit = {}
+) {
     val context = LocalContext.current
     val api = ApiClient.api
     val sessionStore = remember { ApiClient.getSessionStore() ?: SessionStore(context.applicationContext) }
@@ -216,6 +220,8 @@ fun AppNavigation(navController: NavHostController) {
             composable(Screen.Register.route) {
                 RegisterScreen(
                     authViewModel = authViewModel,
+                    initialLeaderDxnId = pendingLeaderDxnId,
+                    onLeaderDxnIdConsumed = onLeaderDxnIdConsumed,
                     onRegister = {
                         navController.navigate(Screen.Main.route) {
                             popUpTo(Screen.Register.route) { inclusive = true }

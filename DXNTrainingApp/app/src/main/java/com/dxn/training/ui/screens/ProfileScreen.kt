@@ -16,6 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -23,21 +26,35 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
+import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.components.dxTextFieldColors
+import com.dxn.training.ui.share.ShareHelper
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.viewmodel.ProfileViewModel
+import com.dxn.training.ui.viewmodel.TeamViewModel
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
+    teamViewModel: TeamViewModel,
+    isLeader: Boolean = false,
     onAdminClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
     onLogout: () -> Unit
 ) {
     val user by viewModel.user.collectAsState()
     val certificates by viewModel.certificates.collectAsState()
+    val teamMembers by teamViewModel.members.collectAsState()
+    val teamLoading by teamViewModel.isLoading.collectAsState()
+    val teamError by teamViewModel.error.collectAsState()
+    val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
+
+    LaunchedEffect(isLeader) {
+        if (isLeader) teamViewModel.load()
+    }
 
     // Refresh certificates each time the screen comes back to the foreground
     // (e.g. after completing a section and receiving a certificate).
@@ -87,6 +104,86 @@ fun ProfileScreen(
             StatBox(value = user.currentStreak.toString(), label = "Streak", icon = "★")
             StatBox(value = user.totalXp.toString(), label = "XP", icon = "●")
             StatBox(value = certificates.size.toString(), label = "شهادة", icon = "▮")
+        }
+
+        if (isLeader && user.dxnId.isNotBlank()) {
+            val inviteLink = "https://dxn-train.dockhosting.cloud/join/${user.dxnId}"
+            DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Text(
+                    text = "رابط دعوتي",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = BrandPlum700
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = inviteLink,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextMuted
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { clipboardManager.setText(AnnotatedString(inviteLink)) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("نسخ")
+                    }
+                    DxButton(
+                        text = "مشاركة",
+                        onClick = { ShareHelper.shareText(context, inviteLink) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "المسجّلون عبر رابطك",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = BrandPlum700
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                when {
+                    teamLoading -> {
+                        CircularProgressIndicator(
+                            color = BrandPlum,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+
+                    teamError != null && teamMembers.isEmpty() -> {
+                        Text(
+                            text = "تعذر تحميل المسجّلين عبر رابطك",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextMuted
+                        )
+                    }
+
+                    teamMembers.isEmpty() -> {
+                        Text(
+                            text = "لا يوجد مسجّلون بعد",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextMuted
+                        )
+                    }
+
+                    else -> {
+                        Text(
+                            text = "العدد: ${teamMembers.size}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = TextMuted
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        teamMembers.forEach { member ->
+                            Text(
+                                text = "• ${member.name}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextPrimary,
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
