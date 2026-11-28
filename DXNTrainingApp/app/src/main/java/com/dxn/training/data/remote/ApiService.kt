@@ -4,6 +4,7 @@ import com.dxn.training.data.model.MemberStatus
 import com.dxn.training.data.model.TeamMember
 import com.dxn.training.data.model.UserProgress
 import com.dxn.training.data.model.SectionProgress
+import com.dxn.training.data.model.TeamSection
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -63,7 +64,9 @@ data class LeaderTeamMemberResponse(
     val name: String,
     val progressPercent: Int = 0,
     val lastActiveDays: Int = 0,
-    val status: String = "INACTIVE"
+    val status: String = "INACTIVE",
+    val badges: List<String> = emptyList(),
+    val sections: List<LeaderTeamSectionResponse> = emptyList()
 ) {
     fun toDomain(): TeamMember = TeamMember(
         id = id,
@@ -74,7 +77,23 @@ data class LeaderTeamMemberResponse(
             MemberStatus.valueOf(status.uppercase())
         } catch (e: IllegalArgumentException) {
             MemberStatus.INACTIVE
-        }
+        },
+        badges = badges,
+        sections = sections.map { it.toDomain() }
+    )
+}
+
+data class LeaderTeamSectionResponse(
+    val title: String = "",
+    val completedLevels: Int = 0,
+    val totalLevels: Int = 0,
+    val certificate: Boolean = false
+) {
+    fun toDomain(): TeamSection = TeamSection(
+        title = title,
+        completedLevels = completedLevels,
+        totalLevels = totalLevels,
+        certificate = certificate
     )
 }
 
@@ -103,7 +122,8 @@ data class UserProfileResponse(
     val totalXp: Int = 0,
     val currentStreak: Int = 0,
     val hearts: Int = 3,
-    val gems: Int = 0
+    val gems: Int = 0,
+    val badges: List<String> = emptyList()
 )
 
 // ===================  API Interface  ===================

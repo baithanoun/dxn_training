@@ -13,20 +13,14 @@ data class User(
     val currentStreak: Int = 0,
     val hearts: Int = 3,
     val gems: Int = 0,
-    val badges: List<Badge> = emptyList(),
+    // Computed badge ids from the server; no local award state (D5 option أ).
+    val badges: List<String> = emptyList(),
     val certificates: List<Certificate> = emptyList()
 )
 
 enum class UserRole {
     TRAINEE, LEADER, ADMIN
 }
-
-data class Badge(
-    val id: String,
-    val name: String,
-    val icon: String,
-    val earnedAt: String
-)
 
 data class Certificate(
     val id: String,

@@ -25,6 +25,7 @@ fun MainScreen(
     teamViewModel: TeamViewModel,
     profileViewModel: ProfileViewModel,
     onLevelClick: (String) -> Unit,
+    onMemberClick: (String) -> Unit,
     onAdminClick: () -> Unit,
     onCertificateClick: (String) -> Unit,
     onLogout: () -> Unit,
@@ -94,7 +95,10 @@ fun MainScreen(
                     viewModel = homeViewModel,
                     onLevelClick = onLevelClick
                 )
-                MainTab.TEAM -> TeamScreen(viewModel = teamViewModel)
+                MainTab.TEAM -> TeamScreen(
+                    viewModel = teamViewModel,
+                    onMemberClick = onMemberClick
+                )
                 MainTab.PROFILE -> ProfileScreen(
                     viewModel = profileViewModel,
                     teamViewModel = teamViewModel,

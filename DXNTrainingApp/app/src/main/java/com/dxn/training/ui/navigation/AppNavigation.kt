@@ -240,6 +240,9 @@ fun AppNavigation(
                     onLevelClick = { levelId ->
                         navController.navigate(Screen.Lesson.createRoute(levelId))
                     },
+                    onMemberClick = { memberId ->
+                        navController.navigate(Screen.TeamMember.createRoute(memberId))
+                    },
                     onAdminClick = { navController.navigate(Screen.AdminOverview.route) },
                     onCertificateClick = { sectionId ->
                         navController.navigate(Screen.Certificate.createRoute(sectionId))
@@ -383,6 +386,19 @@ fun AppNavigation(
                 CertificateScreen(
                     sectionId = sectionId,
                     profileViewModel = profileViewModel,
+                    contentRepository = contentRepository,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.TeamMember.route,
+                arguments = listOf(navArgument("memberId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val memberId = backStackEntry.arguments?.getString("memberId") ?: return@composable
+                MemberDetailsScreen(
+                    memberId = memberId,
+                    viewModel = teamViewModel,
                     contentRepository = contentRepository,
                     onBack = { navController.popBackStack() }
                 )

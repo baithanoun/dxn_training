@@ -98,6 +98,24 @@ class ProgressTest extends TestCase
             ->assertOk();
     }
 
+    public function test_profile_returns_computed_badges_for_self(): void
+    {
+        $user = User::factory()->create(['role' => 'trainee', 'current_streak' => 7]);
+        Certificate::create([
+            'user_id' => $user->id,
+            'section_id' => Section::where('order_index', 1)->firstOrFail()->id,
+            'code' => 'DXN-CERT-1',
+            'issued_at' => now(),
+        ]);
+
+        $profile = $this->actingAs($user, 'sanctum')
+            ->getJson("/api/users/{$user->id}/profile")
+            ->assertOk()->json();
+
+        $this->assertSame((string) $user->id, $profile['id']);
+        $this->assertSame(['first_section', 'streak_7'], $profile['badges']);
+    }
+
     public function test_own_leader_200(): void
     {
         $leader = User::factory()->create(['role' => 'leader']);

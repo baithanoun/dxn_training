@@ -6,11 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Level;
 use App\Models\User;
 use App\Models\UserLevelProgress;
+use App\Services\ProgressService;
 use Illuminate\Http\Request;
 
 class LeaderTeamController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, ProgressService $progress)
     {
         $leader = $request->user();
         if ($leader->role !== 'leader' && $leader->role !== 'admin') {
@@ -22,6 +23,7 @@ class LeaderTeamController extends Controller
 
         $out = [];
         foreach ($members as $m) {
+            $summary = $progress->memberSummary($m);
             $completed = UserLevelProgress::where('user_id', $m->id)->where('status', 'completed')->count();
             $progressPercent = $totalPublished > 0 ? (int) round($completed / $totalPublished * 100) : 0;
             $lastActiveDays = $m->last_activity_date
@@ -39,6 +41,8 @@ class LeaderTeamController extends Controller
                 'progressPercent' => $progressPercent,
                 'lastActiveDays' => $lastActiveDays,
                 'status' => $status,
+                'badges' => $summary['badges'],
+                'sections' => $summary['sections'],
             ];
         }
 

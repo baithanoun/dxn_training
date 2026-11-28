@@ -3,6 +3,7 @@ package com.dxn.training.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dxn.training.data.model.TeamMember
+import com.dxn.training.data.model.UserProgress
 import com.dxn.training.data.repository.TeamRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,9 @@ class TeamViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private val _grades = MutableStateFlow<Map<String, UserProgress>>(emptyMap())
+    val grades: StateFlow<Map<String, UserProgress>> = _grades.asStateFlow()
+
     fun load() {
         viewModelScope.launch {
             _isLoading.value = true
@@ -35,6 +39,15 @@ class TeamViewModel(
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    fun loadGrades(memberId: String) {
+        viewModelScope.launch {
+            _grades.value = emptyMap()
+            teamRepository.loadGrades(memberId)
+                .onSuccess { _grades.value = it }
+                .onFailure { _grades.value = emptyMap() }
         }
     }
 }

@@ -108,6 +108,52 @@ class ProgressService
         return $result;
     }
 
+    /**
+     * D5 option (أ): badges are computed from current progress data; no badges table or manual award endpoint.
+     * Rules: `first_section` = at least one certificate, `streak_7` = current streak >= 7 days,
+     * `all_complete` = published content exists, every published level is completed, and every
+     * published section has a certificate. `certificate` in a section summary means "issued".
+     *
+     * @return array{badges: list<string>, sections: list<array{title: string, completedLevels: int, totalLevels: int, certificate: bool}>}
+     */
+    public function memberSummary(User $user): array
+    {
+        $certificateSectionIds = Certificate::where('user_id', $user->id)->pluck('section_id')->flip();
+        $completedLevelIds = UserLevelProgress::where('user_id', $user->id)
+            ->where('status', 'completed')
+            ->pluck('level_id')
+            ->flip();
+
+        $sections = Section::where('status', 'published')->orderBy('order_index')->get();
+        $sectionSummaries = [];
+        $publishedLevelIds = collect();
+        foreach ($sections as $section) {
+            $levels = $this->orderedLevels($section);
+            $publishedLevelIds = $publishedLevelIds->merge($levels->pluck('id'));
+            $sectionSummaries[] = [
+                'title' => $section->title,
+                'completedLevels' => $levels->filter(fn (Level $level) => $completedLevelIds->has($level->id))->count(),
+                'totalLevels' => $levels->count(),
+                'certificate' => $certificateSectionIds->has($section->id),
+            ];
+        }
+
+        $badges = [];
+        if ($certificateSectionIds->isNotEmpty()) {
+            $badges[] = 'first_section';
+        }
+        if ($user->current_streak >= 7) {
+            $badges[] = 'streak_7';
+        }
+        if ($publishedLevelIds->isNotEmpty()
+            && $publishedLevelIds->every(fn ($levelId) => $completedLevelIds->has($levelId))
+            && $sections->every(fn (Section $section) => $certificateSectionIds->has($section->id))) {
+            $badges[] = 'all_complete';
+        }
+
+        return ['badges' => $badges, 'sections' => $sectionSummaries];
+    }
+
     public function isUnlocked(User $user, Level $level): bool
     {
         $statuses = $this->levelStatuses($user);

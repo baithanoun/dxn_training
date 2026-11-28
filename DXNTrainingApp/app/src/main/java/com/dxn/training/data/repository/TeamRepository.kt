@@ -1,6 +1,7 @@
 package com.dxn.training.data.repository
 
 import com.dxn.training.data.model.TeamMember
+import com.dxn.training.data.model.UserProgress
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.data.remote.ApiService
 import kotlinx.coroutines.CancellationException
@@ -14,6 +15,23 @@ class TeamRepository(
         val response = api.getLeaderTeam()
         if (response.isSuccessful) {
             Result.success(response.body().orEmpty().map { it.toDomain() })
+        } else {
+            Result.failure(HttpException(response))
+        }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** درجات عضو الفريق من نقطة التقدم الحالية على السيرفر (القائد يملك صلاحيتها). */
+    suspend fun loadGrades(memberId: String): Result<Map<String, UserProgress>> = try {
+        val response = api.getUserProgress(memberId)
+        if (response.isSuccessful) {
+            val grades = response.body().orEmpty().mapValues { (levelId, progress) ->
+                progress.toDomain(levelId, memberId)
+            }
+            Result.success(grades)
         } else {
             Result.failure(HttpException(response))
         }

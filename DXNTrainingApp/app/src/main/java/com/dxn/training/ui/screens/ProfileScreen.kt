@@ -26,11 +26,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dxn.training.data.model.UserRole
 import com.dxn.training.ui.components.AvatarPlaceholder
+import com.dxn.training.ui.components.BadgeChips
 import com.dxn.training.ui.components.DxButton
 import com.dxn.training.ui.components.DxCard
 import com.dxn.training.ui.components.ScreenHeader
 import com.dxn.training.ui.components.dxTextFieldColors
 import com.dxn.training.ui.share.ShareHelper
+import com.dxn.training.ui.text.g
 import com.dxn.training.ui.theme.*
 import com.dxn.training.ui.viewmodel.ProfileViewModel
 import com.dxn.training.ui.viewmodel.TeamViewModel
@@ -104,6 +106,16 @@ fun ProfileScreen(
             StatBox(value = user.currentStreak.toString(), label = "Streak", icon = "★")
             StatBox(value = user.totalXp.toString(), label = "XP", icon = "●")
             StatBox(value = certificates.size.toString(), label = "شهادة", icon = "▮")
+        }
+
+        DxCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Text(
+                text = g("الأوسمة", "الأوسمة"),
+                style = MaterialTheme.typography.bodyLarge,
+                color = BrandPlum700
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            BadgeChips(badgeIds = user.badges)
         }
 
         if (isLeader && user.dxnId.isNotBlank()) {
@@ -240,7 +252,7 @@ fun ProfileScreen(
             }
         }
 
-        val menuItems = listOf("حقيبة المتدرب", "الأوسمة", "الإعدادات")
+        val menuItems = listOf("حقيبة المتدرب", "الإعدادات")
         menuItems.forEach { item ->
             Card(
                 modifier = Modifier

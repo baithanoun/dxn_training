@@ -1,6 +1,7 @@
 package com.dxn.training.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,7 +24,10 @@ import com.dxn.training.ui.text.g
 import com.dxn.training.ui.viewmodel.TeamViewModel
 
 @Composable
-fun TeamScreen(viewModel: TeamViewModel) {
+fun TeamScreen(
+    viewModel: TeamViewModel,
+    onMemberClick: (String) -> Unit
+) {
     val members by viewModel.members.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -101,7 +105,9 @@ fun TeamScreen(viewModel: TeamViewModel) {
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                 )
             }
-            else -> filtered.forEach { member -> MemberRow(member = member) }
+            else -> filtered.forEach { member ->
+                MemberRow(member = member, onClick = { onMemberClick(member.id) })
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -131,11 +137,12 @@ private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit, mo
 }
 
 @Composable
-private fun MemberRow(member: TeamMember) {
+private fun MemberRow(member: TeamMember, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Surface)
     ) {

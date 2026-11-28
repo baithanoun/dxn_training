@@ -59,7 +59,7 @@ class UserRepository(
     }
 }
 
-private fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = User(
+internal fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = User(
     id = id,
     fullName = fullName,
     email = email ?: "",
@@ -71,7 +71,7 @@ private fun com.dxn.training.data.remote.UserProfileResponse.toDomain(): User = 
     currentStreak = currentStreak,
     hearts = hearts,
     gems = gems,
-    badges = emptyList(),
+    badges = badges,
     certificates = emptyList()
 )
 
