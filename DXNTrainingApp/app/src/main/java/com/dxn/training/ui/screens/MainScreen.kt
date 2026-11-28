@@ -46,8 +46,10 @@ fun MainScreen(
         }
     }
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             NavigationBar(
+                windowInsets = WindowInsets(0),
                 containerColor = Surface,
                 tonalElevation = 4.dp
             ) {

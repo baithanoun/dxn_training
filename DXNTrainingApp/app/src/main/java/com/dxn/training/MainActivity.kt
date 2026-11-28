@@ -4,13 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.dxn.training.data.remote.ApiClient
 import com.dxn.training.ui.navigation.AppNavigation
+import com.dxn.training.ui.theme.BrandIvory
 import com.dxn.training.ui.theme.DXNTrainingTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,7 +31,14 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    AppNavigation(navController = navController)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(BrandIvory)
+                            .windowInsetsPadding(WindowInsets.safeDrawing)
+                    ) {
+                        AppNavigation(navController = navController)
+                    }
                 }
             }
         }
