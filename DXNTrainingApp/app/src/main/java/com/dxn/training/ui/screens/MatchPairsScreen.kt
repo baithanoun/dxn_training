@@ -108,6 +108,7 @@ fun MatchPairsScreen(
                 color = if (selected?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+            CorrectAnswerFeedback(visible = selected?.isCorrect == true)
         }
 
         Spacer(modifier = Modifier.weight(1f))

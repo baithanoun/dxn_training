@@ -39,6 +39,7 @@ fun OrderSequenceScreen(
     var ordered by remember(round.id) { mutableStateOf(options.shuffled()) }
     var checked by remember(round.id) { mutableStateOf(false) }
     var hearts by remember(levelId) { mutableIntStateOf(3) }
+    val isCorrectOrder = ordered.map { it.id } == options.map { it.id }
     val answers = remember(levelId) { mutableListOf<AnswerDto>() }
 
     LaunchedEffect(levelId) { EventSender.send("level_started", levelId = levelId) }
@@ -128,6 +129,8 @@ fun OrderSequenceScreen(
             Spacer(modifier = Modifier.height(4.dp))
         }
 
+        CorrectAnswerFeedback(visible = checked && isCorrectOrder)
+
         Spacer(modifier = Modifier.weight(1f))
 
         DxButton(
@@ -143,7 +146,7 @@ fun OrderSequenceScreen(
                     }
                 } else {
                     checked = true
-                    if (ordered.map { it.id } != options.map { it.id }) hearts--
+                    if (!isCorrectOrder) hearts--
                 }
             },
             enabled = ordered.isNotEmpty()

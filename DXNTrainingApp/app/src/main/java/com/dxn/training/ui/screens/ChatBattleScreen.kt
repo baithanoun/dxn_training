@@ -133,6 +133,7 @@ fun ChatBattleScreen(
                 color = if (selectedOption?.isCorrect == true) LeafText else Error,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+            CorrectAnswerFeedback(visible = selectedOption?.isCorrect == true)
         }
 
         Spacer(modifier = Modifier.height(12.dp))
