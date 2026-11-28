@@ -43,7 +43,8 @@ data class LessonCard(
     val id: String,
     val title: String,
     val body: String,
-    val tip: String? = null
+    val tip: String? = null,
+    val mediaUrl: String? = null
 )
 
 data class GameRound(

@@ -7,7 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.dxn.training.data.remote.EventSender
 import com.dxn.training.data.repository.ContentRepository
 import com.dxn.training.ui.components.*
@@ -71,19 +73,38 @@ fun LessonScreen(
 
         val card = cards[currentIndex]
         DxCard(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(MaterialTheme.shapes.large)
-                    .background(BrandRose50),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "DXN",
-                    style = MaterialTheme.typography.displayMedium,
-                    color = BrandRose600
-                )
+            val mediaUrl = card.mediaUrl
+            if (mediaUrl.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(BrandRose50),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "DXN",
+                        style = MaterialTheme.typography.displayMedium,
+                        color = BrandRose600
+                    )
+                }
+            } else {
+                // الخلفية العاجية تظهر أثناء التحميل وعند فشل الصورة؛ لا يُعرض أي تنبيه خطأ.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(BrandIvory)
+                ) {
+                    AsyncImage(
+                        model = mediaUrl,
+                        contentDescription = card.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(

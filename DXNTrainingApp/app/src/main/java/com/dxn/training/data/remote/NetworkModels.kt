@@ -84,13 +84,15 @@ data class LessonCardResponse(
     val id: String,
     val title: String,
     val body: String,
-    val tip: String? = null
+    val tip: String? = null,
+    val mediaUrl: String? = null
 ) {
     fun toDomain(): LessonCard = LessonCard(
         id = id,
         title = title,
         body = body,
-        tip = tip
+        tip = tip,
+        mediaUrl = mediaUrl
     )
 }
 
